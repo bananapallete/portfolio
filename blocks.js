@@ -91,6 +91,27 @@ function isVideoFile(src) {
   return /^data:video\//.test(src) || /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(src);
 }
 
+// 브라우저 자동재생 정책상 소리가 있으면 막히므로, 자동재생은 항상 음소거로 시작한다
+// (유튜브/비메오 자체 컨트롤로 사용자가 언제든 음소거를 해제할 수 있다)
+function withAutoplayParams(url) {
+  try {
+    const u = new URL(url);
+    u.searchParams.set("autoplay", "1");
+    if (u.hostname.includes("youtube.com")) {
+      u.searchParams.set("mute", "1");
+      u.searchParams.set("playsinline", "1");
+    } else if (u.hostname.includes("vimeo.com")) {
+      u.searchParams.set("muted", "1");
+    } else {
+      u.searchParams.set("mute", "1");
+      u.searchParams.set("muted", "1");
+    }
+    return u.toString();
+  } catch (e) {
+    return url;
+  }
+}
+
 function renderSlider(images) {
   const wrap = document.createElement("div");
   wrap.className = "blk-slider";
@@ -180,10 +201,14 @@ function renderBlock(block) {
       const v = document.createElement("video");
       v.src = src;
       v.controls = true;
+      v.autoplay = true;
+      v.muted = true;
+      v.loop = true;
+      v.setAttribute("playsinline", "");
       div.appendChild(v);
     } else {
       const iframe = document.createElement("iframe");
-      iframe.src = embedUrl || src;
+      iframe.src = withAutoplayParams(embedUrl || src);
       iframe.setAttribute("allowfullscreen", "true");
       iframe.setAttribute(
         "allow",
