@@ -217,8 +217,7 @@ input, textarea, select { font-family: inherit; }
   align-items: center;
   padding: 60px 0;
   background: var(--paper);
-  min-height: calc(100vh - var(--header-h));
-  min-height: calc(100svh - var(--header-h));
+  height: 1000px;
 }
 
 .hero-media {
@@ -1152,6 +1151,15 @@ input, textarea, select { font-family: inherit; }
 @media (max-width: 640px) {
   :root { --header-h: 48px; }
 
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: none;
+  }
   .site-header .container {
     flex-direction: row;
     height: var(--header-h);
@@ -1161,10 +1169,21 @@ input, textarea, select { font-family: inherit; }
   .brand { flex-direction: row; align-items: baseline; gap: 6px; flex: none; }
   .brand-role { display: none; }
   .brand-name { font-size: 14px; }
+  /* 헤더가 영상 위에 투명하게 떠 있을 때는 밝은 글자색으로 대비 확보 */
+  body.has-hero-video .brand-name { color: #fff; }
+
+  /* 히어로를 벗어나 스크롤되면 다시 불투명한 헤더 + 어두운 글자색으로 */
+  .site-header.scrolled {
+    background: rgba(250, 249, 246, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  body.has-hero-video .site-header.scrolled .brand-name { color: var(--ink); }
   .tabs {
-    flex: 1;
+    /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
+    flex: 0 1 auto;
     min-width: 0;
-    width: auto;
+    margin-left: auto;
     padding: 3px;
     gap: 3px;
     overflow-x: auto;

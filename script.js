@@ -44,10 +44,12 @@ function renderHero(p) {
     video.src = p.heroVideo;
     media.hidden = false;
     hero.classList.add("has-video");
+    document.body.classList.add("has-hero-video");
     dim.style.opacity = p.heroDim != null ? p.heroDim : 0.5;
   } else {
     media.hidden = true;
     hero.classList.remove("has-video");
+    document.body.classList.remove("has-hero-video");
   }
 }
 
@@ -154,6 +156,21 @@ function renderGrid() {
   });
 }
 
+// 모바일에서는 헤더가 히어로 위에 투명하게 떠 있으므로, 히어로를
+// 벗어나 밝은 배경(작업물 목록) 위로 스크롤되면 헤더를 다시 불투명하게 바꾼다
+function setupHeaderScroll() {
+  const header = document.querySelector(".site-header");
+  const hero = document.getElementById("hero");
+  if (!header || !hero) return;
+  const update = () => {
+    const threshold = hero.offsetHeight - 40;
+    header.classList.toggle("scrolled", window.scrollY > threshold);
+  };
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+}
+
 function init() {
   if (!siteData) {
     renderFallback();
@@ -162,6 +179,7 @@ function init() {
   renderHeader();
   renderTabs();
   renderGrid();
+  setupHeaderScroll();
 }
 
 loadSiteData().then((data) => {
