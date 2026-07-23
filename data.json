@@ -21,42 +21,32 @@
         {
           "id": "branding-inhr-plus",
           "title": "INHR+",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "branding-h-dot",
           "title": "H.DOT",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "branding-midas-week-2025",
           "title": "MIDAS WEEK 2025",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "branding-midas-week-2026",
           "title": "MIDAS WEEK 2026",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "branding-jobda-dev",
           "title": "잡다데브",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         }
       ]
     },
@@ -68,60 +58,68 @@
         {
           "id": "illustration-safari-riders",
           "title": "Safari Riders",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "illustration-inhr-plus",
           "title": "INHR+",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "illustration-kakao",
           "title": "Kakao",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "illustration-workout",
           "title": "Workout",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "illustration-hybs-fanart",
           "title": "Hybs Fanart",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "illustration-jihaksa",
           "title": "지학사",
-          "description": "",
           "coverImage": "assets/edd9cb513aaaccafa3bc.png",
-          "images": [
-            "assets/20fe84bdd0ac9a60eebf.png"
-          ],
-          "videos": []
+          "blocks": [
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/20fe84bdd0ac9a60eebf.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "<iframe src=\"https://player.vimeo.com/video/1123797877?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" width=\"888\" height=\"564\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" title=\"간편한 기능 영상1\"></iframe>"
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/1a8e2450116954c982b5.png",
+                "assets/8930fb3a5aa86e1ce53e.png",
+                "assets/00c5db200247476488c6.png",
+                "assets/fc9b1a82f20bdeede474.png",
+                "assets/938e1f0e1574d1f954a3.png",
+                "assets/cfd4f693ec2f4fa617c0.png"
+              ]
+            }
+          ]
         },
         {
           "id": "illustration-tws-fanart",
           "title": "TWS Fanart",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         }
       ]
     },
@@ -133,18 +131,14 @@
         {
           "id": "motion-prototype",
           "title": "Prototype",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         },
         {
           "id": "motion-menuboard",
           "title": "Menuboard",
-          "description": "",
           "coverImage": "",
-          "images": [],
-          "videos": []
+          "blocks": []
         }
       ]
     }
