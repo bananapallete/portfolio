@@ -3,7 +3,7 @@
     "name": "Hanjung Cho",
     "nickname": "Unlimit_Cho",
     "role": "Designer",
-    "tagline": "A creative spanning branding, illustration, and motion graphics",
+    "tagline": "브랜딩 · 일러스트 · 모션그래픽을 넘나드는 크리에이티브",
     "contact": {
       "phone": "+82 10 5678 0569",
       "emails": [
@@ -17,7 +17,7 @@
   "categories": [
     {
       "id": "branding",
-      "name": "Branding",
+      "name": "브랜딩",
       "accent": "#FF4D6D",
       "projects": [
         {
@@ -45,12 +45,17 @@
           "id": "branding-midas-week-2026",
           "title": "MIDAS WEEK 2026",
           "coverImage": "",
-          "blocks": [],
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            }
+          ],
           "summary": ""
         },
         {
           "id": "branding-jobda-dev",
-          "title": "Jobda Dev",
+          "title": "잡다데브",
           "coverImage": "",
           "blocks": [],
           "summary": ""
@@ -59,7 +64,7 @@
     },
     {
       "id": "illustration",
-      "name": "Illustration",
+      "name": "일러스트",
       "accent": "#6C5CE7",
       "projects": [
         {
@@ -99,7 +104,7 @@
         },
         {
           "id": "illustration-jihaksa",
-          "title": "Jihaksa",
+          "title": "지학사",
           "coverImage": "assets/edd9cb513aaaccafa3bc.png",
           "blocks": [
             {
@@ -139,7 +144,7 @@
     },
     {
       "id": "motion",
-      "name": "Motion",
+      "name": "모션그래픽",
       "accent": "#00C2A8",
       "projects": [
         {
