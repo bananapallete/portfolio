@@ -10,7 +10,9 @@
         "unlimit_cho@kakao.com",
         "bananapallete@gmail.com"
       ]
-    }
+    },
+    "heroDim": 0.65,
+    "heroVideo": "assets/9c82b908a4a57428c15d.mp4"
   },
   "categories": [
     {
@@ -22,31 +24,36 @@
           "id": "branding-inhr-plus",
           "title": "INHR+",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "branding-h-dot",
           "title": "H.DOT",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "branding-midas-week-2025",
           "title": "MIDAS WEEK 2025",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "branding-midas-week-2026",
           "title": "MIDAS WEEK 2026",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "branding-jobda-dev",
           "title": "잡다데브",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         }
       ]
     },
@@ -59,31 +66,36 @@
           "id": "illustration-safari-riders",
           "title": "Safari Riders",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "illustration-inhr-plus",
           "title": "INHR+",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "illustration-kakao",
           "title": "Kakao",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "illustration-workout",
           "title": "Workout",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "illustration-hybs-fanart",
           "title": "Hybs Fanart",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "illustration-jihaksa",
@@ -98,10 +110,6 @@
               ]
             },
             {
-              "type": "embed",
-              "src": "<iframe src=\"https://player.vimeo.com/video/1123797877?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479\" width=\"888\" height=\"564\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" title=\"간편한 기능 영상1\"></iframe>"
-            },
-            {
               "type": "images",
               "layout": "grid",
               "images": [
@@ -112,14 +120,20 @@
                 "assets/938e1f0e1574d1f954a3.png",
                 "assets/cfd4f693ec2f4fa617c0.png"
               ]
+            },
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1123797877?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
             }
-          ]
+          ],
+          "summary": ""
         },
         {
           "id": "illustration-tws-fanart",
           "title": "TWS Fanart",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         }
       ]
     },
@@ -132,13 +146,15 @@
           "id": "motion-prototype",
           "title": "Prototype",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         },
         {
           "id": "motion-menuboard",
           "title": "Menuboard",
           "coverImage": "",
-          "blocks": []
+          "blocks": [],
+          "summary": ""
         }
       ]
     }
