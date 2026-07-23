@@ -6,7 +6,10 @@
     "tagline": "브랜딩 · 일러스트 · 모션그래픽을 넘나드는 크리에이티브",
     "contact": {
       "phone": "+82 10 5678 0569",
-      "emails": ["unlimit_cho@kakao.com", "bananapallete@gmail.com"]
+      "emails": [
+        "unlimit_cho@kakao.com",
+        "bananapallete@gmail.com"
+      ]
     }
   },
   "categories": [
@@ -15,11 +18,46 @@
       "name": "브랜딩",
       "accent": "#FF4D6D",
       "projects": [
-        { "id": "branding-inhr-plus", "title": "INHR+", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "branding-h-dot", "title": "H.DOT", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "branding-midas-week-2025", "title": "MIDAS WEEK 2025", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "branding-midas-week-2026", "title": "MIDAS WEEK 2026", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "branding-jobda-dev", "title": "잡다데브", "description": "", "coverImage": "", "images": [], "videos": [] }
+        {
+          "id": "branding-inhr-plus",
+          "title": "INHR+",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "branding-h-dot",
+          "title": "H.DOT",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "branding-midas-week-2025",
+          "title": "MIDAS WEEK 2025",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "branding-midas-week-2026",
+          "title": "MIDAS WEEK 2026",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "branding-jobda-dev",
+          "title": "잡다데브",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        }
       ]
     },
     {
@@ -27,13 +65,64 @@
       "name": "일러스트",
       "accent": "#6C5CE7",
       "projects": [
-        { "id": "illustration-safari-riders", "title": "Safari Riders", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-inhr-plus", "title": "INHR+", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-kakao", "title": "Kakao", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-workout", "title": "Workout", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-hybs-fanart", "title": "Hybs Fanart", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-jihaksa", "title": "지학사", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "illustration-tws-fanart", "title": "TWS Fanart", "description": "", "coverImage": "", "images": [], "videos": [] }
+        {
+          "id": "illustration-safari-riders",
+          "title": "Safari Riders",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "illustration-inhr-plus",
+          "title": "INHR+",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "illustration-kakao",
+          "title": "Kakao",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "illustration-workout",
+          "title": "Workout",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "illustration-hybs-fanart",
+          "title": "Hybs Fanart",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "illustration-jihaksa",
+          "title": "지학사",
+          "description": "",
+          "coverImage": "assets/edd9cb513aaaccafa3bc.png",
+          "images": [
+            "assets/20fe84bdd0ac9a60eebf.png"
+          ],
+          "videos": []
+        },
+        {
+          "id": "illustration-tws-fanart",
+          "title": "TWS Fanart",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        }
       ]
     },
     {
@@ -41,8 +130,22 @@
       "name": "모션그래픽",
       "accent": "#00C2A8",
       "projects": [
-        { "id": "motion-prototype", "title": "Prototype", "description": "", "coverImage": "", "images": [], "videos": [] },
-        { "id": "motion-menuboard", "title": "Menuboard", "description": "", "coverImage": "", "images": [], "videos": [] }
+        {
+          "id": "motion-prototype",
+          "title": "Prototype",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        },
+        {
+          "id": "motion-menuboard",
+          "title": "Menuboard",
+          "description": "",
+          "coverImage": "",
+          "images": [],
+          "videos": []
+        }
       ]
     }
   ]
