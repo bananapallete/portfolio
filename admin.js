@@ -9,8 +9,22 @@ let data = null;
 
 // 펼쳐진 프로젝트(상세 편집 중) id 목록 — 재렌더링해도 유지
 const expandedProjects = new Set();
+// 미리보기·순서 조절 모드인 프로젝트 id 목록
+const previewProjects = new Set();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
+
+// iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
+function normalizeEmbedInput(raw) {
+  let v = (raw || "").trim();
+  const m = /<iframe[^>]*\ssrc=["']([^"']+)["']/i.exec(v);
+  if (m) v = m[1];
+  if (!v) return "";
+  if (v.startsWith("//")) return "https:" + v;
+  if (v.startsWith("data:") || v.startsWith("assets/") || /^https?:\/\//i.test(v)) return v;
+  if (/^[\w.-]+\.[a-z]{2,}([\/?#]|$)/i.test(v)) return "https://" + v;
+  return v;
+}
 
 function slugify(text, fallback) {
   const base = (text || fallback || "item")
@@ -78,11 +92,13 @@ function ensureShape() {
   data.profile = data.profile || {};
   data.profile.contact = data.profile.contact || {};
   data.profile.contact.emails = data.profile.contact.emails || [];
+  if (data.profile.heroDim == null) data.profile.heroDim = 0.5;
   data.categories = data.categories || [];
   data.categories.forEach((cat) => {
     cat.projects = cat.projects || [];
     cat.accent = cat.accent || "#6c5ce7";
     cat.projects.forEach((p) => {
+      p.summary = p.summary || "";
       // 구버전(description/images/videos) 데이터를 블록 구조로 변환
       if (!p.blocks) {
         p.blocks = [];
@@ -99,6 +115,10 @@ function ensureShape() {
       delete p.description;
       delete p.images;
       delete p.videos;
+      // 잘못 저장된 임베드(iframe 코드, https 누락)를 정리
+      p.blocks.forEach((b) => {
+        if (b.type === "embed" && b.src) b.src = normalizeEmbedInput(b.src);
+      });
     });
   });
 }
@@ -212,6 +232,80 @@ function renderProfile() {
   row3.appendChild(emailField);
 
   wrap.appendChild(row3);
+
+  // ---- 히어로 배경 영상 ----
+  const heroLabel = document.createElement("label");
+  heroLabel.textContent = "홈 화면 배경 영상 (선택, 어둡게 딤 처리되어 표시돼요)";
+  heroLabel.className = "mini-label";
+  heroLabel.style.marginTop = "18px";
+  wrap.appendChild(heroLabel);
+
+  const heroRow = document.createElement("div");
+  heroRow.className = "hero-video-row";
+
+  if (data.profile.heroVideo) {
+    const preview = document.createElement("video");
+    preview.src = data.profile.heroVideo;
+    preview.muted = true;
+    preview.className = "hero-video-preview";
+    heroRow.appendChild(preview);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn btn-danger btn-small";
+    removeBtn.textContent = "영상 제거";
+    removeBtn.addEventListener("click", () => {
+      data.profile.heroVideo = "";
+      saveDraft();
+      renderProfile();
+    });
+    heroRow.appendChild(removeBtn);
+  } else {
+    const uploadBtn = document.createElement("button");
+    uploadBtn.className = "btn btn-outline btn-small file-btn";
+    uploadBtn.textContent = "배경 영상 업로드";
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+    input.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      readFileAsDataURL(file).then((dataUrl) => {
+        data.profile.heroVideo = dataUrl;
+        saveDraft();
+        renderProfile();
+      });
+    });
+    uploadBtn.appendChild(input);
+    heroRow.appendChild(uploadBtn);
+  }
+  wrap.appendChild(heroRow);
+
+  if (data.profile.heroVideo) {
+    const dimRow = document.createElement("div");
+    dimRow.className = "block-controls-row";
+    const dimLabel = document.createElement("span");
+    dimLabel.className = "control-label";
+    dimLabel.textContent = "딤(어둡게) 강도";
+    const dimInput = document.createElement("input");
+    dimInput.type = "range";
+    dimInput.min = "0";
+    dimInput.max = "0.9";
+    dimInput.step = "0.05";
+    dimInput.value = data.profile.heroDim != null ? data.profile.heroDim : 0.5;
+    dimInput.className = "dim-range";
+    const dimValue = document.createElement("span");
+    dimValue.className = "control-label";
+    dimValue.textContent = Math.round(dimInput.value * 100) + "%";
+    dimInput.addEventListener("input", () => {
+      data.profile.heroDim = parseFloat(dimInput.value);
+      dimValue.textContent = Math.round(dimInput.value * 100) + "%";
+      saveDraft();
+    });
+    dimRow.appendChild(dimLabel);
+    dimRow.appendChild(dimInput);
+    dimRow.appendChild(dimValue);
+    wrap.appendChild(dimRow);
+  }
 }
 
 function makeTextField(labelText, value, onChange) {
@@ -345,12 +439,54 @@ function renderProjectCard(cat, project, projIndex) {
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
+  const summaryLabel = document.createElement("label");
+  summaryLabel.textContent = "카드 설명 (목록 화면 제목 아래 표시, 1~2줄 권장)";
+  summaryLabel.className = "mini-label";
+  summaryLabel.style.marginTop = "10px";
+  card.appendChild(summaryLabel);
+  const summaryInput = document.createElement("input");
+  summaryInput.type = "text";
+  summaryInput.value = project.summary || "";
+  summaryInput.placeholder = "예: Brand Concept & Strategy, Visual Identity Design";
+  summaryInput.className = "summary-input";
+  summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
+  card.appendChild(summaryInput);
+
   if (!isOpen) {
     const summary = document.createElement("div");
     summary.className = "project-summary";
     const n = (project.blocks || []).length;
     summary.textContent = `${project.coverImage ? "커버 이미지 ✓" : "커버 이미지 없음"} · 콘텐츠 블록 ${n}개`;
+    summary.style.marginTop = "8px";
     card.appendChild(summary);
+    return card;
+  }
+
+  // ---- 모드 전환: 블록 편집 / 미리보기·순서 조절 ----
+  const isPreview = previewProjects.has(project.id);
+  const modeSeg = document.createElement("div");
+  modeSeg.className = "layout-seg";
+  modeSeg.style.marginTop = "4px";
+  [["edit", "✎ 블록 편집"], ["preview", "👁 미리보기 · 순서 조절"]].forEach(([value, text]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if ((isPreview ? "preview" : "edit") === value) b.classList.add("active");
+    b.addEventListener("click", () => {
+      if (value === "preview") previewProjects.add(project.id);
+      else previewProjects.delete(project.id);
+      renderCategories();
+    });
+    modeSeg.appendChild(b);
+  });
+  card.appendChild(modeSeg);
+
+  if (isPreview) {
+    const hint = document.createElement("div");
+    hint.className = "block-hint";
+    hint.textContent = "실제 사이트에 보이는 모습이에요. ⠿ 핸들을 잡고 드래그하면 블록과 이미지 순서를 바꿀 수 있어요.";
+    card.appendChild(hint);
+    card.appendChild(renderProjectPreview(project));
     return card;
   }
 
@@ -556,6 +692,9 @@ function renderBlockBody(project, block, blockIndex) {
 
   if (block.type === "images") {
     // 레이아웃 선택
+    const segRow = document.createElement("div");
+    segRow.className = "seg-row";
+
     const seg = document.createElement("div");
     seg.className = "layout-seg";
     [["single", "단일"], ["grid", "그리드"], ["slider", "자동 슬라이드"]].forEach(([value, text]) => {
@@ -565,12 +704,33 @@ function renderBlockBody(project, block, blockIndex) {
       if ((block.layout || "single") === value) b.classList.add("active");
       b.addEventListener("click", () => {
         block.layout = value;
+        if (value === "grid" && !block.grid) block.grid = "3";
         saveDraft();
         renderCategories();
       });
       seg.appendChild(b);
     });
-    body.appendChild(seg);
+    segRow.appendChild(seg);
+
+    // 그리드 형태 선택
+    if (block.layout === "grid") {
+      const gseg = document.createElement("div");
+      gseg.className = "layout-seg";
+      [["2", "2열"], ["3", "3열"], ["4", "4열"], ["masonry", "모자이크"]].forEach(([value, text]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = text;
+        if (String(block.grid || "3") === value) b.classList.add("active");
+        b.addEventListener("click", () => {
+          block.grid = value;
+          saveDraft();
+          renderCategories();
+        });
+        gseg.appendChild(b);
+      });
+      segRow.appendChild(gseg);
+    }
+    body.appendChild(segRow);
 
     // 썸네일 (드래그로 순서 변경)
     const imgGroup = `imgs-${project.id}-${blockIndex}`;
@@ -636,9 +796,9 @@ function renderBlockBody(project, block, blockIndex) {
 
   if (block.type === "embed") {
     const input = document.createElement("input");
-    input.type = "url";
+    input.type = "text";
     input.className = "embed-input";
-    input.placeholder = "유튜브/비메오 링크 붙여넣기 (예: https://youtu.be/...)";
+    input.placeholder = "유튜브/비메오 링크 또는 <iframe> 임베드 코드 붙여넣기";
     input.value = block.src && !block.src.startsWith("data:") && !block.src.startsWith("assets/") ? block.src : "";
     if (block.src && (block.src.startsWith("data:") || block.src.startsWith("assets/"))) {
       const note = document.createElement("div");
@@ -646,12 +806,172 @@ function renderBlockBody(project, block, blockIndex) {
       note.textContent = "🎬 업로드된 영상 파일이 연결되어 있어요.";
       body.appendChild(note);
     }
-    input.addEventListener("input", () => { block.src = input.value.trim(); saveDraft(); });
+    input.addEventListener("input", () => {
+      block.src = normalizeEmbedInput(input.value);
+      saveDraft();
+    });
+    // 붙여넣기를 마치면 정리된 주소를 입력창에도 보여준다
+    input.addEventListener("change", () => {
+      const v = normalizeEmbedInput(input.value);
+      input.value = v;
+      block.src = v;
+      saveDraft();
+    });
     body.appendChild(input);
     return body;
   }
 
   return body;
+}
+
+/* ------------------------- 미리보기 · 순서 조절 모드 ------------------------- */
+
+function gridClassName(block) {
+  if (block.grid === "masonry") return "blk-images-masonry";
+  const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
+  return `blk-images-grid blk-grid-${cols}`;
+}
+
+function renderProjectPreview(project) {
+  const pane = document.createElement("div");
+  pane.className = "preview-pane";
+  project.blocks = project.blocks || [];
+
+  if (!project.blocks.length) {
+    const empty = document.createElement("div");
+    empty.className = "block-hint";
+    empty.textContent = "아직 콘텐츠 블록이 없어요. \"블록 편집\" 탭에서 추가해주세요.";
+    pane.appendChild(empty);
+    return pane;
+  }
+
+  const group = `pvblocks-${project.id}`;
+  project.blocks.forEach((block, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "pv-block";
+
+    const handle = document.createElement("button");
+    handle.type = "button";
+    handle.className = "drag-handle pv-handle";
+    handle.title = "드래그해서 블록 순서 변경";
+    handle.textContent = "⠿";
+
+    const chip = document.createElement("span");
+    chip.className = "pv-chip";
+    chip.textContent =
+      block.type === "text" ? "텍스트"
+      : block.type === "images" ? ({ single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 자동 슬라이드" }[block.layout] || "이미지")
+      : "비디오 임베드";
+
+    wrap.appendChild(handle);
+    wrap.appendChild(chip);
+    wrap.appendChild(renderPreviewBlockContent(project, block, i));
+    attachDrag(wrap, handle, group, project.blocks, i);
+    pane.appendChild(wrap);
+  });
+
+  return pane;
+}
+
+function renderPreviewBlockContent(project, block, blockIndex) {
+  if (block.type === "text") {
+    const p = document.createElement("p");
+    p.className = "blk-text";
+    p.textContent = block.content || "(빈 텍스트 블록)";
+    p.style.fontSize = (block.size || 15) + "px";
+    if (block.color) p.style.color = block.color;
+    if (!block.content) p.style.opacity = "0.4";
+    return p;
+  }
+
+  if (block.type === "images") {
+    const images = block.images || [];
+    const imgGroup = `pvimgs-${project.id}-${blockIndex}`;
+    let div;
+    if (!images.length) {
+      div = document.createElement("div");
+      div.className = "block-hint";
+      div.textContent = "(이미지가 없는 블록)";
+      return div;
+    }
+    if (block.layout === "slider") {
+      div = document.createElement("div");
+      div.className = "pv-slider-strip";
+    } else if (block.layout === "grid") {
+      div = document.createElement("div");
+      div.className = gridClassName(block);
+    } else {
+      div = document.createElement("div");
+      div.className = "blk-images-single";
+    }
+
+    images.forEach((src, j) => {
+      const w = document.createElement("div");
+      w.className = "pv-img-wrap";
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      img.draggable = false;
+      w.appendChild(img);
+
+      const h = document.createElement("button");
+      h.type = "button";
+      h.className = "drag-handle-mini";
+      h.title = "드래그해서 이미지 순서 변경";
+      h.textContent = "⠿";
+      w.appendChild(h);
+
+      attachDrag(w, h, imgGroup, block.images, j);
+      div.appendChild(w);
+    });
+
+    if (block.layout === "slider") {
+      const outer = document.createElement("div");
+      outer.appendChild(div);
+      const hint = document.createElement("div");
+      hint.className = "block-hint";
+      hint.textContent = "실제 사이트에서는 한 장씩 자동으로 넘어가요. (여기서는 가로로 펼쳐서 순서 조절)";
+      outer.appendChild(hint);
+      return outer;
+    }
+    return div;
+  }
+
+  if (block.type === "embed") {
+    const div = document.createElement("div");
+    div.className = "blk-embed";
+    if (!block.src) {
+      div.className = "block-hint";
+      div.textContent = "(링크가 없는 임베드 블록)";
+      return div;
+    }
+    const isFile = block.src.startsWith("data:") || /\.(mp4|webm|mov|m4v)$/i.test(block.src);
+    if (isFile) {
+      const v = document.createElement("video");
+      v.src = block.src;
+      v.controls = false;
+      v.muted = true;
+      v.style.pointerEvents = "none";
+      div.appendChild(v);
+    } else {
+      const iframe = document.createElement("iframe");
+      let embedSrc = block.src;
+      try {
+        const u = new URL(block.src);
+        const parts = u.pathname.split("/").filter(Boolean);
+        if (u.hostname.includes("youtu.be") && parts[0]) embedSrc = `https://www.youtube.com/embed/${parts[0]}`;
+        else if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) embedSrc = `https://www.youtube.com/embed/${u.searchParams.get("v")}`;
+        else if (u.hostname.includes("youtube.com") && ["shorts", "live", "embed"].includes(parts[0]) && parts[1]) embedSrc = `https://www.youtube.com/embed/${parts[1]}`;
+        else if (u.hostname.includes("vimeo.com") && !u.hostname.includes("player.")) embedSrc = `https://player.vimeo.com/video/${parts.pop()}`;
+      } catch (e) {}
+      iframe.src = embedSrc;
+      iframe.style.pointerEvents = "none"; // 드래그 방해 방지
+      div.appendChild(iframe);
+    }
+    return div;
+  }
+
+  return document.createElement("div");
 }
 
 function makeThumb(src, kind, onRemove) {
@@ -869,6 +1189,9 @@ async function uploadAssetIfNeeded(dataUrl, token) {
 // data 안에서 아직 업로드되지 않은(data:로 시작하는) 이미지/영상 목록을 모은다.
 function collectPendingMedia() {
   const refs = [];
+  if (data.profile && data.profile.heroVideo && data.profile.heroVideo.startsWith("data:")) {
+    refs.push({ get: () => data.profile.heroVideo, set: (v) => { data.profile.heroVideo = v; } });
+  }
   (data.categories || []).forEach((cat) => {
     (cat.projects || []).forEach((p) => {
       if (p.coverImage && p.coverImage.startsWith("data:")) {

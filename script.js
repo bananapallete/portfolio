@@ -1,52 +1,10 @@
 /* ==========================================================================
-   Unlimit_Cho Portfolio — Public site logic
+   Unlimit_Cho Portfolio — 목록 페이지 로직 (블록 렌더링은 blocks.js 공용)
    ========================================================================== */
 
 const ALL_KEY = "__all__";
 let currentFilter = ALL_KEY;
 let siteData = null;
-
-function toEmbedUrl(url) {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtu.be")) {
-      const id = u.pathname.replace("/", "");
-      return `https://www.youtube.com/embed/${id}`;
-    }
-    if (u.hostname.includes("youtube.com")) {
-      const id = u.searchParams.get("v");
-      if (id) return `https://www.youtube.com/embed/${id}`;
-      if (u.pathname.startsWith("/embed/")) return url;
-    }
-    if (u.hostname.includes("vimeo.com")) {
-      const id = u.pathname.split("/").filter(Boolean).pop();
-      return `https://player.vimeo.com/video/${id}`;
-    }
-  } catch (e) {
-    return null;
-  }
-  return null;
-}
-
-async function loadData() {
-  const params = new URLSearchParams(location.search);
-  if (params.get("preview") === "1") {
-    const draft = localStorage.getItem("portfolioDraftData");
-    if (draft) {
-      try {
-        return JSON.parse(draft);
-      } catch (e) {}
-    }
-  }
-  try {
-    const res = await fetch("data.json", { cache: "no-store" });
-    if (!res.ok) throw new Error("fetch failed");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
-}
 
 function renderFallback() {
   const grid = document.getElementById("workGrid");
@@ -76,6 +34,23 @@ function renderFallback() {
   });
 }
 
+function renderHero(p) {
+  const hero = document.getElementById("hero");
+  const media = document.getElementById("heroMedia");
+  const video = document.getElementById("heroVideo");
+  const dim = document.getElementById("heroDim");
+
+  if (p.heroVideo) {
+    video.src = p.heroVideo;
+    media.hidden = false;
+    hero.classList.add("has-video");
+    dim.style.opacity = p.heroDim != null ? p.heroDim : 0.5;
+  } else {
+    media.hidden = true;
+    hero.classList.remove("has-video");
+  }
+}
+
 function renderHeader() {
   const p = siteData.profile || {};
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
@@ -83,6 +58,7 @@ function renderHeader() {
   document.getElementById("heroName").textContent = p.nickname || p.name || "";
   document.getElementById("heroTagline").textContent = p.tagline || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
+  renderHero(p);
 
   const contactEl = document.getElementById("footerContact");
   contactEl.innerHTML = "";
@@ -128,11 +104,17 @@ function renderTabs() {
   });
 }
 
-function projectMediaHTML(project, accent) {
+function projectMediaHTML(project) {
   if (project.coverImage) {
     return `<img src="${project.coverImage}" alt="${project.title}" />`;
   }
   return `<span>${project.title}</span>`;
+}
+
+function goToProject(project) {
+  const q = new URLSearchParams({ id: project.id });
+  if (isPreviewMode()) q.set("preview", "1");
+  location.href = "project.html?" + q.toString();
 }
 
 function renderGrid() {
@@ -155,180 +137,21 @@ function renderGrid() {
     return;
   }
 
-  cards.forEach(({ project, cat }) => {
+  cards.forEach(({ project }) => {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <div class="card-media" style="background:${cat.accent}">
-        ${projectMediaHTML(project, cat.accent)}
+      <div class="card-media">
+        ${projectMediaHTML(project)}
       </div>
       <div class="card-body">
-        <span class="card-tag" style="background:${cat.accent}">${cat.name}</span>
         <div class="card-title">${project.title}</div>
+        ${project.summary ? `<div class="card-desc">${project.summary}</div>` : ""}
       </div>
     `;
-    card.addEventListener("click", () => openModal(project, cat));
+    card.addEventListener("click", () => goToProject(project));
     grid.appendChild(card);
   });
-}
-
-/* ------------------------------ 콘텐츠 블록 렌더링 ------------------------------ */
-
-let sliderTimers = [];
-
-function stopSliders() {
-  sliderTimers.forEach((t) => clearInterval(t));
-  sliderTimers = [];
-}
-
-// blocks가 없는 구버전 데이터는 즉석에서 블록 형태로 변환
-function blocksOf(project) {
-  if (project.blocks && project.blocks.length) return project.blocks;
-  const blocks = [];
-  if (project.description) {
-    blocks.push({ type: "text", content: project.description, size: 15, color: "" });
-  }
-  if (project.images && project.images.length) {
-    blocks.push({ type: "images", layout: "grid", images: project.images });
-  }
-  (project.videos || []).forEach((v) => {
-    if (v && v.src) blocks.push({ type: "embed", src: v.src });
-  });
-  return blocks;
-}
-
-function isVideoFile(src) {
-  return /^data:video\//.test(src) || /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(src);
-}
-
-function renderSlider(images) {
-  const wrap = document.createElement("div");
-  wrap.className = "blk-slider";
-  const track = document.createElement("div");
-  track.className = "blk-slider-track";
-  images.forEach((src) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = "";
-    track.appendChild(img);
-  });
-  wrap.appendChild(track);
-
-  const dots = document.createElement("div");
-  dots.className = "blk-slider-dots";
-  let idx = 0;
-  let timer = null;
-
-  const go = (i) => {
-    idx = (i + images.length) % images.length;
-    track.style.transform = `translateX(-${idx * 100}%)`;
-    Array.from(dots.children).forEach((d, j) => d.classList.toggle("active", j === idx));
-  };
-  const start = () => {
-    timer = setInterval(() => go(idx + 1), 3500);
-    sliderTimers.push(timer);
-  };
-
-  images.forEach((_, i) => {
-    const d = document.createElement("button");
-    d.addEventListener("click", () => {
-      clearInterval(timer);
-      go(i);
-      start();
-    });
-    dots.appendChild(d);
-  });
-  wrap.appendChild(dots);
-
-  go(0);
-  start();
-  return wrap;
-}
-
-function renderBlock(block) {
-  if (block.type === "text") {
-    if (!block.content) return null;
-    const p = document.createElement("p");
-    p.className = "blk-text";
-    p.textContent = block.content;
-    if (block.size) p.style.fontSize = block.size + "px";
-    if (block.color) p.style.color = block.color;
-    return p;
-  }
-
-  if (block.type === "images") {
-    const images = block.images || [];
-    if (!images.length) return null;
-    if (block.layout === "slider" && images.length > 1) return renderSlider(images);
-    const div = document.createElement("div");
-    div.className = block.layout === "grid" ? "blk-images-grid" : "blk-images-single";
-    images.forEach((src) => {
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "";
-      div.appendChild(img);
-    });
-    return div;
-  }
-
-  if (block.type === "embed") {
-    if (!block.src) return null;
-    const div = document.createElement("div");
-    div.className = "blk-embed";
-    const embedUrl = toEmbedUrl(block.src);
-    if (!embedUrl && isVideoFile(block.src)) {
-      const v = document.createElement("video");
-      v.src = block.src;
-      v.controls = true;
-      div.appendChild(v);
-    } else {
-      const iframe = document.createElement("iframe");
-      iframe.src = embedUrl || block.src;
-      iframe.setAttribute("allowfullscreen", "true");
-      iframe.setAttribute(
-        "allow",
-        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      );
-      div.appendChild(iframe);
-    }
-    return div;
-  }
-
-  return null;
-}
-
-function openModal(project, cat) {
-  document.getElementById("modalTag").textContent = cat.name;
-  document.getElementById("modalTag").style.background = cat.accent;
-  document.getElementById("modalTitle").textContent = project.title;
-
-  stopSliders();
-  const container = document.getElementById("modalBlocks");
-  container.innerHTML = "";
-
-  const blocks = blocksOf(project);
-  let rendered = 0;
-  blocks.forEach((block) => {
-    const el = renderBlock(block);
-    if (el) {
-      container.appendChild(el);
-      rendered++;
-    }
-  });
-  if (rendered === 0) {
-    const empty = document.createElement("p");
-    empty.className = "blk-text";
-    empty.style.color = "rgba(20,18,26,0.5)";
-    empty.textContent = "아직 등록된 콘텐츠가 없어요.";
-    container.appendChild(empty);
-  }
-
-  document.getElementById("modalOverlay").classList.remove("hidden");
-}
-
-function closeModal() {
-  stopSliders();
-  document.getElementById("modalOverlay").classList.add("hidden");
 }
 
 function init() {
@@ -341,15 +164,7 @@ function init() {
   renderGrid();
 }
 
-document.getElementById("modalClose").addEventListener("click", closeModal);
-document.getElementById("modalOverlay").addEventListener("click", (e) => {
-  if (e.target.id === "modalOverlay") closeModal();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeModal();
-});
-
-loadData().then((data) => {
+loadSiteData().then((data) => {
   siteData = data;
   init();
 });
