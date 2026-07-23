@@ -3,7 +3,14 @@
    ========================================================================== */
 
 const DRAFT_KEY = "portfolioDraftData";
+const RECENT_COLORS_KEY = "portfolioRecentColors";
+const DEFAULT_COLORS = ["#14121a", "#ff4d6d", "#6c5ce7", "#00c2a8", "#ffc93c", "#ffffff"];
 let data = null;
+
+// 펼쳐진 프로젝트(상세 편집 중) id 목록 — 재렌더링해도 유지
+const expandedProjects = new Set();
+// 현재 드래그 중인 항목 정보 { group, list, from }
+let dragCtx = null;
 
 function slugify(text, fallback) {
   const base = (text || fallback || "item")
@@ -76,10 +83,80 @@ function ensureShape() {
     cat.projects = cat.projects || [];
     cat.accent = cat.accent || "#6c5ce7";
     cat.projects.forEach((p) => {
-      p.images = p.images || [];
-      p.videos = p.videos || [];
+      // 구버전(description/images/videos) 데이터를 블록 구조로 변환
+      if (!p.blocks) {
+        p.blocks = [];
+        if (p.description) {
+          p.blocks.push({ type: "text", content: p.description, size: 15, color: "#14121a" });
+        }
+        if (p.images && p.images.length) {
+          p.blocks.push({ type: "images", layout: "grid", images: p.images.slice() });
+        }
+        (p.videos || []).forEach((v) => {
+          if (v && v.src) p.blocks.push({ type: "embed", src: v.src });
+        });
+      }
+      delete p.description;
+      delete p.images;
+      delete p.videos;
     });
   });
+}
+
+/* ------------------------------ 드래그 정렬 공통 ------------------------------ */
+
+// handle을 잡고 끌면 itemEl을 같은 group/list 안에서 순서를 바꿀 수 있다.
+function attachDrag(itemEl, handleEl, group, list, index) {
+  handleEl.addEventListener("mousedown", () => { itemEl.draggable = true; });
+  itemEl.addEventListener("dragstart", (e) => {
+    e.stopPropagation();
+    dragCtx = { group, list, from: index };
+    itemEl.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", ""); } catch (err) {}
+  });
+  itemEl.addEventListener("dragend", () => {
+    itemEl.draggable = false;
+    itemEl.classList.remove("dragging");
+    document.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    dragCtx = null;
+  });
+  itemEl.addEventListener("dragover", (e) => {
+    if (!dragCtx || dragCtx.group !== group) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    itemEl.classList.add("drag-over");
+  });
+  itemEl.addEventListener("dragleave", () => itemEl.classList.remove("drag-over"));
+  itemEl.addEventListener("drop", (e) => {
+    if (!dragCtx || dragCtx.group !== group) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const from = dragCtx.from;
+    dragCtx = null;
+    if (from === index) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(index, 0, moved);
+    saveDraft();
+    renderCategories();
+  });
+}
+
+/* ------------------------------ 자주 쓰는 색상 ------------------------------ */
+
+function getRecentColors() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RECENT_COLORS_KEY));
+    if (Array.isArray(saved) && saved.length) return saved.slice(0, 6);
+  } catch (e) {}
+  return DEFAULT_COLORS.slice();
+}
+
+function pushRecentColor(color) {
+  const list = getRecentColors().filter((c) => c.toLowerCase() !== color.toLowerCase());
+  list.unshift(color);
+  localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(list.slice(0, 6)));
 }
 
 /* ---------------------------------- Profile ---------------------------------- */
@@ -242,6 +319,16 @@ function renderProjectCard(cat, project, projIndex) {
   titleInput.style.padding = "8px 10px";
   titleInput.addEventListener("input", () => { project.title = titleInput.value; saveDraft(); });
 
+  const isOpen = expandedProjects.has(project.id);
+  const editBtn = document.createElement("button");
+  editBtn.className = "btn btn-small " + (isOpen ? "btn-outline" : "btn-primary");
+  editBtn.textContent = isOpen ? "▲ 접기" : "✎ 상세 편집";
+  editBtn.addEventListener("click", () => {
+    if (isOpen) expandedProjects.delete(project.id);
+    else expandedProjects.add(project.id);
+    renderCategories();
+  });
+
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "btn btn-danger btn-small";
   deleteBtn.textContent = "삭제";
@@ -254,35 +341,27 @@ function renderProjectCard(cat, project, projIndex) {
   });
 
   head.appendChild(titleInput);
+  head.appendChild(editBtn);
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
-  // Description
-  const descField = document.createElement("div");
-  descField.className = "field";
-  const descLabel = document.createElement("label");
-  descLabel.textContent = "설명";
-  const descTa = document.createElement("textarea");
-  descTa.value = project.description || "";
-  descTa.rows = 3;
-  descTa.addEventListener("input", () => { project.description = descTa.value; saveDraft(); });
-  descField.appendChild(descLabel);
-  descField.appendChild(descTa);
-  card.appendChild(descField);
+  if (!isOpen) {
+    const summary = document.createElement("div");
+    summary.className = "project-summary";
+    const n = (project.blocks || []).length;
+    summary.textContent = `${project.coverImage ? "커버 이미지 ✓" : "커버 이미지 없음"} · 콘텐츠 블록 ${n}개`;
+    card.appendChild(summary);
+    return card;
+  }
 
-  // Cover image
+  // ---- 커버 이미지 ----
   const coverLabel = document.createElement("label");
-  coverLabel.textContent = "커버 이미지";
-  coverLabel.style.display = "block";
-  coverLabel.style.fontSize = "12px";
-  coverLabel.style.fontWeight = "700";
-  coverLabel.style.color = "rgba(20,18,26,0.55)";
-  coverLabel.style.margin = "12px 0 6px";
+  coverLabel.textContent = "커버 이미지 (목록 카드에 표시)";
+  coverLabel.className = "mini-label";
   card.appendChild(coverLabel);
 
   const coverRow = document.createElement("div");
   coverRow.className = "thumb-row";
-
   if (project.coverImage) {
     coverRow.appendChild(makeThumb(project.coverImage, "image", () => {
       project.coverImage = "";
@@ -290,7 +369,6 @@ function renderProjectCard(cat, project, projIndex) {
       renderCategories();
     }));
   }
-
   const coverUploadBtn = document.createElement("button");
   coverUploadBtn.className = "btn btn-outline btn-small file-btn";
   coverUploadBtn.textContent = "커버 이미지 업로드";
@@ -310,120 +388,270 @@ function renderProjectCard(cat, project, projIndex) {
   card.appendChild(coverRow);
   card.appendChild(coverUploadBtn);
 
-  // Additional images
-  const imgLabel = document.createElement("label");
-  imgLabel.textContent = "추가 이미지 (여러 장 가능)";
-  imgLabel.style.display = "block";
-  imgLabel.style.fontSize = "12px";
-  imgLabel.style.fontWeight = "700";
-  imgLabel.style.color = "rgba(20,18,26,0.55)";
-  imgLabel.style.margin = "16px 0 6px";
-  card.appendChild(imgLabel);
+  // ---- 콘텐츠 블록 ----
+  const blocksLabel = document.createElement("label");
+  blocksLabel.textContent = "상세 콘텐츠 (⠿ 핸들을 잡고 드래그하면 순서가 바뀌어요)";
+  blocksLabel.className = "mini-label";
+  blocksLabel.style.marginTop = "18px";
+  card.appendChild(blocksLabel);
 
-  const imgRow = document.createElement("div");
-  imgRow.className = "thumb-row";
-  (project.images || []).forEach((src, i) => {
-    imgRow.appendChild(makeThumb(src, "image", () => {
-      project.images.splice(i, 1);
-      saveDraft();
-      renderCategories();
-    }));
-  });
-  card.appendChild(imgRow);
-
-  const imgUploadBtn = document.createElement("button");
-  imgUploadBtn.className = "btn btn-outline btn-small file-btn";
-  imgUploadBtn.style.marginTop = "8px";
-  imgUploadBtn.textContent = "이미지 추가 업로드";
-  const imgInput = document.createElement("input");
-  imgInput.type = "file";
-  imgInput.accept = "image/*";
-  imgInput.multiple = true;
-  imgInput.addEventListener("change", async (e) => {
-    const files = Array.from(e.target.files || []);
-    for (const file of files) {
-      const dataUrl = await readFileAsDataURL(file);
-      project.images.push(dataUrl);
-    }
-    saveDraft();
-    renderCategories();
-  });
-  imgUploadBtn.appendChild(imgInput);
-  card.appendChild(imgUploadBtn);
-
-  // Videos
-  const videoLabel = document.createElement("label");
-  videoLabel.textContent = "영상 (유튜브/비메오 링크 또는 파일 업로드)";
-  videoLabel.style.display = "block";
-  videoLabel.style.fontSize = "12px";
-  videoLabel.style.fontWeight = "700";
-  videoLabel.style.color = "rgba(20,18,26,0.55)";
-  videoLabel.style.margin = "16px 0 6px";
-  card.appendChild(videoLabel);
-
-  (project.videos || []).forEach((video, i) => {
-    const row = document.createElement("div");
-    row.className = "video-row";
-    const badge = document.createElement("span");
-    badge.textContent = video.type === "embed" ? "🔗 링크" : "🎬 파일";
-    badge.style.fontWeight = "700";
-    badge.style.flex = "none";
-    const label = document.createElement("span");
-    label.textContent = video.type === "embed" ? video.src : "업로드된 영상 파일";
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "btn btn-small btn-danger";
-    removeBtn.textContent = "삭제";
-    removeBtn.addEventListener("click", () => {
-      project.videos.splice(i, 1);
-      saveDraft();
-      renderCategories();
-    });
-    row.appendChild(badge);
-    row.appendChild(label);
-    row.appendChild(removeBtn);
-    card.appendChild(row);
-  });
-
-  const addVideoRow = document.createElement("div");
-  addVideoRow.className = "add-video-row";
-
-  const urlInput = document.createElement("input");
-  urlInput.type = "url";
-  urlInput.placeholder = "유튜브/비메오 링크 붙여넣기";
-
-  const addUrlBtn = document.createElement("button");
-  addUrlBtn.className = "btn btn-outline btn-small";
-  addUrlBtn.textContent = "링크 추가";
-  addUrlBtn.addEventListener("click", () => {
-    if (!urlInput.value.trim()) return;
-    project.videos.push({ type: "embed", src: urlInput.value.trim() });
-    saveDraft();
-    renderCategories();
-  });
-
-  const uploadVideoBtn = document.createElement("button");
-  uploadVideoBtn.className = "btn btn-outline btn-small file-btn";
-  uploadVideoBtn.textContent = "영상 파일 업로드";
-  const videoFileInput = document.createElement("input");
-  videoFileInput.type = "file";
-  videoFileInput.accept = "video/*";
-  videoFileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    readFileAsDataURL(file).then((dataUrl) => {
-      project.videos.push({ type: "file", src: dataUrl });
-      saveDraft();
-      renderCategories();
-    });
-  });
-  uploadVideoBtn.appendChild(videoFileInput);
-
-  addVideoRow.appendChild(urlInput);
-  addVideoRow.appendChild(addUrlBtn);
-  addVideoRow.appendChild(uploadVideoBtn);
-  card.appendChild(addVideoRow);
+  card.appendChild(renderBlocksEditor(project));
 
   return card;
+}
+
+/* ---------------------------------- 블록 에디터 ---------------------------------- */
+
+function renderBlocksEditor(project) {
+  project.blocks = project.blocks || [];
+  const wrap = document.createElement("div");
+  wrap.className = "block-list";
+  const group = `blocks-${project.id}`;
+
+  project.blocks.forEach((block, i) => {
+    const item = document.createElement("div");
+    item.className = "block-item";
+
+    const bh = document.createElement("div");
+    bh.className = "block-head";
+
+    const handle = document.createElement("button");
+    handle.type = "button";
+    handle.className = "drag-handle";
+    handle.title = "드래그해서 순서 변경";
+    handle.textContent = "⠿";
+
+    const label = document.createElement("span");
+    label.className = "block-type-label";
+    label.textContent =
+      block.type === "text" ? "텍스트"
+      : block.type === "images" ? ({ single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 슬라이드" }[block.layout] || "이미지")
+      : "비디오 임베드";
+
+    const del = document.createElement("button");
+    del.className = "btn btn-danger btn-small";
+    del.textContent = "블록 삭제";
+    del.style.marginLeft = "auto";
+    del.addEventListener("click", () => {
+      if (confirm("이 블록을 삭제할까요?")) {
+        project.blocks.splice(i, 1);
+        saveDraft();
+        renderCategories();
+      }
+    });
+
+    bh.appendChild(handle);
+    bh.appendChild(label);
+    bh.appendChild(del);
+    item.appendChild(bh);
+    item.appendChild(renderBlockBody(project, block, i));
+    attachDrag(item, handle, group, project.blocks, i);
+    wrap.appendChild(item);
+  });
+
+  const addRow = document.createElement("div");
+  addRow.className = "add-block-row";
+  const mkAdd = (text, makeBlock) => {
+    const b = document.createElement("button");
+    b.className = "btn btn-outline btn-small";
+    b.textContent = text;
+    b.addEventListener("click", () => {
+      project.blocks.push(makeBlock());
+      saveDraft();
+      renderCategories();
+    });
+    return b;
+  };
+  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#14121a" })));
+  addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
+  addRow.appendChild(mkAdd("+ 비디오 임베드", () => ({ type: "embed", src: "" })));
+  wrap.appendChild(addRow);
+
+  return wrap;
+}
+
+function renderBlockBody(project, block, blockIndex) {
+  const body = document.createElement("div");
+
+  if (block.type === "text") {
+    const ta = document.createElement("textarea");
+    ta.rows = 4;
+    ta.value = block.content || "";
+    ta.className = "block-textarea";
+    ta.style.fontSize = (block.size || 15) + "px";
+    ta.style.color = block.color || "#14121a";
+    ta.placeholder = "내용을 입력하세요 (프리텐다드 폰트로 표시돼요)";
+    ta.addEventListener("input", () => { block.content = ta.value; saveDraft(); });
+    body.appendChild(ta);
+
+    const controls = document.createElement("div");
+    controls.className = "block-controls-row";
+
+    const sizeLabel = document.createElement("span");
+    sizeLabel.className = "control-label";
+    sizeLabel.textContent = "크기";
+    const sizeInput = document.createElement("input");
+    sizeInput.type = "number";
+    sizeInput.min = 10;
+    sizeInput.max = 80;
+    sizeInput.value = block.size || 15;
+    sizeInput.className = "size-input";
+    sizeInput.addEventListener("input", () => {
+      const v = parseInt(sizeInput.value, 10);
+      if (v >= 10 && v <= 80) {
+        block.size = v;
+        ta.style.fontSize = v + "px";
+        saveDraft();
+      }
+    });
+    const pxLabel = document.createElement("span");
+    pxLabel.className = "control-label";
+    pxLabel.textContent = "px";
+
+    const colorLabel = document.createElement("span");
+    colorLabel.className = "control-label";
+    colorLabel.textContent = "색상";
+    colorLabel.style.marginLeft = "12px";
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.value = block.color || "#14121a";
+    colorInput.className = "color-input";
+    colorInput.addEventListener("input", () => {
+      block.color = colorInput.value;
+      ta.style.color = colorInput.value;
+      saveDraft();
+    });
+    // 색상 선택을 마쳤을 때 자주 쓰는 색상에 기록
+    colorInput.addEventListener("change", () => {
+      pushRecentColor(colorInput.value);
+      renderCategories();
+    });
+
+    const swatches = document.createElement("div");
+    swatches.className = "color-swatches";
+    getRecentColors().forEach((c) => {
+      const s = document.createElement("button");
+      s.type = "button";
+      s.className = "swatch";
+      s.style.background = c;
+      s.title = c;
+      s.addEventListener("click", () => {
+        block.color = c;
+        pushRecentColor(c);
+        saveDraft();
+        renderCategories();
+      });
+      swatches.appendChild(s);
+    });
+
+    controls.appendChild(sizeLabel);
+    controls.appendChild(sizeInput);
+    controls.appendChild(pxLabel);
+    controls.appendChild(colorLabel);
+    controls.appendChild(colorInput);
+    controls.appendChild(swatches);
+    body.appendChild(controls);
+    return body;
+  }
+
+  if (block.type === "images") {
+    // 레이아웃 선택
+    const seg = document.createElement("div");
+    seg.className = "layout-seg";
+    [["single", "단일"], ["grid", "그리드"], ["slider", "자동 슬라이드"]].forEach(([value, text]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = text;
+      if ((block.layout || "single") === value) b.classList.add("active");
+      b.addEventListener("click", () => {
+        block.layout = value;
+        saveDraft();
+        renderCategories();
+      });
+      seg.appendChild(b);
+    });
+    body.appendChild(seg);
+
+    // 썸네일 (드래그로 순서 변경)
+    const imgGroup = `imgs-${project.id}-${blockIndex}`;
+    const row = document.createElement("div");
+    row.className = "thumb-row";
+    (block.images || []).forEach((src, j) => {
+      const thumb = document.createElement("div");
+      thumb.className = "thumb";
+      const img = document.createElement("img");
+      img.src = src;
+      img.draggable = false;
+      thumb.appendChild(img);
+
+      const miniHandle = document.createElement("button");
+      miniHandle.type = "button";
+      miniHandle.className = "drag-handle-mini";
+      miniHandle.title = "드래그해서 순서 변경";
+      miniHandle.textContent = "⠿";
+      thumb.appendChild(miniHandle);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", () => {
+        block.images.splice(j, 1);
+        saveDraft();
+        renderCategories();
+      });
+      thumb.appendChild(removeBtn);
+
+      attachDrag(thumb, miniHandle, imgGroup, block.images, j);
+      row.appendChild(thumb);
+    });
+    body.appendChild(row);
+
+    const uploadBtn = document.createElement("button");
+    uploadBtn.className = "btn btn-outline btn-small file-btn";
+    uploadBtn.style.marginTop = "8px";
+    uploadBtn.textContent = "이미지 업로드 (여러 장 가능)";
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+    input.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) {
+        const dataUrl = await readFileAsDataURL(file);
+        block.images.push(dataUrl);
+      }
+      saveDraft();
+      renderCategories();
+    });
+    uploadBtn.appendChild(input);
+    body.appendChild(uploadBtn);
+
+    if (block.layout === "slider") {
+      const hint = document.createElement("div");
+      hint.className = "block-hint";
+      hint.textContent = "사이트에서 3.5초 간격으로 자동으로 넘어가요. 점을 눌러 이동할 수도 있어요.";
+      body.appendChild(hint);
+    }
+    return body;
+  }
+
+  if (block.type === "embed") {
+    const input = document.createElement("input");
+    input.type = "url";
+    input.className = "embed-input";
+    input.placeholder = "유튜브/비메오 링크 붙여넣기 (예: https://youtu.be/...)";
+    input.value = block.src && !block.src.startsWith("data:") && !block.src.startsWith("assets/") ? block.src : "";
+    if (block.src && (block.src.startsWith("data:") || block.src.startsWith("assets/"))) {
+      const note = document.createElement("div");
+      note.className = "block-hint";
+      note.textContent = "🎬 업로드된 영상 파일이 연결되어 있어요.";
+      body.appendChild(note);
+    }
+    input.addEventListener("input", () => { block.src = input.value.trim(); saveDraft(); });
+    body.appendChild(input);
+    return body;
+  }
+
+  return body;
 }
 
 function makeThumb(src, kind, onRemove) {
@@ -431,6 +659,7 @@ function makeThumb(src, kind, onRemove) {
   thumb.className = "thumb";
   const media = kind === "image" ? document.createElement("img") : document.createElement("video");
   media.src = src;
+  media.draggable = false;
   thumb.appendChild(media);
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "✕";
@@ -645,14 +874,16 @@ function collectPendingMedia() {
       if (p.coverImage && p.coverImage.startsWith("data:")) {
         refs.push({ get: () => p.coverImage, set: (v) => { p.coverImage = v; } });
       }
-      (p.images || []).forEach((src, i) => {
-        if (src && src.startsWith("data:")) {
-          refs.push({ get: () => p.images[i], set: (v) => { p.images[i] = v; } });
+      (p.blocks || []).forEach((block) => {
+        if (block.type === "images") {
+          (block.images || []).forEach((src, i) => {
+            if (src && src.startsWith("data:")) {
+              refs.push({ get: () => block.images[i], set: (v) => { block.images[i] = v; } });
+            }
+          });
         }
-      });
-      (p.videos || []).forEach((video) => {
-        if (video.type === "file" && video.src && video.src.startsWith("data:")) {
-          refs.push({ get: () => video.src, set: (v) => { video.src = v; } });
+        if (block.type === "embed" && block.src && block.src.startsWith("data:")) {
+          refs.push({ get: () => block.src, set: (v) => { block.src = v; } });
         }
       });
     });
