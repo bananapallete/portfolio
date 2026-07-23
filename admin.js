@@ -16,12 +16,18 @@ function slugify(text, fallback) {
 }
 
 function saveDraft() {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
   const status = document.getElementById("autosaveStatus");
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  status.textContent = `임시 저장됨 (브라우저에만) · ${hh}:${mm}`;
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    status.textContent = `임시 저장됨 (브라우저에만) · ${hh}:${mm}`;
+  } catch (e) {
+    // 대용량 이미지/영상 때문에 localStorage 용량(약 5MB)을 넘긴 경우
+    status.textContent =
+      "임시 저장 실패(브라우저 용량 초과) — \"사이트에 반영\"을 누르면 파일이 업로드되며 용량이 줄어들어요.";
+  }
 }
 
 async function loadInitial() {
@@ -519,6 +525,195 @@ document.getElementById("addCategoryBtn").addEventListener("click", () => {
   });
   saveDraft();
   renderCategories();
+});
+
+/* ---------------------------------- GitHub 자동 배포 ---------------------------------- */
+
+const GH_OWNER = "bananapallete";
+const GH_REPO = "portfolio";
+const GH_BRANCH = "main";
+const GH_TOKEN_KEY = "portfolioGithubToken";
+
+const MIME_EXT = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/svg+xml": "svg",
+  "image/avif": "avif",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
+};
+
+function setPublishStatus(text) {
+  document.getElementById("autosaveStatus").textContent = text;
+}
+
+function getGithubToken(forceAsk = false) {
+  let token = localStorage.getItem(GH_TOKEN_KEY);
+  if (token && !forceAsk) return token;
+  token = prompt(
+    "GitHub 토큰(ghp_...)을 입력해주세요.\n\n" +
+      "발급 방법: github.com/settings/tokens → Generate new token (classic) → 'repo' 권한 체크\n\n" +
+      "토큰은 이 브라우저에만 저장되며, 토큰이 없는 사람은 이 페이지를 열어도 사이트를 수정할 수 없어요.",
+    ""
+  );
+  if (token) {
+    token = token.trim();
+    localStorage.setItem(GH_TOKEN_KEY, token);
+    return token;
+  }
+  return null;
+}
+
+async function ghRequest(path, token, options = {}) {
+  const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/${path}`, {
+    ...options,
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: "application/vnd.github+json",
+      ...(options.headers || {}),
+    },
+  });
+  if (res.status === 401) {
+    localStorage.removeItem(GH_TOKEN_KEY);
+    throw new Error("토큰이 만료되었거나 잘못됐어요. \"사이트에 반영\"을 다시 눌러 새 토큰을 입력해주세요.");
+  }
+  return res;
+}
+
+function parseDataUrl(dataUrl) {
+  const m = /^data:([^;,]+);base64,(.+)$/s.exec(dataUrl);
+  if (!m) return null;
+  return { mime: m[1], base64: m[2] };
+}
+
+async function hashBase64(base64) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(base64));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 20);
+}
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
+// data: URL을 저장소의 assets/ 파일로 올리고 경로를 돌려준다.
+// 같은 내용은 같은 파일명이 되므로 이미 올라간 파일은 건너뛴다.
+async function uploadAssetIfNeeded(dataUrl, token) {
+  const parsed = parseDataUrl(dataUrl);
+  if (!parsed) return dataUrl;
+
+  const approxBytes = parsed.base64.length * 0.75;
+  if (approxBytes > 95 * 1024 * 1024) {
+    throw new Error("95MB가 넘는 파일은 GitHub에 올릴 수 없어요. 큰 영상은 유튜브/비메오 링크를 사용해주세요.");
+  }
+
+  const hash = await hashBase64(parsed.base64);
+  const ext = MIME_EXT[parsed.mime] || (parsed.mime.split("/")[1] || "bin").replace(/[^a-z0-9]/gi, "");
+  const path = `assets/${hash}.${ext}`;
+
+  const check = await ghRequest(`contents/${path}?ref=${GH_BRANCH}`, token);
+  if (check.status !== 404) return path; // 이미 업로드된 파일
+
+  const put = await ghRequest(`contents/${path}`, token, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `assets: ${path} 업로드 (관리자 페이지)`,
+      content: parsed.base64,
+      branch: GH_BRANCH,
+    }),
+  });
+  if (!put.ok) throw new Error(`파일 업로드 실패 (GitHub 응답 ${put.status})`);
+  return path;
+}
+
+// data 안에서 아직 업로드되지 않은(data:로 시작하는) 이미지/영상 목록을 모은다.
+function collectPendingMedia() {
+  const refs = [];
+  (data.categories || []).forEach((cat) => {
+    (cat.projects || []).forEach((p) => {
+      if (p.coverImage && p.coverImage.startsWith("data:")) {
+        refs.push({ get: () => p.coverImage, set: (v) => { p.coverImage = v; } });
+      }
+      (p.images || []).forEach((src, i) => {
+        if (src && src.startsWith("data:")) {
+          refs.push({ get: () => p.images[i], set: (v) => { p.images[i] = v; } });
+        }
+      });
+      (p.videos || []).forEach((video) => {
+        if (video.type === "file" && video.src && video.src.startsWith("data:")) {
+          refs.push({ get: () => video.src, set: (v) => { video.src = v; } });
+        }
+      });
+    });
+  });
+  return refs;
+}
+
+async function publishToGithub() {
+  if (!data) {
+    alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 반영해주세요.");
+    return;
+  }
+  const token = getGithubToken();
+  if (!token) return;
+
+  const btn = document.getElementById("publishBtn");
+  btn.disabled = true;
+  try {
+    // 1) 새로 추가된 이미지/영상을 assets/ 폴더에 업로드
+    const refs = collectPendingMedia();
+    for (let i = 0; i < refs.length; i++) {
+      setPublishStatus(`이미지/영상 업로드 중… (${i + 1}/${refs.length})`);
+      const newPath = await uploadAssetIfNeeded(refs[i].get(), token);
+      refs[i].set(newPath);
+      saveDraft();
+    }
+
+    // 2) data.json 커밋
+    setPublishStatus("data.json 반영 중…");
+    let sha = null;
+    const cur = await ghRequest(`contents/data.json?ref=${GH_BRANCH}`, token);
+    if (cur.status === 200) sha = (await cur.json()).sha;
+
+    const body = {
+      message: "content: 관리자 페이지에서 콘텐츠 업데이트",
+      content: utf8ToBase64(JSON.stringify(data, null, 2)),
+      branch: GH_BRANCH,
+    };
+    if (sha) body.sha = sha;
+
+    const put = await ghRequest("contents/data.json", token, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    if (!put.ok) throw new Error(`data.json 반영 실패 (GitHub 응답 ${put.status})`);
+
+    setPublishStatus("✅ 배포 완료! 1~2분 뒤 실제 사이트에 반영돼요.");
+    alert("배포 완료!\n\nGitHub Pages가 사이트를 다시 빌드하는 데 1~2분 걸려요.\n잠시 후 사이트를 새로고침해서 확인해주세요.");
+  } catch (e) {
+    setPublishStatus("⚠️ 배포 실패: " + e.message);
+    alert("배포에 실패했어요.\n\n" + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById("publishBtn").addEventListener("click", publishToGithub);
+document.getElementById("tokenBtn").addEventListener("click", () => {
+  if (getGithubToken(true)) {
+    setPublishStatus("토큰을 저장했어요. 이제 \"사이트에 반영\"을 누르면 배포됩니다.");
+  }
 });
 
 /* ---------------------------------- Init ---------------------------------- */

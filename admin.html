@@ -19,7 +19,9 @@
         </button>
         <button class="btn btn-ghost btn-small" id="resetBtn">원본 다시 불러오기</button>
         <button class="btn btn-ghost btn-small" id="previewBtn">미리보기</button>
-        <button class="btn btn-primary btn-small" id="exportBtn">내보내기(다운로드)</button>
+        <button class="btn btn-ghost btn-small" id="tokenBtn">GitHub 토큰 설정</button>
+        <button class="btn btn-outline btn-small" id="exportBtn" style="color:#fff;border-color:rgba(250,249,246,0.3)">내보내기(백업)</button>
+        <button class="btn btn-primary btn-small" id="publishBtn">🚀 사이트에 반영</button>
       </div>
     </div>
     <div class="container" style="margin-top:8px;">
@@ -29,9 +31,10 @@
 
   <div class="container">
     <div class="admin-notice">
-      ⚠️ 이 페이지에서 수정한 내용은 브라우저에만 임시 저장돼요(자동 임시저장).<br/>
-      실제 공개 사이트에 반영하려면 <strong>① 내보내기</strong>로 <code>data.json</code>을 받은 뒤
-      <strong>② 사이트 폴더의 data.json 파일을 덮어쓰고</strong>, GitHub Pages 등에 <strong>③ 다시 업로드(커밋 &amp; 푸시)</strong>해야 해요.
+      ✨ 수정한 내용은 브라우저에 자동 임시저장되고, 상단 <strong>🚀 사이트에 반영</strong> 버튼을 누르면
+      GitHub에 자동으로 커밋되어 <strong>1~2분 안에 실제 사이트에 반영</strong>돼요.<br/>
+      처음 한 번만 GitHub 토큰을 입력하면 이 브라우저에 저장됩니다(토큰이 없는 사람은 배포할 수 없어요).
+      <strong>내보내기(백업)</strong>는 data.json을 파일로 받아두는 백업용이에요.
     </div>
 
     <section class="admin-section" id="profileSection">
