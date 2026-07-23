@@ -67,8 +67,8 @@ async function initProject() {
     const el = renderBlock(block);
     if (!el) return;
     rendered++;
-    if (block.type === "text" || block.type === "embed") {
-      // 텍스트/영상은 읽기 좋은 폭으로, 이미지는 화면 가로 꽉 채움
+    if (block.type === "text") {
+      // 텍스트는 읽기 좋은 폭으로, 이미지·영상은 화면 가로 꽉 채움
       const narrow = document.createElement("div");
       narrow.className = "container-narrow";
       narrow.appendChild(el);

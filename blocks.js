@@ -36,6 +36,7 @@ function normalizeEmbedSrc(raw) {
   let v = (raw || "").trim();
   const m = /<iframe[^>]*\ssrc=["']([^"']+)["']/i.exec(v);
   if (m) v = m[1];
+  v = v.replace(/&amp;/g, "&");
   if (!v) return "";
   if (v.startsWith("//")) return "https:" + v;
   if (v.startsWith("data:") || v.startsWith("assets/") || /^https?:\/\//i.test(v)) return v;

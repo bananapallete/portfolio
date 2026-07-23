@@ -837,6 +837,13 @@ input, textarea, select { font-family: inherit; }
 .proj-blocks .blk-images-masonry { column-gap: 10px; }
 .proj-blocks .blk-images-masonry > * { margin-bottom: 10px; }
 
+/* 상세 페이지에서 영상 임베드도 화면 가로를 꽉 채운다 */
+.proj-blocks .blk-embed iframe,
+.proj-blocks .blk-embed video {
+  border: none;
+  border-radius: 0;
+}
+
 /* ---------------------------- 블록 에디터 (관리자) ---------------------------- */
 
 .project-summary {

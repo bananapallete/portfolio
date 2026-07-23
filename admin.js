@@ -19,6 +19,8 @@ function normalizeEmbedInput(raw) {
   let v = (raw || "").trim();
   const m = /<iframe[^>]*\ssrc=["']([^"']+)["']/i.exec(v);
   if (m) v = m[1];
+  // iframe 코드를 그대로 붙여넣으면 속성 안의 &가 &amp;로 인코딩되어 있어 쿼리 파라미터가 깨짐
+  v = v.replace(/&amp;/g, "&");
   if (!v) return "";
   if (v.startsWith("//")) return "https:" + v;
   if (v.startsWith("data:") || v.startsWith("assets/") || /^https?:\/\//i.test(v)) return v;
