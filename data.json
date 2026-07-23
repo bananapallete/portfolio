@@ -17,7 +17,7 @@
   "categories": [
     {
       "id": "branding",
-      "name": "브랜딩",
+      "name": "Branding",
       "accent": "#FF4D6D",
       "projects": [
         {
@@ -59,7 +59,7 @@
     },
     {
       "id": "illustration",
-      "name": "일러스트",
+      "name": "Illustration",
       "accent": "#6C5CE7",
       "projects": [
         {
@@ -139,7 +139,7 @@
     },
     {
       "id": "motion",
-      "name": "모션그래픽",
+      "name": "Motion",
       "accent": "#00C2A8",
       "projects": [
         {

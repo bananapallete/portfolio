@@ -83,7 +83,7 @@ function renderTabs() {
 
   const allBtn = document.createElement("button");
   allBtn.className = "tab" + (currentFilter === ALL_KEY ? " active" : "");
-  allBtn.textContent = "전체";
+  allBtn.textContent = "All";
   allBtn.addEventListener("click", () => {
     currentFilter = ALL_KEY;
     renderTabs();
