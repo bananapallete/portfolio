@@ -104,26 +104,26 @@
           "blocks": [
             {
               "type": "images",
-              "layout": "grid",
+              "layout": "single",
               "images": [
                 "assets/20fe84bdd0ac9a60eebf.png"
               ]
             },
             {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1123797877?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+            },
+            {
               "type": "images",
               "layout": "grid",
               "images": [
-                "assets/1a8e2450116954c982b5.png",
                 "assets/8930fb3a5aa86e1ce53e.png",
+                "assets/1a8e2450116954c982b5.png",
                 "assets/00c5db200247476488c6.png",
                 "assets/fc9b1a82f20bdeede474.png",
                 "assets/938e1f0e1574d1f954a3.png",
                 "assets/cfd4f693ec2f4fa617c0.png"
               ]
-            },
-            {
-              "type": "embed",
-              "src": "https://player.vimeo.com/video/1123797877?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
             }
           ],
           "summary": ""
