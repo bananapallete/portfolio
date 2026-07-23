@@ -7,7 +7,7 @@ async function initProject() {
   const siteData = await loadSiteData();
 
   if (!siteData) {
-    wrap.innerHTML = `<div class="empty-state">데이터를 불러오지 못했어요. <a href="index.html" style="text-decoration:underline;">← 목록으로</a></div>`;
+    wrap.innerHTML = `<div class="empty-state">Couldn't load the data. <a href="index.html" style="text-decoration:underline;">← Back to list</a></div>`;
     return;
   }
 
@@ -48,8 +48,8 @@ async function initProject() {
   }
 
   if (!project) {
-    document.getElementById("projTitle").textContent = "프로젝트를 찾을 수 없어요";
-    wrap.innerHTML = `<div class="empty-state">주소가 잘못되었거나 삭제된 프로젝트예요. <a href="index.html" style="text-decoration:underline;">← 목록으로</a></div>`;
+    document.getElementById("projTitle").textContent = "Project not found";
+    wrap.innerHTML = `<div class="empty-state">This link is invalid or the project has been removed. <a href="index.html" style="text-decoration:underline;">← Back to list</a></div>`;
     return;
   }
 
@@ -79,7 +79,7 @@ async function initProject() {
   });
 
   if (rendered === 0) {
-    wrap.innerHTML = `<div class="empty-state">아직 등록된 콘텐츠가 없어요.</div>`;
+    wrap.innerHTML = `<div class="empty-state">No content yet.</div>`;
   }
 }
 

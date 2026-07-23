@@ -146,10 +146,20 @@ input, textarea, select { font-family: inherit; }
 /* ---------------------------------- Header ---------------------------------- */
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
-  background: rgba(250, 249, 246, 0.85);
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: none;
+  transition: background 0.2s ease, backdrop-filter 0.2s ease, border-color 0.2s ease;
+}
+
+/* 히어로를 벗어나 스크롤되면 다시 불투명한 헤더로 전환 */
+.site-header.scrolled {
+  background: rgba(250, 249, 246, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -172,13 +182,21 @@ input, textarea, select { font-family: inherit; }
   font-weight: 800;
   font-size: 20px;
   letter-spacing: -0.02em;
+  transition: color 0.2s ease;
 }
 
 .brand-role {
   font-size: 12px;
   color: rgba(20, 18, 26, 0.5);
   font-weight: 600;
+  transition: color 0.2s ease;
 }
+
+/* 히어로 영상 위에서는 밝은 글자색으로 대비 확보, 스크롤되면 다시 어둡게 */
+body.has-hero-video .brand-name { color: #fff; }
+body.has-hero-video .brand-role { color: rgba(255, 255, 255, 0.75); }
+body.has-hero-video .site-header.scrolled .brand-name { color: var(--ink); }
+body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 0.5); }
 
 .tabs {
   display: flex;
@@ -1151,15 +1169,6 @@ input, textarea, select { font-family: inherit; }
 @media (max-width: 640px) {
   :root { --header-h: 48px; }
 
-  .site-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: transparent;
-    backdrop-filter: none;
-    border-bottom: none;
-  }
   .site-header .container {
     flex-direction: row;
     height: var(--header-h);
@@ -1169,16 +1178,6 @@ input, textarea, select { font-family: inherit; }
   .brand { flex-direction: row; align-items: baseline; gap: 6px; flex: none; }
   .brand-role { display: none; }
   .brand-name { font-size: 14px; }
-  /* 헤더가 영상 위에 투명하게 떠 있을 때는 밝은 글자색으로 대비 확보 */
-  body.has-hero-video .brand-name { color: #fff; }
-
-  /* 히어로를 벗어나 스크롤되면 다시 불투명한 헤더 + 어두운 글자색으로 */
-  .site-header.scrolled {
-    background: rgba(250, 249, 246, 0.92);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  body.has-hero-video .site-header.scrolled .brand-name { color: var(--ink); }
   .tabs {
     /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
     flex: 0 1 auto;

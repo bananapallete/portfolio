@@ -3,7 +3,7 @@
     "name": "Hanjung Cho",
     "nickname": "Unlimit_Cho",
     "role": "Designer",
-    "tagline": "브랜딩 · 일러스트 · 모션그래픽을 넘나드는 크리에이티브",
+    "tagline": "A creative spanning branding, illustration, and motion graphics",
     "contact": {
       "phone": "+82 10 5678 0569",
       "emails": [
@@ -50,7 +50,7 @@
         },
         {
           "id": "branding-jobda-dev",
-          "title": "잡다데브",
+          "title": "Jobda Dev",
           "coverImage": "",
           "blocks": [],
           "summary": ""
@@ -99,7 +99,7 @@
         },
         {
           "id": "illustration-jihaksa",
-          "title": "지학사",
+          "title": "Jihaksa",
           "coverImage": "assets/edd9cb513aaaccafa3bc.png",
           "blocks": [
             {

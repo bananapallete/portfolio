@@ -10,9 +10,9 @@ function renderFallback() {
   const grid = document.getElementById("workGrid");
   grid.innerHTML = `
     <div class="empty-state">
-      data.json을 불러오지 못했어요.<br/>
-      브라우저에서 파일을 직접 열었다면(file://) 보안 정책 때문에 데이터를 못 읽어올 수 있어요.<br/>
-      아래에서 data.json 파일을 직접 선택하거나, 로컬 서버(예: VSCode Live Server, <code>python -m http.server</code>)로 열어주세요.
+      Couldn't load data.json.<br/>
+      If you opened this file directly (file://), your browser's security policy may be blocking the data from loading.<br/>
+      Select the data.json file below, or serve this folder with a local server (e.g. VSCode Live Server, <code>python -m http.server</code>).
       <div style="margin-top:16px;">
         <input type="file" accept="application/json" id="fallbackFile" />
       </div>
@@ -27,7 +27,7 @@ function renderFallback() {
         siteData = JSON.parse(reader.result);
         init();
       } catch (err) {
-        alert("JSON 파일을 읽는 중 오류가 발생했어요.");
+        alert("There was an error reading the JSON file.");
       }
     };
     reader.readAsText(file);
@@ -135,7 +135,7 @@ function renderGrid() {
   });
 
   if (cards.length === 0) {
-    grid.innerHTML = `<div class="empty-state">아직 등록된 프로젝트가 없어요.</div>`;
+    grid.innerHTML = `<div class="empty-state">No projects yet.</div>`;
     return;
   }
 
