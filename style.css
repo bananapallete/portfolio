@@ -278,7 +278,7 @@ input, textarea, select { font-family: inherit; }
 .work-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 36px 26px;
+  gap: 5px;
   margin-top: 32px;
 }
 
@@ -297,10 +297,10 @@ input, textarea, select { font-family: inherit; }
   font-weight: 700;
   font-size: 16px;
   text-align: center;
-  padding: 20px;
+  padding: 0;
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   transition: opacity 0.2s ease;
 }
 
@@ -314,7 +314,7 @@ input, textarea, select { font-family: inherit; }
 }
 
 .card-body {
-  padding: 14px 2px 0;
+  padding: 10px 0 0;
 }
 
 .card-title {
