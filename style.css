@@ -360,7 +360,7 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .card-desc {
