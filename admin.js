@@ -195,19 +195,55 @@ function renderProfile() {
   row1.appendChild(makeTextField("역할/타이틀", data.profile.role, (v) => { data.profile.role = v; saveDraft(); }));
   wrap.appendChild(row1);
 
+  const heroTitleVisible = data.profile.showHeroTitle !== false;
+
   const heroTitleRow = document.createElement("div");
   heroTitleRow.className = "field-row";
   const heroTitleField = document.createElement("div");
   heroTitleField.className = "field";
   heroTitleField.style.gridColumn = "1 / -1";
+
+  const heroTitleLabelRow = document.createElement("div");
+  heroTitleLabelRow.style.display = "flex";
+  heroTitleLabelRow.style.alignItems = "center";
+  heroTitleLabelRow.style.justifyContent = "space-between";
+  heroTitleLabelRow.style.gap = "10px";
+
   const heroTitleLabel = document.createElement("label");
   heroTitleLabel.textContent = "홈 화면 큰 제목 (비워두면 \"Hi, I'm {닉네임}\"으로 표시)";
+  heroTitleLabel.style.marginBottom = "0";
+
+  const toggleLabel = document.createElement("label");
+  toggleLabel.className = "toggle-switch";
+  const toggleInput = document.createElement("input");
+  toggleInput.type = "checkbox";
+  toggleInput.checked = heroTitleVisible;
+  const toggleSlider = document.createElement("span");
+  toggleSlider.className = "toggle-slider";
+  const toggleText = document.createElement("span");
+  toggleText.className = "toggle-text";
+  toggleText.textContent = heroTitleVisible ? "표시함" : "숨김";
+  toggleInput.addEventListener("change", () => {
+    data.profile.showHeroTitle = toggleInput.checked;
+    saveDraft();
+    renderProfile();
+  });
+  toggleLabel.appendChild(toggleInput);
+  toggleLabel.appendChild(toggleSlider);
+  toggleLabel.appendChild(toggleText);
+
+  heroTitleLabelRow.appendChild(heroTitleLabel);
+  heroTitleLabelRow.appendChild(toggleLabel);
+
   const heroTitleInput = document.createElement("input");
   heroTitleInput.type = "text";
   heroTitleInput.value = data.profile.heroTitle || "";
   heroTitleInput.placeholder = `Hi, I'm ${data.profile.nickname || data.profile.name || ""}`;
+  heroTitleInput.disabled = !heroTitleVisible;
+  heroTitleInput.style.marginTop = "6px";
   heroTitleInput.addEventListener("input", () => { data.profile.heroTitle = heroTitleInput.value; saveDraft(); });
-  heroTitleField.appendChild(heroTitleLabel);
+
+  heroTitleField.appendChild(heroTitleLabelRow);
   heroTitleField.appendChild(heroTitleInput);
   heroTitleRow.appendChild(heroTitleField);
   wrap.appendChild(heroTitleRow);

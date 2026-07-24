@@ -869,6 +869,59 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
   margin: 12px 0 6px;
 }
 
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: none;
+}
+
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--line);
+  transition: background 0.15s ease;
+  flex: none;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 18, 26, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--ink);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+}
+
+.toggle-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(20, 18, 26, 0.55);
+  white-space: nowrap;
+}
+
 .block-list { margin-top: 4px; }
 
 .block-item {
