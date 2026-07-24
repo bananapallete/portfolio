@@ -316,7 +316,8 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
 .work-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 5px;
+  column-gap: 5px;
+  row-gap: 44px;
   margin-top: 32px;
 }
 
@@ -352,7 +353,7 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
 }
 
 .card-body {
-  padding: 10px 0 0;
+  padding: 8px 0 0;
 }
 
 .card-title {
