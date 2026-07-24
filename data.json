@@ -23,15 +23,15 @@
       "accent": "#FF4D6D",
       "projects": [
         {
-          "id": "branding-inhr-plus",
-          "title": "INHR+",
+          "id": "branding-h-dot",
+          "title": "H.DOT",
           "coverImage": "",
           "blocks": [],
           "summary": ""
         },
         {
-          "id": "branding-h-dot",
-          "title": "H.DOT",
+          "id": "branding-inhr-plus",
+          "title": "INHR+",
           "coverImage": "",
           "blocks": [],
           "summary": ""
@@ -130,10 +130,11 @@
                 "assets/fc9b1a82f20bdeede474.png",
                 "assets/938e1f0e1574d1f954a3.png",
                 "assets/cfd4f693ec2f4fa617c0.png"
-              ]
+              ],
+              "grid": "4"
             }
           ],
-          "summary": ""
+          "summary": "지학사 책 표지 디자인"
         },
         {
           "id": "illustration-tws-fanart",
