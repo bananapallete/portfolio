@@ -499,6 +499,18 @@ function renderProjectThumbCard(cat, project, projIndex) {
   });
   card.appendChild(deleteBtn);
 
+  const handle = document.createElement("button");
+  handle.type = "button";
+  handle.className = "project-thumb-handle";
+  handle.title = "드래그해서 순서 변경";
+  handle.textContent = "⠿";
+  handle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    card.draggable = false; // 드래그 없이 핸들만 클릭했다면 draggable 상태를 되돌린다
+  });
+  card.appendChild(handle);
+  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderCategories);
+
   return card;
 }
 

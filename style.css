@@ -200,31 +200,49 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
 
 .tabs {
   display: flex;
-  gap: 6px;
-  background: var(--paper-soft);
-  padding: 6px;
-  border-radius: 999px;
+  align-items: center;
+  gap: 22px;
 }
 
 .tab {
   border: none;
   background: transparent;
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-weight: 700;
+  padding: 6px 0;
+  font-weight: 400;
   font-size: 14px;
   color: rgba(20, 18, 26, 0.55);
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  transition: color 0.2s ease, transform 0.15s ease;
   white-space: nowrap;
   flex: none;
 }
 
 .tab:hover { transform: translateY(-1px); }
 
-.tab.active {
-  background: var(--ink);
-  color: var(--paper);
+.tab.active { color: var(--ink); }
+
+body.has-hero-video .tab { color: rgba(255, 255, 255, 0.65); }
+body.has-hero-video .tab.active { color: #fff; }
+body.has-hero-video .site-header.scrolled .tab { color: rgba(20, 18, 26, 0.55); }
+body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
+
+/* 선택된 메뉴가 볼드체로 자연스럽게 전환되도록, 굵은 글자를 오버레이해서 크로스페이드 */
+.tab-label {
+  position: relative;
+  display: inline-block;
 }
+
+.tab-label::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  white-space: nowrap;
+}
+
+.tab.active .tab-label::after { opacity: 1; }
 
 /* ---------------------------------- Hero ---------------------------------- */
 
@@ -623,6 +641,36 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
 }
 
 .project-thumb-card:hover .project-thumb-delete { opacity: 1; }
+
+.project-thumb-handle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(20, 18, 26, 0.7);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 0.15s ease;
+}
+
+.project-thumb-card:hover .project-thumb-handle { opacity: 1; }
+.project-thumb-handle:active { cursor: grabbing; }
+
+.project-thumb-card.dragging { opacity: 0.4; }
+
+.project-thumb-card.drag-over {
+  border-color: var(--illustration);
+  box-shadow: 0 0 0 2px var(--illustration);
+}
 
 /* ---- 프로젝트 편집 팝업 ---- */
 
@@ -1360,13 +1408,12 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
     flex: 0 1 auto;
     min-width: 0;
     margin-left: auto;
-    padding: 3px;
-    gap: 3px;
+    gap: 14px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { padding: 6px 10px; font-size: 11px; }
+  .tab { padding: 6px 0; font-size: 12px; }
 
   .hero { padding: 40px 0; }
   .container { padding: 0 18px; }

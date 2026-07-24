@@ -85,30 +85,34 @@ function renderHeader() {
   });
 }
 
+function makeTab(text, isActive, onClick) {
+  const btn = document.createElement("button");
+  btn.className = "tab" + (isActive ? " active" : "");
+  const label = document.createElement("span");
+  label.className = "tab-label";
+  label.dataset.text = text;
+  label.textContent = text;
+  btn.appendChild(label);
+  btn.addEventListener("click", onClick);
+  return btn;
+}
+
 function renderTabs() {
   const tabs = document.getElementById("tabs");
   tabs.innerHTML = "";
 
-  const allBtn = document.createElement("button");
-  allBtn.className = "tab" + (currentFilter === ALL_KEY ? " active" : "");
-  allBtn.textContent = "All";
-  allBtn.addEventListener("click", () => {
+  tabs.appendChild(makeTab("All", currentFilter === ALL_KEY, () => {
     currentFilter = ALL_KEY;
     renderTabs();
     renderGrid();
-  });
-  tabs.appendChild(allBtn);
+  }));
 
   (siteData.categories || []).forEach((cat) => {
-    const btn = document.createElement("button");
-    btn.className = "tab" + (currentFilter === cat.id ? " active" : "");
-    btn.textContent = cat.name;
-    btn.addEventListener("click", () => {
+    tabs.appendChild(makeTab(cat.name, currentFilter === cat.id, () => {
       currentFilter = cat.id;
       renderTabs();
       renderGrid();
-    });
-    tabs.appendChild(btn);
+    }));
   });
 }
 
