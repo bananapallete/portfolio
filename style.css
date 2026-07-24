@@ -259,19 +259,6 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
 
 .hero .container { position: relative; z-index: 1; width: 100%; }
 
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
-  margin-bottom: 24px;
-}
-
 .hero-title {
   font-size: clamp(40px, 7vw, 84px);
   font-weight: 800;
@@ -288,7 +275,6 @@ body.has-hero-video .site-header.scrolled .brand-role { color: rgba(20, 18, 26, 
 }
 
 /* 배경 영상이 설정되면 밝은 텍스트로 전환 */
-.hero.has-video .hero-kicker { background: rgba(250, 249, 246, 0.16); color: #fff; }
 .hero.has-video .hero-title { color: #fff; }
 .hero.has-video .hero-tagline { color: rgba(255, 255, 255, 0.82); }
 

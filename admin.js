@@ -195,6 +195,23 @@ function renderProfile() {
   row1.appendChild(makeTextField("역할/타이틀", data.profile.role, (v) => { data.profile.role = v; saveDraft(); }));
   wrap.appendChild(row1);
 
+  const heroTitleRow = document.createElement("div");
+  heroTitleRow.className = "field-row";
+  const heroTitleField = document.createElement("div");
+  heroTitleField.className = "field";
+  heroTitleField.style.gridColumn = "1 / -1";
+  const heroTitleLabel = document.createElement("label");
+  heroTitleLabel.textContent = "홈 화면 큰 제목 (비워두면 \"Hi, I'm {닉네임}\"으로 표시)";
+  const heroTitleInput = document.createElement("input");
+  heroTitleInput.type = "text";
+  heroTitleInput.value = data.profile.heroTitle || "";
+  heroTitleInput.placeholder = `Hi, I'm ${data.profile.nickname || data.profile.name || ""}`;
+  heroTitleInput.addEventListener("input", () => { data.profile.heroTitle = heroTitleInput.value; saveDraft(); });
+  heroTitleField.appendChild(heroTitleLabel);
+  heroTitleField.appendChild(heroTitleInput);
+  heroTitleRow.appendChild(heroTitleField);
+  wrap.appendChild(heroTitleRow);
+
   const row2 = document.createElement("div");
   row2.className = "field-row";
   const taglineField = document.createElement("div");

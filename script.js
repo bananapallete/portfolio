@@ -57,7 +57,8 @@ function renderHeader() {
   const p = siteData.profile || {};
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
   document.getElementById("brandRole").textContent = p.role || "";
-  document.getElementById("heroName").textContent = p.nickname || p.name || "";
+  document.getElementById("heroTitle").textContent =
+    p.heroTitle || `Hi, I'm ${p.nickname || p.name || ""}`;
   document.getElementById("heroTagline").textContent = p.tagline || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
   renderHero(p);
