@@ -134,7 +134,9 @@
               "grid": "4"
             }
           ],
-          "summary": "지학사 책 표지 디자인"
+          "summary": "지학사 책 표지 디자인",
+          "heroBg": "#14121a",
+          "titleWeight": "400"
         },
         {
           "id": "illustration-tws-fanart",
