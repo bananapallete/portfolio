@@ -7,12 +7,12 @@ const RECENT_COLORS_KEY = "portfolioRecentColors";
 const DEFAULT_COLORS = ["#14121a", "#ff4d6d", "#6c5ce7", "#00c2a8", "#ffc93c", "#ffffff"];
 let data = null;
 
-// 펼쳐진 프로젝트(상세 편집 중) id 목록 — 재렌더링해도 유지
-const expandedProjects = new Set();
 // 미리보기·순서 조절 모드인 프로젝트 id 목록
 const previewProjects = new Set();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
+// 편집 팝업이 열려 있는 대상 { cat, project, projIndex }
+let editingContext = null;
 
 // iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
 function normalizeEmbedInput(raw) {
@@ -128,7 +128,8 @@ function ensureShape() {
 /* ------------------------------ 드래그 정렬 공통 ------------------------------ */
 
 // handle을 잡고 끌면 itemEl을 같은 group/list 안에서 순서를 바꿀 수 있다.
-function attachDrag(itemEl, handleEl, group, list, index) {
+// onChange: 순서가 바뀐 뒤 다시 그릴 함수 (기본값은 편집 팝업 새로고침)
+function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditModalBody) {
   handleEl.addEventListener("mousedown", () => { itemEl.draggable = true; });
   itemEl.addEventListener("dragstart", (e) => {
     e.stopPropagation();
@@ -161,7 +162,7 @@ function attachDrag(itemEl, handleEl, group, list, index) {
     const [moved] = list.splice(from, 1);
     list.splice(index, 0, moved);
     saveDraft();
-    renderCategories();
+    onChange();
   });
 }
 
@@ -204,14 +205,10 @@ function renderProfile() {
   heroTitleField.style.gridColumn = "1 / -1";
 
   const heroTitleLabelRow = document.createElement("div");
-  heroTitleLabelRow.style.display = "flex";
-  heroTitleLabelRow.style.alignItems = "center";
-  heroTitleLabelRow.style.justifyContent = "space-between";
-  heroTitleLabelRow.style.gap = "10px";
+  heroTitleLabelRow.className = "toggle-row";
 
   const heroTitleLabel = document.createElement("label");
-  heroTitleLabel.textContent = "홈 화면 큰 제목 (비워두면 \"Hi, I'm {닉네임}\"으로 표시)";
-  heroTitleLabel.style.marginBottom = "0";
+  heroTitleLabel.textContent = "홈 화면 큰 제목";
 
   const toggleLabel = document.createElement("label");
   toggleLabel.className = "toggle-switch";
@@ -235,15 +232,20 @@ function renderProfile() {
   heroTitleLabelRow.appendChild(heroTitleLabel);
   heroTitleLabelRow.appendChild(toggleLabel);
 
+  const heroTitleHint = document.createElement("div");
+  heroTitleHint.className = "block-hint";
+  heroTitleHint.style.margin = "0 0 6px";
+  heroTitleHint.textContent = `비워두면 "Hi, I'm ${data.profile.nickname || data.profile.name || ""}"로 자동 표시돼요.`;
+
   const heroTitleInput = document.createElement("input");
   heroTitleInput.type = "text";
   heroTitleInput.value = data.profile.heroTitle || "";
   heroTitleInput.placeholder = `Hi, I'm ${data.profile.nickname || data.profile.name || ""}`;
   heroTitleInput.disabled = !heroTitleVisible;
-  heroTitleInput.style.marginTop = "6px";
   heroTitleInput.addEventListener("input", () => { data.profile.heroTitle = heroTitleInput.value; saveDraft(); });
 
   heroTitleField.appendChild(heroTitleLabelRow);
+  heroTitleField.appendChild(heroTitleHint);
   heroTitleField.appendChild(heroTitleInput);
   heroTitleRow.appendChild(heroTitleField);
   wrap.appendChild(heroTitleRow);
@@ -426,24 +428,28 @@ function renderCategories() {
     head.appendChild(deleteCatBtn);
     block.appendChild(head);
 
+    const projectsGrid = document.createElement("div");
+    projectsGrid.className = "project-thumb-grid";
     (cat.projects || []).forEach((project, projIndex) => {
-      block.appendChild(renderProjectCard(cat, project, projIndex));
+      projectsGrid.appendChild(renderProjectThumbCard(cat, project, projIndex));
     });
+    block.appendChild(projectsGrid);
 
     const addProjectBtn = document.createElement("button");
     addProjectBtn.className = "btn btn-outline btn-small";
     addProjectBtn.textContent = "+ 프로젝트 추가";
     addProjectBtn.addEventListener("click", () => {
-      cat.projects.push({
+      const project = {
         id: slugify("new-project"),
         title: "새 프로젝트",
-        description: "",
         coverImage: "",
-        images: [],
-        videos: [],
-      });
+        blocks: [],
+        summary: "",
+      };
+      cat.projects.push(project);
       saveDraft();
       renderCategories();
+      openProjectEditor(cat, project, cat.projects.length - 1);
     });
     block.appendChild(addProjectBtn);
 
@@ -451,9 +457,70 @@ function renderCategories() {
   });
 }
 
-function renderProjectCard(cat, project, projIndex) {
+function renderProjectThumbCard(cat, project, projIndex) {
   const card = document.createElement("div");
-  card.className = "project-card";
+  card.className = "project-thumb-card";
+  card.addEventListener("click", () => openProjectEditor(cat, project, projIndex));
+
+  const media = document.createElement("div");
+  media.className = "project-thumb-media";
+  if (project.coverImage) {
+    const img = document.createElement("img");
+    img.src = project.coverImage;
+    media.appendChild(img);
+  } else {
+    media.textContent = "커버 없음";
+  }
+  card.appendChild(media);
+
+  const body = document.createElement("div");
+  body.className = "project-thumb-body";
+  const title = document.createElement("div");
+  title.className = "project-thumb-title";
+  title.textContent = project.title || "(제목 없음)";
+  const meta = document.createElement("div");
+  meta.className = "project-thumb-meta";
+  meta.textContent = `블록 ${(project.blocks || []).length}개`;
+  body.appendChild(title);
+  body.appendChild(meta);
+  card.appendChild(body);
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "project-thumb-delete";
+  deleteBtn.title = "삭제";
+  deleteBtn.textContent = "✕";
+  deleteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (confirm(`"${project.title}" 프로젝트를 삭제할까요?`)) {
+      cat.projects.splice(projIndex, 1);
+      saveDraft();
+      renderCategories();
+    }
+  });
+  card.appendChild(deleteBtn);
+
+  return card;
+}
+
+/* ---------------------------------- 프로젝트 편집 팝업 ---------------------------------- */
+
+function openProjectEditor(cat, project, projIndex) {
+  editingContext = { cat, project, projIndex };
+  renderEditModalBody();
+  document.getElementById("projectEditOverlay").classList.remove("hidden");
+}
+
+function closeProjectEditor() {
+  editingContext = null;
+  document.getElementById("projectEditOverlay").classList.add("hidden");
+  renderCategories();
+}
+
+function renderEditModalBody() {
+  if (!editingContext) return;
+  const { cat, project, projIndex } = editingContext;
+  const card = document.getElementById("projectEditBody");
+  card.innerHTML = "";
 
   const head = document.createElement("div");
   head.className = "project-card-head";
@@ -468,16 +535,6 @@ function renderProjectCard(cat, project, projIndex) {
   titleInput.style.padding = "8px 10px";
   titleInput.addEventListener("input", () => { project.title = titleInput.value; saveDraft(); });
 
-  const isOpen = expandedProjects.has(project.id);
-  const editBtn = document.createElement("button");
-  editBtn.className = "btn btn-small " + (isOpen ? "btn-outline" : "btn-primary");
-  editBtn.textContent = isOpen ? "▲ 접기" : "✎ 상세 편집";
-  editBtn.addEventListener("click", () => {
-    if (isOpen) expandedProjects.delete(project.id);
-    else expandedProjects.add(project.id);
-    renderCategories();
-  });
-
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "btn btn-danger btn-small";
   deleteBtn.textContent = "삭제";
@@ -485,12 +542,11 @@ function renderProjectCard(cat, project, projIndex) {
     if (confirm(`"${project.title}" 프로젝트를 삭제할까요?`)) {
       cat.projects.splice(projIndex, 1);
       saveDraft();
-      renderCategories();
+      closeProjectEditor();
     }
   });
 
   head.appendChild(titleInput);
-  head.appendChild(editBtn);
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
@@ -507,21 +563,11 @@ function renderProjectCard(cat, project, projIndex) {
   summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
   card.appendChild(summaryInput);
 
-  if (!isOpen) {
-    const summary = document.createElement("div");
-    summary.className = "project-summary";
-    const n = (project.blocks || []).length;
-    summary.textContent = `${project.coverImage ? "커버 이미지 ✓" : "커버 이미지 없음"} · 콘텐츠 블록 ${n}개`;
-    summary.style.marginTop = "8px";
-    card.appendChild(summary);
-    return card;
-  }
-
   // ---- 모드 전환: 블록 편집 / 미리보기·순서 조절 ----
   const isPreview = previewProjects.has(project.id);
   const modeSeg = document.createElement("div");
   modeSeg.className = "layout-seg";
-  modeSeg.style.marginTop = "4px";
+  modeSeg.style.marginTop = "14px";
   [["edit", "✎ 블록 편집"], ["preview", "👁 미리보기 · 순서 조절"]].forEach(([value, text]) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -530,7 +576,7 @@ function renderProjectCard(cat, project, projIndex) {
     b.addEventListener("click", () => {
       if (value === "preview") previewProjects.add(project.id);
       else previewProjects.delete(project.id);
-      renderCategories();
+      renderEditModalBody();
     });
     modeSeg.appendChild(b);
   });
@@ -542,7 +588,7 @@ function renderProjectCard(cat, project, projIndex) {
     hint.textContent = "실제 사이트에 보이는 모습이에요. ⠿ 핸들을 잡고 드래그하면 블록과 이미지 순서를 바꿀 수 있어요.";
     card.appendChild(hint);
     card.appendChild(renderProjectPreview(project));
-    return card;
+    return;
   }
 
   // ---- 커버 이미지 ----
@@ -557,7 +603,7 @@ function renderProjectCard(cat, project, projIndex) {
     coverRow.appendChild(makeThumb(project.coverImage, "image", () => {
       project.coverImage = "";
       saveDraft();
-      renderCategories();
+      renderEditModalBody();
     }));
   }
   const coverUploadBtn = document.createElement("button");
@@ -572,7 +618,7 @@ function renderProjectCard(cat, project, projIndex) {
     readFileAsDataURL(file).then((dataUrl) => {
       project.coverImage = dataUrl;
       saveDraft();
-      renderCategories();
+      renderEditModalBody();
     });
   });
   coverUploadBtn.appendChild(coverInput);
@@ -587,8 +633,6 @@ function renderProjectCard(cat, project, projIndex) {
   card.appendChild(blocksLabel);
 
   card.appendChild(renderBlocksEditor(project));
-
-  return card;
 }
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */
@@ -627,7 +671,7 @@ function renderBlocksEditor(project) {
       if (confirm("이 블록을 삭제할까요?")) {
         project.blocks.splice(i, 1);
         saveDraft();
-        renderCategories();
+        renderEditModalBody();
       }
     });
 
@@ -649,7 +693,7 @@ function renderBlocksEditor(project) {
     b.addEventListener("click", () => {
       project.blocks.push(makeBlock());
       saveDraft();
-      renderCategories();
+      renderEditModalBody();
     });
     return b;
   };
@@ -715,7 +759,7 @@ function renderBlockBody(project, block, blockIndex) {
     // 색상 선택을 마쳤을 때 자주 쓰는 색상에 기록
     colorInput.addEventListener("change", () => {
       pushRecentColor(colorInput.value);
-      renderCategories();
+      renderEditModalBody();
     });
 
     const swatches = document.createElement("div");
@@ -730,7 +774,7 @@ function renderBlockBody(project, block, blockIndex) {
         block.color = c;
         pushRecentColor(c);
         saveDraft();
-        renderCategories();
+        renderEditModalBody();
       });
       swatches.appendChild(s);
     });
@@ -761,7 +805,7 @@ function renderBlockBody(project, block, blockIndex) {
         block.layout = value;
         if (value === "grid" && !block.grid) block.grid = "3";
         saveDraft();
-        renderCategories();
+        renderEditModalBody();
       });
       seg.appendChild(b);
     });
@@ -779,7 +823,7 @@ function renderBlockBody(project, block, blockIndex) {
         b.addEventListener("click", () => {
           block.grid = value;
           saveDraft();
-          renderCategories();
+          renderEditModalBody();
         });
         gseg.appendChild(b);
       });
@@ -811,7 +855,7 @@ function renderBlockBody(project, block, blockIndex) {
       removeBtn.addEventListener("click", () => {
         block.images.splice(j, 1);
         saveDraft();
-        renderCategories();
+        renderEditModalBody();
       });
       thumb.appendChild(removeBtn);
 
@@ -835,7 +879,7 @@ function renderBlockBody(project, block, blockIndex) {
         block.images.push(dataUrl);
       }
       saveDraft();
-      renderCategories();
+      renderEditModalBody();
     });
     uploadBtn.appendChild(input);
     body.appendChild(uploadBtn);
@@ -1129,6 +1173,14 @@ document.getElementById("addCategoryBtn").addEventListener("click", () => {
   });
   saveDraft();
   renderCategories();
+});
+
+document.getElementById("projectEditClose").addEventListener("click", closeProjectEditor);
+document.getElementById("projectEditOverlay").addEventListener("click", (e) => {
+  if (e.target.id === "projectEditOverlay") closeProjectEditor();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && editingContext) closeProjectEditor();
 });
 
 /* ---------------------------------- GitHub 자동 배포 ---------------------------------- */
