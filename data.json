@@ -116,24 +116,40 @@
               "layout": "single",
               "images": [
                 "assets/20fe84bdd0ac9a60eebf.png"
-              ]
+              ],
+              "grid": "3"
             },
             {
-              "type": "embed",
-              "src": "https://player.vimeo.com/video/1123797877?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479"
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/bed999c1ae75d17ae650.png"
+              ]
             },
             {
               "type": "images",
               "layout": "grid",
               "images": [
-                "assets/8930fb3a5aa86e1ce53e.png",
-                "assets/1a8e2450116954c982b5.png",
-                "assets/00c5db200247476488c6.png",
-                "assets/fc9b1a82f20bdeede474.png",
-                "assets/938e1f0e1574d1f954a3.png",
-                "assets/cfd4f693ec2f4fa617c0.png"
+                "assets/fff17cc99ef6e98299d2.png",
+                "assets/1a8e2450116954c982b5.png"
               ],
-              "grid": "4"
+              "grid": "2"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/00c5db200247476488c6.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/fc9b1a82f20bdeede474.png",
+                "assets/938e1f0e1574d1f954a3.png"
+              ],
+              "grid": "2"
             }
           ],
           "summary": "지학사 책 표지 디자인",
