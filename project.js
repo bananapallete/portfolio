@@ -56,7 +56,16 @@ async function initProject() {
   document.title = `${project.title} — ${profile.nickname || profile.name || "Portfolio"}`;
   const tag = document.getElementById("projTag");
   tag.textContent = category.name;
-  document.getElementById("projTitle").textContent = project.title;
+  const titleEl = document.getElementById("projTitle");
+  titleEl.textContent = project.title;
+  if (project.titleWeight) titleEl.style.fontWeight = project.titleWeight;
+
+  // 상세 페이지 상단(태그+제목) 배경색 지정
+  if (project.heroBg) {
+    const heroWrap = document.getElementById("projHeroWrap");
+    heroWrap.style.background = project.heroBg;
+    if (isDarkColor(project.heroBg)) heroWrap.classList.add("proj-hero-dark");
+  }
 
   wrap.innerHTML = "";
   stopSliders();

@@ -90,8 +90,15 @@ function makeTab(text, isActive, onClick) {
   btn.className = "tab" + (isActive ? " active" : "");
   const label = document.createElement("span");
   label.className = "tab-label";
-  label.dataset.text = text;
-  label.textContent = text;
+  // 볼드 글자가 폭을 정하고(레이아웃 안 흔들림), 레귤러 글자는 그 위에 겹쳐 크로스페이드
+  const bold = document.createElement("span");
+  bold.className = "tl-bold";
+  bold.textContent = text;
+  const reg = document.createElement("span");
+  reg.className = "tl-reg";
+  reg.textContent = text;
+  label.appendChild(bold);
+  label.appendChild(reg);
   btn.appendChild(label);
   btn.addEventListener("click", onClick);
   return btn;

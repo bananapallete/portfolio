@@ -562,10 +562,83 @@ function renderEditModalBody() {
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
+  // ---- 프로젝트명 폰트 두께 ----
+  const weightLabel = document.createElement("label");
+  weightLabel.textContent = "프로젝트명 폰트 두께";
+  weightLabel.className = "mini-label";
+  weightLabel.style.marginTop = "10px";
+  card.appendChild(weightLabel);
+
+  const weightSeg = document.createElement("div");
+  weightSeg.className = "layout-seg";
+  [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]].forEach(([value, text]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if (String(project.titleWeight || "900") === value) b.classList.add("active");
+    b.addEventListener("click", () => {
+      project.titleWeight = value;
+      saveDraft();
+      renderEditModalBody();
+    });
+    weightSeg.appendChild(b);
+  });
+  card.appendChild(weightSeg);
+
+  // ---- 상세 페이지 상단 배경색 ----
+  const bgLabel = document.createElement("label");
+  bgLabel.textContent = "상세 페이지 상단 배경색 (제목 영역)";
+  bgLabel.className = "mini-label";
+  bgLabel.style.marginTop = "16px";
+  card.appendChild(bgLabel);
+
+  const bgRow = document.createElement("div");
+  bgRow.className = "block-controls-row";
+
+  const bgColorInput = document.createElement("input");
+  bgColorInput.type = "color";
+  bgColorInput.value = project.heroBg || "#faf9f6";
+  bgColorInput.className = "color-input";
+  bgColorInput.addEventListener("input", () => {
+    project.heroBg = bgColorInput.value;
+    saveDraft();
+  });
+
+  const bgSwatches = document.createElement("div");
+  bgSwatches.className = "color-swatches";
+  getRecentColors().forEach((c) => {
+    const s = document.createElement("button");
+    s.type = "button";
+    s.className = "swatch";
+    s.style.background = c;
+    s.title = c;
+    s.addEventListener("click", () => {
+      project.heroBg = c;
+      pushRecentColor(c);
+      saveDraft();
+      renderEditModalBody();
+    });
+    bgSwatches.appendChild(s);
+  });
+
+  const bgClearBtn = document.createElement("button");
+  bgClearBtn.className = "btn btn-outline btn-small";
+  bgClearBtn.textContent = "배경 없음";
+  bgClearBtn.addEventListener("click", () => {
+    delete project.heroBg;
+    saveDraft();
+    renderEditModalBody();
+  });
+
+  bgRow.appendChild(bgColorInput);
+  bgRow.appendChild(bgSwatches);
+  bgRow.appendChild(bgClearBtn);
+  card.appendChild(bgRow);
+
   const summaryLabel = document.createElement("label");
   summaryLabel.textContent = "카드 설명 (목록 화면 제목 아래 표시, 1~2줄 권장)";
   summaryLabel.className = "mini-label";
-  summaryLabel.style.marginTop = "10px";
+  summaryLabel.style.marginTop = "16px";
   card.appendChild(summaryLabel);
   const summaryInput = document.createElement("input");
   summaryInput.type = "text";

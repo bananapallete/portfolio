@@ -9,6 +9,19 @@ function stopSliders() {
   sliderTimers = [];
 }
 
+// #RGB / #RRGGBB 색이 어두운지 판별 (밝기 < 0.55면 어두움 → 흰 글자 사용)
+function isDarkColor(hex) {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((hex || "").trim());
+  if (!m) return false;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  return lum < 0.55;
+}
+
 function isPreviewMode() {
   return new URLSearchParams(location.search).get("preview") === "1";
 }

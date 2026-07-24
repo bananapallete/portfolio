@@ -225,24 +225,30 @@ body.has-hero-video .tab.active { color: #fff; }
 body.has-hero-video .site-header.scrolled .tab { color: rgba(20, 18, 26, 0.55); }
 body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
 
-/* 선택된 메뉴가 볼드체로 자연스럽게 전환되도록, 굵은 글자를 오버레이해서 크로스페이드 */
+/* 선택된 메뉴가 볼드체로 자연스럽게 전환되도록 레귤러↔볼드 두 겹을 크로스페이드.
+   볼드 글자가 폭을 결정하므로 활성/비활성 전환 시 레이아웃이 흔들리지 않고 겹침도 없음 */
 .tab-label {
   position: relative;
   display: inline-block;
-}
-
-.tab-label::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-weight: 700;
-  opacity: 0;
-  transition: opacity 0.25s ease;
   white-space: nowrap;
 }
 
-.tab.active .tab-label::after { opacity: 1; }
+.tab-label .tl-bold {
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.tab-label .tl-reg {
+  position: absolute;
+  inset: 0;
+  font-weight: 400;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.tab.active .tab-label .tl-bold { opacity: 1; }
+.tab.active .tab-label .tl-reg { opacity: 0; }
 
 /* ---------------------------------- Hero ---------------------------------- */
 
@@ -983,7 +989,15 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
   padding: 0 24px;
 }
 
-.proj-hero { padding-top: 48px; }
+.proj-hero-wrap { padding: 48px 0 8px; }
+
+.proj-hero-wrap.proj-hero-dark .proj-title { color: #fff; }
+.proj-hero-wrap.proj-hero-dark .modal-tag {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.proj-hero { padding-top: 0; }
 
 .proj-title {
   font-size: clamp(30px, 5vw, 52px);
