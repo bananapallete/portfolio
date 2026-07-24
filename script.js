@@ -51,6 +51,18 @@ function renderHero(p) {
     hero.classList.remove("has-video");
     document.body.classList.remove("has-hero-video");
   }
+
+  // 홈 화면 프로젝트 영역 배경색
+  const work = document.querySelector(".work");
+  if (work) {
+    if (p.workBg) {
+      work.style.background = p.workBg;
+      work.classList.toggle("work-dark", isDarkColor(p.workBg));
+    } else {
+      work.style.background = "";
+      work.classList.remove("work-dark");
+    }
+  }
 }
 
 function renderHeader() {

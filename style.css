@@ -306,7 +306,12 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
 
 .work {
   padding: 20px 0 100px;
+  transition: background 0.2s ease;
 }
+
+/* 홈 프로젝트 영역 배경이 어두우면 카드 제목·설명을 밝게 */
+.work.work-dark .card-title { color: #fff; }
+.work.work-dark .card-desc { color: rgba(255, 255, 255, 0.6); }
 
 .work-grid {
   display: grid;
@@ -1207,6 +1212,25 @@ body.has-hero-video .site-header.scrolled .tab.active { color: var(--ink); }
   border-radius: 8px;
   padding: 2px;
   background: #fff;
+  flex: none;
+}
+
+/* 컬러피커 + 헥스 입력 + 스와치를 한 줄로 묶는 색상 조절 필드 */
+.color-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hex-input {
+  width: 90px;
+  padding: 7px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  text-transform: lowercase;
 }
 
 .color-swatches {

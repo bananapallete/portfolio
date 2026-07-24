@@ -58,7 +58,9 @@ async function initProject() {
   tag.textContent = category.name;
   const titleEl = document.getElementById("projTitle");
   titleEl.textContent = project.title;
-  if (project.titleWeight) titleEl.style.fontWeight = project.titleWeight;
+  // 폰트 두께는 프로필의 전역 설정을 모든 프로젝트에 일괄 적용
+  const gw = profile.projectTitleWeight || (project.titleWeight /* 구버전 호환 */);
+  if (gw) titleEl.style.fontWeight = gw;
 
   // 상세 페이지 상단(태그+제목) 배경색 지정
   if (project.heroBg) {

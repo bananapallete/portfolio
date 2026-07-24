@@ -96,6 +96,14 @@ function ensureShape() {
   data.profile.contact.emails = data.profile.contact.emails || [];
   if (data.profile.heroDim == null) data.profile.heroDim = 0.5;
   data.categories = data.categories || [];
+  // 구버전: 프로젝트별 titleWeight가 있으면 전역 설정으로 승격 후 제거
+  if (!data.profile.projectTitleWeight) {
+    for (const c of data.categories) {
+      const found = (c.projects || []).find((p) => p.titleWeight);
+      if (found) { data.profile.projectTitleWeight = found.titleWeight; break; }
+    }
+  }
+  (data.categories || []).forEach((c) => (c.projects || []).forEach((p) => { delete p.titleWeight; }));
   data.categories.forEach((cat) => {
     cat.projects = cat.projects || [];
     cat.accent = cat.accent || "#6c5ce7";
@@ -180,6 +188,75 @@ function pushRecentColor(color) {
   const list = getRecentColors().filter((c) => c.toLowerCase() !== color.toLowerCase());
   list.unshift(color);
   localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(list.slice(0, 6)));
+}
+
+// #RGB / #RRGGBB → #rrggbb (color input이 6자리만 받으므로 정규화)
+function toHex6(v) {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((v || "").trim());
+  if (!m) return null;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  return "#" + h.toLowerCase();
+}
+
+// 컬러피커 + 헥스코드 입력 + (옵션)최근 색상 스와치를 묶은 색상 조절 필드.
+// onChange(value): 색이 바뀔 때마다 호출. options.swatches: 최근색 표시,
+// options.rerender: 스와치 클릭 후 다시 그릴 함수(선택 상태 갱신용).
+function buildColorField(initial, onChange, options = {}) {
+  const field = document.createElement("div");
+  field.className = "color-control";
+
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.className = "color-input";
+  colorInput.value = toHex6(initial) || "#000000";
+
+  const hexInput = document.createElement("input");
+  hexInput.type = "text";
+  hexInput.className = "hex-input";
+  hexInput.value = initial || "";
+  hexInput.placeholder = "#000000";
+  hexInput.spellcheck = false;
+  hexInput.maxLength = 7;
+
+  colorInput.addEventListener("input", () => {
+    hexInput.value = colorInput.value;
+    onChange(colorInput.value);
+  });
+
+  hexInput.addEventListener("input", () => {
+    let v = hexInput.value.trim();
+    if (v && !v.startsWith("#")) v = "#" + v;
+    const hx = toHex6(v);
+    if (hx) colorInput.value = hx;
+    onChange(v);
+  });
+
+  field.appendChild(colorInput);
+  field.appendChild(hexInput);
+
+  if (options.swatches) {
+    const sw = document.createElement("div");
+    sw.className = "color-swatches";
+    getRecentColors().forEach((c) => {
+      const s = document.createElement("button");
+      s.type = "button";
+      s.className = "swatch";
+      s.style.background = c;
+      s.title = c;
+      s.addEventListener("click", () => {
+        colorInput.value = toHex6(c) || "#000000";
+        hexInput.value = c;
+        onChange(c);
+        pushRecentColor(c);
+        if (options.rerender) options.rerender();
+      });
+      sw.appendChild(s);
+    });
+    field.appendChild(sw);
+  }
+
+  return { field, colorInput, hexInput };
 }
 
 /* ---------------------------------- Profile ---------------------------------- */
@@ -363,6 +440,56 @@ function renderProfile() {
     dimRow.appendChild(dimValue);
     wrap.appendChild(dimRow);
   }
+
+  // ---- 프로젝트명 폰트 두께 (모든 프로젝트 일괄 적용) ----
+  const twLabel = document.createElement("label");
+  twLabel.textContent = "프로젝트명 폰트 두께 (모든 프로젝트 상세 페이지에 일괄 적용)";
+  twLabel.className = "mini-label";
+  twLabel.style.marginTop = "18px";
+  wrap.appendChild(twLabel);
+
+  const twSeg = document.createElement("div");
+  twSeg.className = "layout-seg";
+  [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]].forEach(([value, text]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if (String(data.profile.projectTitleWeight || "900") === value) b.classList.add("active");
+    b.addEventListener("click", () => {
+      data.profile.projectTitleWeight = value;
+      saveDraft();
+      renderProfile();
+    });
+    twSeg.appendChild(b);
+  });
+  wrap.appendChild(twSeg);
+
+  // ---- 홈 화면 프로젝트 영역 배경색 ----
+  const workBgLabel = document.createElement("label");
+  workBgLabel.textContent = "홈 화면 프로젝트 영역 배경색";
+  workBgLabel.className = "mini-label";
+  workBgLabel.style.marginTop = "18px";
+  wrap.appendChild(workBgLabel);
+
+  const workBgRow = document.createElement("div");
+  workBgRow.className = "block-controls-row";
+  const workBgField = buildColorField(
+    data.profile.workBg || "#faf9f6",
+    (v) => { data.profile.workBg = v; saveDraft(); },
+    { swatches: true, rerender: renderProfile }
+  );
+  workBgRow.appendChild(workBgField.field);
+
+  const workBgClear = document.createElement("button");
+  workBgClear.className = "btn btn-outline btn-small";
+  workBgClear.textContent = "기본값";
+  workBgClear.addEventListener("click", () => {
+    delete data.profile.workBg;
+    saveDraft();
+    renderProfile();
+  });
+  workBgRow.appendChild(workBgClear);
+  wrap.appendChild(workBgRow);
 }
 
 function makeTextField(labelText, value, onChange) {
@@ -392,14 +519,10 @@ function renderCategories() {
     const head = document.createElement("div");
     head.className = "category-block-head";
 
-    const colorInput = document.createElement("input");
-    colorInput.type = "color";
-    colorInput.value = cat.accent || "#6c5ce7";
-    colorInput.style.width = "34px";
-    colorInput.style.height = "34px";
-    colorInput.style.border = "none";
-    colorInput.style.borderRadius = "8px";
-    colorInput.addEventListener("input", () => { cat.accent = colorInput.value; saveDraft(); });
+    const accentField = buildColorField(
+      cat.accent || "#6c5ce7",
+      (v) => { cat.accent = v; saveDraft(); }
+    );
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
@@ -423,7 +546,7 @@ function renderCategories() {
       }
     });
 
-    head.appendChild(colorInput);
+    head.appendChild(accentField.field);
     head.appendChild(nameInput);
     head.appendChild(deleteCatBtn);
     block.appendChild(head);
@@ -562,64 +685,22 @@ function renderEditModalBody() {
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
-  // ---- 프로젝트명 폰트 두께 ----
-  const weightLabel = document.createElement("label");
-  weightLabel.textContent = "프로젝트명 폰트 두께";
-  weightLabel.className = "mini-label";
-  weightLabel.style.marginTop = "10px";
-  card.appendChild(weightLabel);
-
-  const weightSeg = document.createElement("div");
-  weightSeg.className = "layout-seg";
-  [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]].forEach(([value, text]) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = text;
-    if (String(project.titleWeight || "900") === value) b.classList.add("active");
-    b.addEventListener("click", () => {
-      project.titleWeight = value;
-      saveDraft();
-      renderEditModalBody();
-    });
-    weightSeg.appendChild(b);
-  });
-  card.appendChild(weightSeg);
-
   // ---- 상세 페이지 상단 배경색 ----
   const bgLabel = document.createElement("label");
   bgLabel.textContent = "상세 페이지 상단 배경색 (제목 영역)";
   bgLabel.className = "mini-label";
-  bgLabel.style.marginTop = "16px";
+  bgLabel.style.marginTop = "10px";
   card.appendChild(bgLabel);
 
   const bgRow = document.createElement("div");
   bgRow.className = "block-controls-row";
 
-  const bgColorInput = document.createElement("input");
-  bgColorInput.type = "color";
-  bgColorInput.value = project.heroBg || "#faf9f6";
-  bgColorInput.className = "color-input";
-  bgColorInput.addEventListener("input", () => {
-    project.heroBg = bgColorInput.value;
-    saveDraft();
-  });
-
-  const bgSwatches = document.createElement("div");
-  bgSwatches.className = "color-swatches";
-  getRecentColors().forEach((c) => {
-    const s = document.createElement("button");
-    s.type = "button";
-    s.className = "swatch";
-    s.style.background = c;
-    s.title = c;
-    s.addEventListener("click", () => {
-      project.heroBg = c;
-      pushRecentColor(c);
-      saveDraft();
-      renderEditModalBody();
-    });
-    bgSwatches.appendChild(s);
-  });
+  const bgField = buildColorField(
+    project.heroBg || "#faf9f6",
+    (v) => { project.heroBg = v; saveDraft(); },
+    { swatches: true, rerender: renderEditModalBody }
+  );
+  bgRow.appendChild(bgField.field);
 
   const bgClearBtn = document.createElement("button");
   bgClearBtn.className = "btn btn-outline btn-small";
@@ -629,9 +710,6 @@ function renderEditModalBody() {
     saveDraft();
     renderEditModalBody();
   });
-
-  bgRow.appendChild(bgColorInput);
-  bgRow.appendChild(bgSwatches);
   bgRow.appendChild(bgClearBtn);
   card.appendChild(bgRow);
 
@@ -832,44 +910,22 @@ function renderBlockBody(project, block, blockIndex) {
     colorLabel.className = "control-label";
     colorLabel.textContent = "색상";
     colorLabel.style.marginLeft = "12px";
-    const colorInput = document.createElement("input");
-    colorInput.type = "color";
-    colorInput.value = block.color || "#14121a";
-    colorInput.className = "color-input";
-    colorInput.addEventListener("input", () => {
-      block.color = colorInput.value;
-      ta.style.color = colorInput.value;
-      saveDraft();
-    });
-    // 색상 선택을 마쳤을 때 자주 쓰는 색상에 기록
-    colorInput.addEventListener("change", () => {
-      pushRecentColor(colorInput.value);
-      renderEditModalBody();
-    });
 
-    const swatches = document.createElement("div");
-    swatches.className = "color-swatches";
-    getRecentColors().forEach((c) => {
-      const s = document.createElement("button");
-      s.type = "button";
-      s.className = "swatch";
-      s.style.background = c;
-      s.title = c;
-      s.addEventListener("click", () => {
-        block.color = c;
-        pushRecentColor(c);
+    const colorField = buildColorField(
+      block.color || "#14121a",
+      (v) => {
+        block.color = v;
+        ta.style.color = v;
         saveDraft();
-        renderEditModalBody();
-      });
-      swatches.appendChild(s);
-    });
+      },
+      { swatches: true, rerender: renderEditModalBody }
+    );
 
     controls.appendChild(sizeLabel);
     controls.appendChild(sizeInput);
     controls.appendChild(pxLabel);
     controls.appendChild(colorLabel);
-    controls.appendChild(colorInput);
-    controls.appendChild(swatches);
+    controls.appendChild(colorField.field);
     body.appendChild(controls);
     return body;
   }
