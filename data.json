@@ -14,7 +14,7 @@
     "heroDim": 0.65,
     "heroVideo": "assets/9c82b908a4a57428c15d.mp4",
     "heroTitle": "",
-    "showHeroTitle": true
+    "showHeroTitle": false
   },
   "categories": [
     {
