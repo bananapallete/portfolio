@@ -14,7 +14,9 @@
     "heroDim": 0.65,
     "heroVideo": "assets/9c82b908a4a57428c15d.mp4",
     "heroTitle": "",
-    "showHeroTitle": false
+    "showHeroTitle": false,
+    "projectTitleWeight": "400",
+    "workBg": "#14121a"
   },
   "categories": [
     {
@@ -135,8 +137,7 @@
             }
           ],
           "summary": "지학사 책 표지 디자인",
-          "heroBg": "#14121a",
-          "titleWeight": "400"
+          "heroBg": "#393545"
         },
         {
           "id": "illustration-tws-fanart",
