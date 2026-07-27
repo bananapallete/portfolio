@@ -4,7 +4,7 @@
 
 const DRAFT_KEY = "portfolioDraftData";
 const RECENT_COLORS_KEY = "portfolioRecentColors";
-const DEFAULT_COLORS = ["#14121a", "#ff4d6d", "#6c5ce7", "#00c2a8", "#ffc93c", "#ffffff"];
+const DEFAULT_COLORS = ["#f5f4f0", "#ff4d6d", "#6c5ce7", "#00c2a8", "#ffc93c", "#14121a"];
 let data = null;
 
 // 미리보기·순서 조절 모드인 프로젝트 id 목록
@@ -273,60 +273,6 @@ function renderProfile() {
   row1.appendChild(makeTextField("역할/타이틀", data.profile.role, (v) => { data.profile.role = v; saveDraft(); }));
   wrap.appendChild(row1);
 
-  const heroTitleVisible = data.profile.showHeroTitle !== false;
-
-  const heroTitleRow = document.createElement("div");
-  heroTitleRow.className = "field-row";
-  const heroTitleField = document.createElement("div");
-  heroTitleField.className = "field";
-  heroTitleField.style.gridColumn = "1 / -1";
-
-  const heroTitleLabelRow = document.createElement("div");
-  heroTitleLabelRow.className = "toggle-row";
-
-  const heroTitleLabel = document.createElement("label");
-  heroTitleLabel.textContent = "홈 화면 큰 제목";
-
-  const toggleLabel = document.createElement("label");
-  toggleLabel.className = "toggle-switch";
-  const toggleInput = document.createElement("input");
-  toggleInput.type = "checkbox";
-  toggleInput.checked = heroTitleVisible;
-  const toggleSlider = document.createElement("span");
-  toggleSlider.className = "toggle-slider";
-  const toggleText = document.createElement("span");
-  toggleText.className = "toggle-text";
-  toggleText.textContent = heroTitleVisible ? "표시함" : "숨김";
-  toggleInput.addEventListener("change", () => {
-    data.profile.showHeroTitle = toggleInput.checked;
-    saveDraft();
-    renderProfile();
-  });
-  toggleLabel.appendChild(toggleInput);
-  toggleLabel.appendChild(toggleSlider);
-  toggleLabel.appendChild(toggleText);
-
-  heroTitleLabelRow.appendChild(heroTitleLabel);
-  heroTitleLabelRow.appendChild(toggleLabel);
-
-  const heroTitleHint = document.createElement("div");
-  heroTitleHint.className = "block-hint";
-  heroTitleHint.style.margin = "0 0 6px";
-  heroTitleHint.textContent = `비워두면 "Hi, I'm ${data.profile.nickname || data.profile.name || ""}"로 자동 표시돼요.`;
-
-  const heroTitleInput = document.createElement("input");
-  heroTitleInput.type = "text";
-  heroTitleInput.value = data.profile.heroTitle || "";
-  heroTitleInput.placeholder = `Hi, I'm ${data.profile.nickname || data.profile.name || ""}`;
-  heroTitleInput.disabled = !heroTitleVisible;
-  heroTitleInput.addEventListener("input", () => { data.profile.heroTitle = heroTitleInput.value; saveDraft(); });
-
-  heroTitleField.appendChild(heroTitleLabelRow);
-  heroTitleField.appendChild(heroTitleHint);
-  heroTitleField.appendChild(heroTitleInput);
-  heroTitleRow.appendChild(heroTitleField);
-  wrap.appendChild(heroTitleRow);
-
   const row2 = document.createElement("div");
   row2.className = "field-row";
   const taglineField = document.createElement("div");
@@ -367,80 +313,6 @@ function renderProfile() {
 
   wrap.appendChild(row3);
 
-  // ---- 히어로 배경 영상 ----
-  const heroLabel = document.createElement("label");
-  heroLabel.textContent = "홈 화면 배경 영상 (선택, 어둡게 딤 처리되어 표시돼요)";
-  heroLabel.className = "mini-label";
-  heroLabel.style.marginTop = "18px";
-  wrap.appendChild(heroLabel);
-
-  const heroRow = document.createElement("div");
-  heroRow.className = "hero-video-row";
-
-  if (data.profile.heroVideo) {
-    const preview = document.createElement("video");
-    preview.src = data.profile.heroVideo;
-    preview.muted = true;
-    preview.className = "hero-video-preview";
-    heroRow.appendChild(preview);
-
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "btn btn-danger btn-small";
-    removeBtn.textContent = "영상 제거";
-    removeBtn.addEventListener("click", () => {
-      data.profile.heroVideo = "";
-      saveDraft();
-      renderProfile();
-    });
-    heroRow.appendChild(removeBtn);
-  } else {
-    const uploadBtn = document.createElement("button");
-    uploadBtn.className = "btn btn-outline btn-small file-btn";
-    uploadBtn.textContent = "배경 영상 업로드";
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "video/*";
-    input.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      readFileAsDataURL(file).then((dataUrl) => {
-        data.profile.heroVideo = dataUrl;
-        saveDraft();
-        renderProfile();
-      });
-    });
-    uploadBtn.appendChild(input);
-    heroRow.appendChild(uploadBtn);
-  }
-  wrap.appendChild(heroRow);
-
-  if (data.profile.heroVideo) {
-    const dimRow = document.createElement("div");
-    dimRow.className = "block-controls-row";
-    const dimLabel = document.createElement("span");
-    dimLabel.className = "control-label";
-    dimLabel.textContent = "딤(어둡게) 강도";
-    const dimInput = document.createElement("input");
-    dimInput.type = "range";
-    dimInput.min = "0";
-    dimInput.max = "0.9";
-    dimInput.step = "0.05";
-    dimInput.value = data.profile.heroDim != null ? data.profile.heroDim : 0.5;
-    dimInput.className = "dim-range";
-    const dimValue = document.createElement("span");
-    dimValue.className = "control-label";
-    dimValue.textContent = Math.round(dimInput.value * 100) + "%";
-    dimInput.addEventListener("input", () => {
-      data.profile.heroDim = parseFloat(dimInput.value);
-      dimValue.textContent = Math.round(dimInput.value * 100) + "%";
-      saveDraft();
-    });
-    dimRow.appendChild(dimLabel);
-    dimRow.appendChild(dimInput);
-    dimRow.appendChild(dimValue);
-    wrap.appendChild(dimRow);
-  }
-
   // ---- 프로젝트명 폰트 두께 (모든 프로젝트 일괄 적용) ----
   const twLabel = document.createElement("label");
   twLabel.textContent = "프로젝트명 폰트 두께 (모든 프로젝트 상세 페이지에 일괄 적용)";
@@ -474,7 +346,7 @@ function renderProfile() {
   const workBgRow = document.createElement("div");
   workBgRow.className = "block-controls-row";
   const workBgField = buildColorField(
-    data.profile.workBg || "#faf9f6",
+    data.profile.workBg || "#0d0d0d",
     (v) => { data.profile.workBg = v; saveDraft(); },
     { swatches: true, rerender: renderProfile }
   );
@@ -696,7 +568,7 @@ function renderEditModalBody() {
   bgRow.className = "block-controls-row";
 
   const bgField = buildColorField(
-    project.heroBg || "#faf9f6",
+    project.heroBg || "#0d0d0d",
     (v) => { project.heroBg = v; saveDraft(); },
     { swatches: true, rerender: renderEditModalBody }
   );
@@ -860,7 +732,7 @@ function renderBlocksEditor(project) {
     });
     return b;
   };
-  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#14121a" })));
+  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#f5f4f0" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
   addRow.appendChild(mkAdd("+ 비디오 임베드", () => ({ type: "embed", src: "" })));
   wrap.appendChild(addRow);

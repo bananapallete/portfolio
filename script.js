@@ -34,51 +34,19 @@ function renderFallback() {
   });
 }
 
-function renderHero(p) {
-  const hero = document.getElementById("hero");
-  const media = document.getElementById("heroMedia");
-  const video = document.getElementById("heroVideo");
-  const dim = document.getElementById("heroDim");
-
-  if (p.heroVideo) {
-    video.src = p.heroVideo;
-    media.hidden = false;
-    hero.classList.add("has-video");
-    document.body.classList.add("has-hero-video");
-    dim.style.opacity = p.heroDim != null ? p.heroDim : 0.5;
-  } else {
-    media.hidden = true;
-    hero.classList.remove("has-video");
-    document.body.classList.remove("has-hero-video");
-  }
-
-  // 홈 화면 프로젝트 영역 배경색
+// 홈 화면 프로젝트 영역 배경색 (관리자에서 지정한 경우에만 기본 다크 배경 위에 덮어씀)
+function applyWorkBg(p) {
   const work = document.querySelector(".work");
-  if (work) {
-    if (p.workBg) {
-      work.style.background = p.workBg;
-      work.classList.toggle("work-dark", isDarkColor(p.workBg));
-    } else {
-      work.style.background = "";
-      work.classList.remove("work-dark");
-    }
-  }
+  if (!work) return;
+  work.style.background = p.workBg || "";
 }
 
 function renderHeader() {
   const p = siteData.profile || {};
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
   document.getElementById("brandRole").textContent = p.role || "";
-  const heroTitleEl = document.getElementById("heroTitle");
-  if (p.showHeroTitle === false) {
-    heroTitleEl.hidden = true;
-  } else {
-    heroTitleEl.hidden = false;
-    heroTitleEl.textContent = p.heroTitle || `Hi, I'm ${p.nickname || p.name || ""}`;
-  }
-  document.getElementById("heroTagline").textContent = p.tagline || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
-  renderHero(p);
+  applyWorkBg(p);
 
   const contactEl = document.getElementById("footerContact");
   contactEl.innerHTML = "";
@@ -139,7 +107,7 @@ function projectMediaHTML(project) {
   if (project.coverImage) {
     return `<img src="${project.coverImage}" alt="${project.title}" />`;
   }
-  return `<span>${project.title}</span>`;
+  return "";
 }
 
 function goToProject(project) {
@@ -185,21 +153,6 @@ function renderGrid() {
   });
 }
 
-// 모바일에서는 헤더가 히어로 위에 투명하게 떠 있으므로, 히어로를
-// 벗어나 밝은 배경(작업물 목록) 위로 스크롤되면 헤더를 다시 불투명하게 바꾼다
-function setupHeaderScroll() {
-  const header = document.querySelector(".site-header");
-  const hero = document.getElementById("hero");
-  if (!header || !hero) return;
-  const update = () => {
-    const threshold = hero.offsetHeight - 40;
-    header.classList.toggle("scrolled", window.scrollY > threshold);
-  };
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
-  update();
-}
-
 function init() {
   if (!siteData) {
     renderFallback();
@@ -208,7 +161,6 @@ function init() {
   renderHeader();
   renderTabs();
   renderGrid();
-  setupHeaderScroll();
 }
 
 loadSiteData().then((data) => {
