@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게임 매크로 만들기</title>
+  <link rel="stylesheet" href="macro.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-head">
+      <h1>게임 매크로 만들기</h1>
+      <p>퀘스트를 고르고 <b>시작</b>을 누르면, 정해둔 순서대로 화면을 반복해서 눌러줍니다.</p>
+    </header>
+
+    <!-- 실행기 -->
+    <section class="runner">
+      <!-- 폰 미리보기 -->
+      <div class="stage">
+        <div class="phone" id="phone">
+          <img class="phone__img" id="phoneImg" alt="게임 화면" />
+          <div class="phone__dim" id="phoneDim"></div>
+          <div class="phone__box" id="phoneBox"></div>
+          <div class="phone__tap" id="phoneTap"></div>
+        </div>
+        <div class="stepcaption" id="stepCaption">시작을 누르면 매크로가 실행됩니다</div>
+      </div>
+
+      <!-- 컨트롤 -->
+      <div class="panel">
+        <div class="field">
+          <label for="macroSelect">퀘스트 선택</label>
+          <select id="macroSelect"></select>
+        </div>
+
+        <div class="field">
+          <label>실행 순서</label>
+          <div class="steplist" id="stepList"></div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="repeatCount">반복 횟수</label>
+            <input type="number" id="repeatCount" min="1" value="10" />
+          </div>
+          <div class="field" style="justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <label class="check"><input type="checkbox" id="infinite" /> 무한 반복</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="speed">단계 간격 · <span class="range-val" id="speedVal">0.9초</span></label>
+          <input type="range" id="speed" min="300" max="2500" step="100" value="900" />
+        </div>
+
+        <button class="run-btn" id="runBtn">▶ 시작</button>
+        <div class="status" id="status"></div>
+      </div>
+    </section>
+
+    <!-- 스토리보드 (Figma 원본) -->
+    <div class="board-head">
+      <h2>클릭 순서 (분홍색 = 누르는 위치)</h2>
+      <p>기본 화면에서 시작해 각 버튼을 차례대로 누른 뒤, 이 과정을 반복합니다.</p>
+    </div>
+    <div class="board" id="board"></div>
+
+    <p class="note">
+      💡 <b>이 페이지는 매크로 동작을 미리 보여주는 시뮬레이터예요.</b>
+      브라우저는 다른 앱(게임)을 대신 눌러줄 수 없어서, 여기서는 어떤 위치를 어떤 순서로
+      누를지를 그대로 재현해 보여줍니다. 실제 휴대폰에서 자동으로 누르게 하려면 안드로이드
+      <b>접근성(자동 클릭)</b> 앱이나 PC의 <b>ADB</b>로 같은 좌표·순서를 실행하면 됩니다.
+      새 퀘스트는 <b>macro.js</b>의 <b>MACROS</b> 배열에 단계(누를 위치)만 추가하면 늘릴 수 있어요.
+    </p>
+  </div>
+
+  <script src="macro.js"></script>
+</body>
+</html>
