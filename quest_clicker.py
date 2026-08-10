@@ -116,6 +116,78 @@ def spots_file(qkey):
 
 
 # ===========================================================================
+# 클릭하기 (미러링 창에서도 확실히 먹히도록)
+#   macOS 는 "뒤에 있는 창"을 클릭하면 그 클릭이 창을 앞으로 가져오는 데만 쓰이고
+#   앱(게임)에는 전달되지 않습니다. 그래서 먼저 창을 활성화한 뒤에 눌러야 해요.
+#   또 게임은 너무 빠른 클릭(누르자마자 뗌)을 무시할 때가 많아 살짝 눌러줍니다.
+# ===========================================================================
+# 매크로를 띄운 창들(이게 맨 앞이면 = 미러 창이 뒤에 있다는 뜻)
+_OUR_APPS = ("terminal", "iterm", "python", "warp", "ghostty", "kitty",
+             "alacritty", "code", "tk", "hammerspoon")
+
+
+def frontmost_app():
+    """지금 맨 앞에 있는 앱 이름 (못 알아내면 빈 문자열)"""
+    try:
+        from AppKit import NSWorkspace
+        app = NSWorkspace.sharedWorkspace().frontmostApplication()
+        return (app.localizedName() or "") if app else ""
+    except Exception:
+        return ""
+
+
+def mirror_is_behind():
+    """미러 창이 뒤에 있는지(= 지금 맨 앞이 우리 창인지)"""
+    name = frontmost_app().lower()
+    if not name:
+        return False
+    return any(k in name for k in _OUR_APPS)
+
+
+# 아이폰 미러링 앱을 찾기 위한 이름/식별자
+_MIRROR_HINTS = ("iphone mirroring", "iphone 미러링", "미러링", "screencontinuity")
+
+
+def activate_mirror():
+    """미러링 앱을 '클릭 없이' 앞으로 가져오기. 성공하면 True.
+       (클릭으로 창을 깨우면 버튼이 두 번 눌릴 수 있어서 이 방법을 먼저 씁니다)"""
+    try:
+        from AppKit import NSWorkspace
+        for app in NSWorkspace.sharedWorkspace().runningApplications():
+            name = (app.localizedName() or "").lower()
+            bid = (app.bundleIdentifier() or "").lower()
+            if any(h in name for h in _MIRROR_HINTS) or "screencontinuity" in bid:
+                app.activateWithOptions_(1 << 1)  # 다른 앱 무시하고 활성화
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def tap(x, y, hold=0.09, log=None):
+    """(x, y) 를 확실하게 누르기."""
+    # 1) 미러 창이 뒤에 있으면 먼저 앞으로 가져온다
+    if mirror_is_behind():
+        if activate_mirror():
+            if log:
+                log("      (미러링 창을 앞으로 가져왔어요)")
+            nap(0.5)
+        else:
+            # 미러 앱을 못 찾으면: 한 번 눌러서 창을 깨움
+            if log:
+                log("      (창을 앞으로 가져오는 중...)")
+            pyautogui.moveTo(x, y, duration=0.1)
+            pyautogui.click()
+            nap(0.6)
+    # 2) 실제 클릭 — 살짝 눌렀다 떼기(게임이 인식하도록)
+    pyautogui.moveTo(x, y, duration=0.15)
+    nap(0.05)
+    pyautogui.mouseDown()
+    nap(hold)
+    pyautogui.mouseUp()
+
+
+# ===========================================================================
 # 글자 인식 (Apple Vision)
 # ===========================================================================
 def read_screen_text():
@@ -188,8 +260,7 @@ def find_and_click(target, timeout=10.0, poll=0.6, log=print):
             x, y, s = hit
             log(f"      ✓ '{s}' 발견 → 클릭")
             check_stop()
-            pyautogui.moveTo(x, y, duration=0.15)
-            pyautogui.click()
+            tap(x, y, log=log)
             return True
         nap(poll)
     log(f"      ✗ '{target}' 를 못 찾았어요 (시간 초과)")
@@ -222,7 +293,7 @@ def setup(qkey, quest):
                 spots[s["key"]] = [int(x), int(y)]
                 print(f"   → 저장됨 ({int(x)}, {int(y)})")
                 nap(0.3)
-                pyautogui.click(x, y)  # 눌러서 다음 화면으로
+                tap(x, y)  # 눌러서 다음 화면으로
                 nap(1.2)
     except Stopped:
         print("\n⏹  ESC — 취소했습니다."); return
@@ -273,8 +344,7 @@ def run(qkey, quest, spots, repeat, step_gap, loop_gap, log=print, do_countdown=
                 else:
                     x, y = spots[s["key"]]
                     log(f"      → 저장된 위치 ({x}, {y}) 클릭")
-                    pyautogui.moveTo(x, y, duration=0.15)
-                    pyautogui.click()
+                    tap(x, y, log=log)
                 nap(step_gap)
             nap(loop_gap)
     except Stopped:

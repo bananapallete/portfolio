@@ -100,6 +100,12 @@ class App:
                                   activebackground="#4a4a4d", highlightbackground=BG)
         self.btn_test.pack(fill="x", pady=3)
 
+        self.btn_click = tk.Button(btns, text="①-2 클릭 테스트 (버튼이 눌리는지 확인)",
+                                   command=self.on_clicktest,
+                                   height=2, bg="#3a3a3d", fg="black",
+                                   activebackground="#4a4a4d", highlightbackground=BG)
+        self.btn_click.pack(fill="x", pady=3)
+
         self.btn_setup = tk.Button(btns, text="② 그림 버튼 위치 알려주기", command=self.on_setup,
                                    height=2, bg="#3a3a3d", fg="black",
                                    activebackground="#4a4a4d", highlightbackground=BG)
@@ -154,7 +160,7 @@ class App:
 
     def busy(self, on):
         state = "disabled" if on else "normal"
-        for b in (self.btn_test, self.btn_setup, self.btn_run):
+        for b in (self.btn_test, self.btn_click, self.btn_setup, self.btn_run):
             b.config(state=state)
         self.btn_stop.config(state="normal" if on else "disabled")
 
@@ -197,6 +203,23 @@ class App:
                 self.say(f"   · {s}")
         self.start_worker(job)
 
+    # ---------- ①-2 클릭 테스트 ----------
+    def on_clicktest(self):
+        def job():
+            self.say("\n[클릭 테스트] 게임에서 눌러도 괜찮은 곳에")
+            self.say("마우스를 올려두세요. 5초 뒤 그 자리를 눌러볼게요.")
+            for n in (5, 4, 3, 2, 1):
+                self.say(f"   {n}초...")
+                qc.nap(1)
+            x, y = pyautogui.position()
+            self.say(f"   맨 앞 창: {qc.frontmost_app() or '알 수 없음'}")
+            qc.tap(x, y, log=self.say)
+            self.say(f"   → ({int(x)}, {int(y)}) 눌렀어요.")
+            self.say("게임이 반응했나요?")
+            self.say("  · 반응했다 → ②번으로 진행하세요 ✅")
+            self.say("  · 반응 없다 → 손쉬운 사용(접근성) 권한을 확인해 주세요.")
+        self.start_worker(job)
+
     # ---------- ② 그림 버튼 위치 알려주기 ----------
     def on_setup(self):
         qkey, quest = self.current_quest()
@@ -235,7 +258,7 @@ class App:
                     spots[s["key"]] = [int(x), int(y)]
                     self.say(f"   ✓ 저장됨 ({int(x)}, {int(y)})")
                     qc.nap(0.3)
-                    pyautogui.click(x, y)
+                    qc.tap(x, y, log=self.say)
                     qc.nap(1.2)
             with open(qc.spots_file(qkey), "w", encoding="utf-8") as f:
                 json.dump(spots, f, ensure_ascii=False, indent=2)
