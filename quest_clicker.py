@@ -50,6 +50,19 @@ class Stopped(Exception):
 
 _ESC_KEYCODE = 53  # macOS 에서 ESC 키 번호
 
+# 버튼(GUI) 등 밖에서 "멈춰!" 라고 알려줄 때 쓰는 스위치
+_stop_flag = {"stop": False}
+
+
+def request_stop():
+    """밖에서 중단 요청 (예: GUI 의 정지 버튼)"""
+    _stop_flag["stop"] = True
+
+
+def clear_stop():
+    """실행 시작 전에 스위치 초기화"""
+    _stop_flag["stop"] = False
+
 
 def esc_pressed():
     """지금 ESC 키가 눌려 있으면 True."""
@@ -61,7 +74,7 @@ def esc_pressed():
 
 
 def check_stop():
-    if esc_pressed():
+    if _stop_flag["stop"] or esc_pressed():
         raise Stopped()
 
 
@@ -166,20 +179,20 @@ def find_text(target, texts=None):
     return None
 
 
-def find_and_click(target, timeout=10.0, poll=0.6):
+def find_and_click(target, timeout=10.0, poll=0.6, log=print):
     end = time.time() + timeout
     while time.time() < end:
         check_stop()
         hit = find_text(target)
         if hit:
             x, y, s = hit
-            print(f"      ✓ '{s}' 발견 → 클릭")
+            log(f"      ✓ '{s}' 발견 → 클릭")
             check_stop()
             pyautogui.moveTo(x, y, duration=0.15)
             pyautogui.click()
             return True
         nap(poll)
-    print(f"      ✗ '{target}' 를 못 찾았어요 (시간 초과)")
+    log(f"      ✗ '{target}' 를 못 찾았어요 (시간 초과)")
     return False
 
 
@@ -238,38 +251,39 @@ def load_spots(qkey):
 # ===========================================================================
 # 자동 실행
 # ===========================================================================
-def run(qkey, quest, spots, repeat, step_gap, loop_gap):
+def run(qkey, quest, spots, repeat, step_gap, loop_gap, log=print, do_countdown=True):
     steps = quest["steps"]
-    print(f"\n▶ '{quest['name']}' 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복")
-    print("   ⏹  멈추려면 ESC 키 (또는 Control+C / 마우스를 왼쪽 위 모서리로)")
+    log(f"\n▶ '{quest['name']}' 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복")
+    log("   ⏹  멈추려면 ESC 키 (또는 Control+C / 마우스를 왼쪽 위 모서리로)")
 
     loop = 0
     try:
-        countdown()
+        if do_countdown:
+            countdown()
         while repeat is None or loop < repeat:
             loop += 1
             rep_txt = f"{loop}/{repeat}" if repeat else str(loop)
             for i, s in enumerate(steps, 1):
                 check_stop()
-                print(f"[반복 {rep_txt}] {i}/{len(steps)} · {s['label']}")
+                log(f"[반복 {rep_txt}] {i}/{len(steps)} · {s['label']}")
                 if s["kind"] == "text":
-                    if not find_and_click(s["text"]):
-                        print("   → 이번 바퀴는 건너뛰고 다시 시작할게요.")
+                    if not find_and_click(s["text"], log=log):
+                        log("   → 이번 바퀴는 건너뛰고 다시 시작할게요.")
                         break
                 else:
                     x, y = spots[s["key"]]
-                    print(f"      → 저장된 위치 ({x}, {y}) 클릭")
+                    log(f"      → 저장된 위치 ({x}, {y}) 클릭")
                     pyautogui.moveTo(x, y, duration=0.15)
                     pyautogui.click()
                 nap(step_gap)
             nap(loop_gap)
     except Stopped:
-        print("\n⏹  ESC — 중단했습니다."); return
+        log("\n⏹  중단했습니다."); return
     except KeyboardInterrupt:
-        print("\n⏹  Control+C — 중단했습니다."); return
+        log("\n⏹  Control+C — 중단했습니다."); return
     except pyautogui.FailSafeException:
-        print("\n⏹  안전장치 발동 — 중단했습니다."); return
-    print("\n✅ 완료.")
+        log("\n⏹  안전장치 발동 — 중단했습니다."); return
+    log("\n✅ 완료.")
 
 
 # ===========================================================================
