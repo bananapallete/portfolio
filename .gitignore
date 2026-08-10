@@ -1,1 +1,5 @@
 .claude/
+__pycache__/
+*.pyc
+clicker_calibration.json
+recorded_*.json
