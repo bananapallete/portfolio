@@ -15,8 +15,9 @@
   3) 화면 기록:  시스템 설정 → 개인정보 보호 및 보안 → 화면 기록 → "터미널" 켜기   ← OCR에 꼭 필요
   (권한을 켠 뒤에는 터미널을 껐다 다시 켜세요.)
 
-■ 실행:      python3 quest_clicker.py
-■ 긴급 정지: 마우스를 화면 맨 왼쪽 위 모서리로 던지거나, Control + C
+■ 실행:  python3 quest_clicker.py
+■ 정지:  ESC 키  ← 실행 중 아무 때나 누르면 즉시 멈춤
+         (예비: Control + C, 또는 마우스를 화면 맨 왼쪽 위 모서리로 던지기)
 
 주의: 게임 자동화는 게임사 정책 위반이 될 수 있어요. 개인적으로, 본인 책임 하에 사용하세요.
 """
@@ -36,6 +37,47 @@ except ImportError:
 pyautogui.FAILSAFE = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 _SHOT = os.path.join(tempfile.gettempdir(), "_quest_shot.png")
+
+
+# ===========================================================================
+# ESC 키로 멈추기
+#   실행 중 아무 때나 ESC 를 누르면 즉시 멈춥니다.
+#   (터미널이 아니라 게임 화면을 보고 있어도 눌리면 감지돼요)
+# ===========================================================================
+class Stopped(Exception):
+    """사용자가 ESC 를 눌러 중단"""
+
+
+_ESC_KEYCODE = 53  # macOS 에서 ESC 키 번호
+
+
+def esc_pressed():
+    """지금 ESC 키가 눌려 있으면 True."""
+    try:
+        import Quartz
+        return bool(Quartz.CGEventSourceKeyState(1, _ESC_KEYCODE))  # 1 = HID 시스템 상태
+    except Exception:
+        return False  # 감지 못 하면 그냥 계속 (Control+C / 안전장치로 멈출 수 있음)
+
+
+def check_stop():
+    if esc_pressed():
+        raise Stopped()
+
+
+def nap(seconds):
+    """자는 동안에도 ESC 를 계속 확인하는 sleep."""
+    end = time.time() + seconds
+    while time.time() < end:
+        check_stop()
+        time.sleep(min(0.05, max(0.0, end - time.time())))
+
+
+def countdown(n=3):
+    for i in range(n, 0, -1):
+        print(f"   {i}...", end=" ", flush=True)
+        nap(1)
+    print("시작!\n")
 
 
 # ---------------------------------------------------------------------------
@@ -127,14 +169,16 @@ def find_text(target, texts=None):
 def find_and_click(target, timeout=10.0, poll=0.6):
     end = time.time() + timeout
     while time.time() < end:
+        check_stop()
         hit = find_text(target)
         if hit:
             x, y, s = hit
             print(f"      ✓ '{s}' 발견 → 클릭")
+            check_stop()
             pyautogui.moveTo(x, y, duration=0.15)
             pyautogui.click()
             return True
-        time.sleep(poll)
+        nap(poll)
     print(f"      ✗ '{target}' 를 못 찾았어요 (시간 초과)")
     return False
 
@@ -158,15 +202,17 @@ def setup(qkey, quest):
                 if not find_and_click(s["text"]):
                     print("   글자를 못 찾았어요. 화면/권한을 확인하고 다시 시도해 주세요.")
                     return
-                time.sleep(1.2)
+                nap(1.2)
             else:  # spot
                 input(f"{i}/{len(steps)} · [{s['label']}] 위에 마우스를 올리고 Enter... ")
                 x, y = pyautogui.position()
                 spots[s["key"]] = [int(x), int(y)]
                 print(f"   → 저장됨 ({int(x)}, {int(y)})")
-                time.sleep(0.3)
+                nap(0.3)
                 pyautogui.click(x, y)  # 눌러서 다음 화면으로
-                time.sleep(1.2)
+                nap(1.2)
+    except Stopped:
+        print("\n⏹  ESC — 취소했습니다."); return
     except pyautogui.FailSafeException:
         print("\n⏹  안전장치 발동 — 취소했습니다."); return
     except KeyboardInterrupt:
@@ -195,17 +241,16 @@ def load_spots(qkey):
 def run(qkey, quest, spots, repeat, step_gap, loop_gap):
     steps = quest["steps"]
     print(f"\n▶ '{quest['name']}' 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복")
-    print("   (멈추려면: 마우스를 왼쪽 위 모서리로 던지거나 Control+C)")
-    for n in (3, 2, 1):
-        print(f"   {n}...", end=" ", flush=True); time.sleep(1)
-    print("시작!\n")
+    print("   ⏹  멈추려면 ESC 키 (또는 Control+C / 마우스를 왼쪽 위 모서리로)")
 
     loop = 0
     try:
+        countdown()
         while repeat is None or loop < repeat:
             loop += 1
             rep_txt = f"{loop}/{repeat}" if repeat else str(loop)
             for i, s in enumerate(steps, 1):
+                check_stop()
                 print(f"[반복 {rep_txt}] {i}/{len(steps)} · {s['label']}")
                 if s["kind"] == "text":
                     if not find_and_click(s["text"]):
@@ -216,8 +261,10 @@ def run(qkey, quest, spots, repeat, step_gap, loop_gap):
                     print(f"      → 저장된 위치 ({x}, {y}) 클릭")
                     pyautogui.moveTo(x, y, duration=0.15)
                     pyautogui.click()
-                time.sleep(step_gap)
-            time.sleep(loop_gap)
+                nap(step_gap)
+            nap(loop_gap)
+    except Stopped:
+        print("\n⏹  ESC — 중단했습니다."); return
     except KeyboardInterrupt:
         print("\n⏹  Control+C — 중단했습니다."); return
     except pyautogui.FailSafeException:
@@ -230,9 +277,10 @@ def run(qkey, quest, spots, repeat, step_gap, loop_gap):
 # ===========================================================================
 def test_ocr():
     print("\n[글자 테스트] 3초 뒤 지금 화면에서 읽히는 글자를 보여줄게요...")
-    for n in (3, 2, 1):
-        print(f"   {n}...", end=" ", flush=True); time.sleep(1)
-    print()
+    try:
+        countdown()
+    except Stopped:
+        print("\n⏹  ESC — 취소했습니다."); return
     texts = read_screen_text()
     if not texts:
         print("⚠️  읽힌 글자가 없어요.")
@@ -269,6 +317,7 @@ def main():
     print("=" * 46)
     print(" 게임 퀘스트 자동 클릭 (글자인식 + 위치)")
     print("=" * 46)
+    print(" ⏹  실행 중에는 ESC 키를 누르면 언제든 멈춥니다.")
     while True:
         print("\n  t) 글자 테스트 (권한/인식 확인)  ← 처음 한 번 확인용")
         print("  1) 그림 버튼 위치 알려주기 (처음 한 번 / 창 옮기면 다시)")

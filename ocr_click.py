@@ -36,6 +36,37 @@ pyautogui.FAILSAFE = True
 _SHOT = os.path.join(tempfile.gettempdir(), "_ocr_click_shot.png")
 
 
+# ---------------------------------------------------------------------------
+# ESC 키로 멈추기 — 실행 중 아무 때나 ESC 를 누르면 즉시 중단됩니다.
+# ---------------------------------------------------------------------------
+class Stopped(Exception):
+    """사용자가 ESC 를 눌러 중단"""
+
+
+_ESC_KEYCODE = 53  # macOS 에서 ESC 키 번호
+
+
+def esc_pressed():
+    try:
+        import Quartz
+        return bool(Quartz.CGEventSourceKeyState(1, _ESC_KEYCODE))
+    except Exception:
+        return False
+
+
+def check_stop():
+    if esc_pressed():
+        raise Stopped()
+
+
+def nap(seconds):
+    """자는 동안에도 ESC 를 계속 확인하는 sleep."""
+    end = time.time() + seconds
+    while time.time() < end:
+        check_stop()
+        time.sleep(min(0.05, max(0.0, end - time.time())))
+
+
 def read_screen_text():
     """지금 화면을 캡처해서, 읽힌 글자들의 목록을 돌려줍니다.
     반환: [(문자열, 화면가로좌표, 화면세로좌표), ...]  (좌표는 그 글자의 중심, 단위=포인트)
@@ -110,6 +141,7 @@ def find_and_click(target, timeout=10.0, poll=0.6):
     """target 글자가 화면에 나타날 때까지 기다렸다가 그 버튼을 누릅니다."""
     end = time.time() + timeout
     while time.time() < end:
+        check_stop()
         hit = find_text(target)
         if hit:
             x, y, s = hit
@@ -117,7 +149,7 @@ def find_and_click(target, timeout=10.0, poll=0.6):
             pyautogui.moveTo(x, y, duration=0.15)
             pyautogui.click()
             return True
-        time.sleep(poll)
+        nap(poll)
     print(f"   ✗ '{target}' 를 화면에서 못 찾았어요 (시간 초과)")
     return False
 
@@ -157,20 +189,23 @@ def run_sequence():
     gap = float(gap_raw) if gap_raw else 1.5
 
     print(f"\n▶ 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복")
-    print("   (멈추려면: 마우스를 왼쪽 위 모서리로 던지거나 Control+C)")
-    for n in (3, 2, 1):
-        print(f"   {n}...", end=" ", flush=True); time.sleep(1)
-    print("시작!\n")
+    print("   ⏹  멈추려면 ESC 키 (또는 Control+C / 마우스를 왼쪽 위 모서리로)")
 
     loop = 0
     try:
+        for n in (3, 2, 1):
+            print(f"   {n}...", end=" ", flush=True); nap(1)
+        print("시작!\n")
         while repeat is None or loop < repeat:
             loop += 1
             rep_txt = f"{loop}/{repeat}" if repeat else str(loop)
             for i, tgt in enumerate(targets, 1):
+                check_stop()
                 print(f"[반복 {rep_txt}] {i}/{len(targets)} · '{tgt}' 찾는 중...")
                 find_and_click(tgt)
-                time.sleep(gap)
+                nap(gap)
+    except Stopped:
+        print("\n⏹  ESC — 중단했습니다."); return
     except KeyboardInterrupt:
         print("\n⏹  Control+C — 중단했습니다."); return
     except pyautogui.FailSafeException:

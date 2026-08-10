@@ -38,6 +38,37 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CALIB_FILE = os.path.join(HERE, "clicker_calibration.json")
 
 
+# ---------------------------------------------------------------------------
+# ESC 키로 멈추기 — 실행 중 아무 때나 ESC 를 누르면 즉시 중단됩니다.
+# ---------------------------------------------------------------------------
+class Stopped(Exception):
+    """사용자가 ESC 를 눌러 중단"""
+
+
+_ESC_KEYCODE = 53  # macOS 에서 ESC 키 번호
+
+
+def esc_pressed():
+    try:
+        import Quartz
+        return bool(Quartz.CGEventSourceKeyState(1, _ESC_KEYCODE))
+    except Exception:
+        return False
+
+
+def check_stop():
+    if esc_pressed():
+        raise Stopped()
+
+
+def nap(seconds):
+    """자는 동안에도 ESC 를 계속 확인하는 sleep."""
+    end = time.time() + seconds
+    while time.time() < end:
+        check_stop()
+        time.sleep(min(0.05, max(0.0, end - time.time())))
+
+
 def recorded_file(qkey):
     return os.path.join(HERE, f"recorded_{qkey}.json")
 
@@ -169,23 +200,27 @@ def get_targets(qkey, quest, calib):
 def run_quest(quest, targets, source, repeat, step_gap, loop_gap):
     steps = quest["steps"]
     print(f"\n▶ '{quest['name']}' 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복  [{source}]")
-    print("   (멈추려면: 마우스를 왼쪽 위 모서리로 던지거나 Control+C)\n")
-    for n in (3, 2, 1):
-        print(f"   {n}...", end=" ", flush=True)
-        time.sleep(1)
-    print("시작!\n")
+    print("   ⏹  멈추려면 ESC 키 (또는 Control+C / 마우스를 왼쪽 위 모서리로)\n")
 
     loop = 0
     try:
+        for n in (3, 2, 1):
+            print(f"   {n}...", end=" ", flush=True)
+            nap(1)
+        print("시작!\n")
         while repeat is None or loop < repeat:
             loop += 1
             rep_txt = f"{loop}/{repeat}" if repeat else f"{loop}"
             for i, (s, (x, y)) in enumerate(zip(steps, targets), 1):
+                check_stop()
                 print(f"   [반복 {rep_txt}] {i}/{len(steps)} · {s['label']}  → ({int(x)}, {int(y)})")
                 pyautogui.moveTo(x, y, duration=0.15)
                 pyautogui.click()
-                time.sleep(step_gap)
-            time.sleep(loop_gap)
+                nap(step_gap)
+            nap(loop_gap)
+    except Stopped:
+        print("\n⏹  ESC — 중단했습니다.")
+        return
     except KeyboardInterrupt:
         print("\n⏹  Control+C — 중단했습니다.")
         return
