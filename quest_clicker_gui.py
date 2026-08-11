@@ -52,6 +52,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.worker = None
+        self.recording = False
         self.msgq = queue.Queue()
 
         root.title("게임 매크로")
@@ -63,9 +64,81 @@ class App:
 
         tk.Label(root, text="게임 매크로", bg=BG, fg=TEXT,
                  font=("Helvetica", 22, "bold")).pack(anchor="w", padx=16, pady=(16, 0))
-        tk.Label(root, text="아이폰을 미러링해 두고, 아래 순서대로 누르세요.",
+        tk.Label(root, text="아이폰을 미러링해 두고 사용하세요.",
                  bg=BG, fg=MUTED).pack(anchor="w", padx=16, pady=(0, 10))
 
+        nb = ttk.Notebook(root)
+        nb.pack(fill="both", expand=True, padx=12, pady=(0, 8))
+        easy = tk.Frame(nb, bg=BG)
+        adv = tk.Frame(nb, bg=BG)
+        nb.add(easy, text="  따라하기 (쉬움)  ")
+        nb.add(adv, text="  퀘스트 모드  ")
+        self._build_easy(easy)
+        self._build_advanced(adv, pad)
+
+        # --- 진행 상황 (두 탭이 함께 사용) ---
+        tk.Label(root, text="진행 상황", bg=BG, fg=MUTED).pack(anchor="w", padx=16)
+        self.log = tk.Text(root, height=9, bg="#141416", fg="#d8d8dc",
+                           insertbackground=TEXT, relief="flat", wrap="word")
+        self.log.pack(fill="both", expand=True, padx=16, pady=(2, 16))
+        self.say("👋 '따라하기' 탭에서 시작하세요. 설명 필요 없이 3단계면 끝!")
+
+        self.root.after(100, self._drain)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    # =====================================================================
+    # 탭 1 · 따라하기 (녹화 → 반복)
+    # =====================================================================
+    def _build_easy(self, p):
+        tk.Label(p, text="게임을 평소처럼 한 번만 해 보이면,\n제가 그대로 반복해 드려요.",
+                 bg=BG, fg=TEXT, justify="left",
+                 font=("Helvetica", 13)).pack(anchor="w", padx=14, pady=(14, 10))
+
+        self.btn_rec = tk.Button(p, text="🔴  1. 녹화 시작", command=self.on_record,
+                                 height=2, bg="#ff5a5a", fg="black",
+                                 font=("Helvetica", 15, "bold"),
+                                 activebackground="#ff7a7a", highlightbackground=BG)
+        self.btn_rec.pack(fill="x", padx=14, pady=4)
+
+        row = tk.Frame(p, bg=BG); row.pack(fill="x", padx=14, pady=(10, 2))
+        tk.Label(row, text="반복", bg=BG, fg=MUTED).pack(side="left")
+        self.e_repeat = tk.StringVar(value="10")
+        tk.Entry(row, textvariable=self.e_repeat, width=6).pack(side="left", padx=(8, 4))
+        self.e_inf = tk.BooleanVar(value=False)
+        tk.Checkbutton(row, text="무한", variable=self.e_inf, bg=BG, fg=TEXT,
+                       selectcolor=BG, activebackground=BG,
+                       activeforeground=TEXT).pack(side="left", padx=(0, 14))
+        tk.Label(row, text="속도", bg=BG, fg=MUTED).pack(side="left")
+        self.e_speed = tk.StringVar(value="1.0")
+        tk.Entry(row, textvariable=self.e_speed, width=5).pack(side="left", padx=8)
+        tk.Label(row, text="(1=녹화한 그대로)", bg=BG, fg=MUTED).pack(side="left")
+
+        self.btn_play = tk.Button(p, text="▶  2. 그대로 반복하기", command=self.on_play,
+                                  height=2, bg=PINK, fg="black",
+                                  font=("Helvetica", 15, "bold"),
+                                  activebackground="#f07dff", highlightbackground=BG)
+        self.btn_play.pack(fill="x", padx=14, pady=4)
+
+        self.btn_estop = tk.Button(p, text="■  정지  (ESC 키도 가능)", command=self.on_stop,
+                                   height=2, bg="#3a3a3d", fg="black",
+                                   font=("Helvetica", 13, "bold"),
+                                   activebackground="#4a4a4d", highlightbackground=BG,
+                                   state="disabled")
+        self.btn_estop.pack(fill="x", padx=14, pady=(4, 12))
+
+        self.lbl_rec = tk.Label(p, text="", bg=BG, fg=MUTED)
+        self.lbl_rec.pack(anchor="w", padx=14)
+        self._refresh_rec_label()
+
+    def _refresh_rec_label(self):
+        pts = qc.load_recording()
+        self.lbl_rec.config(
+            text=f"저장된 녹화: {len(pts)}번 클릭 ✅" if pts else "저장된 녹화가 없어요. 1번부터 하세요.")
+
+    # =====================================================================
+    # 탭 2 · 퀘스트 모드 (기존 방식)
+    # =====================================================================
+    def _build_advanced(self, root, pad):
         # --- 퀘스트 선택 ---
         box = tk.Frame(root, bg=PANEL)
         box.pack(fill="x", **pad)
@@ -124,17 +197,6 @@ class App:
                                   state="disabled")
         self.btn_stop.pack(fill="x", pady=3)
 
-        # --- 진행 상황 ---
-        tk.Label(root, text="진행 상황", bg=BG, fg=MUTED).pack(anchor="w", padx=16, pady=(10, 2))
-        self.log = tk.Text(root, height=10, bg="#141416", fg="#d8d8dc",
-                           insertbackground=TEXT, relief="flat", wrap="word")
-        self.log.pack(fill="both", expand=True, padx=16, pady=(0, 16))
-        self.say("준비됐어요. ①번부터 차례로 눌러보세요.")
-        self.say("(②번은 처음 한 번만. 미러링 창을 옮기면 다시 해주세요.)")
-
-        self.root.after(100, self._drain)
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
     # ---------- 로그 ----------
     def say(self, msg):
         """어느 스레드에서 불러도 안전하게 로그 남기기"""
@@ -160,9 +222,13 @@ class App:
 
     def busy(self, on):
         state = "disabled" if on else "normal"
-        for b in (self.btn_test, self.btn_click, self.btn_setup, self.btn_run):
+        for b in (self.btn_test, self.btn_click, self.btn_setup, self.btn_run,
+                  self.btn_play):
             b.config(state=state)
-        self.btn_stop.config(state="normal" if on else "disabled")
+        for b in (self.btn_stop, self.btn_estop):
+            b.config(state="normal" if on else "disabled")
+        if not self.recording:
+            self.btn_rec.config(state=state)
 
     def start_worker(self, fn):
         if self.worker and self.worker.is_alive():
@@ -202,6 +268,74 @@ class App:
             for s, x, y in texts[:25]:
                 self.say(f"   · {s}")
         self.start_worker(job)
+
+    # ---------- 따라하기: 녹화 ----------
+    def on_record(self):
+        if self.recording:          # 녹화 중이면 → 끝내기
+            qc.request_stop()
+            return
+        messagebox.showinfo(
+            "녹화 시작",
+            "확인을 누르면 녹화가 시작됩니다.\n\n"
+            "이제 게임에서 평소처럼 순서대로 눌러주세요.\n"
+            "(예: 퀘스트 → 상자 → 사용하기 → 닫기)\n\n"
+            "다 누른 뒤 '녹화 끝' 버튼을 누르면 됩니다.")
+        self.recording = True
+        self.btn_rec.config(text="⏹  녹화 끝  (다 눌렀으면 클릭)", bg="#ffb300")
+
+        def job():
+            self.say("\n🔴 녹화 중… 게임에서 순서대로 눌러주세요.")
+            self.say("   (다 하면 '녹화 끝' 버튼 또는 ESC)")
+            self.root.update_idletasks()
+            rect = (self.root.winfo_rootx(), self.root.winfo_rooty(),
+                    self.root.winfo_width(), self.root.winfo_height())
+            pts = qc.record_clicks(log=self.say, exclude_rect=rect)
+            if not pts:
+                self.say("⚠️  기록된 클릭이 없어요. 다시 시도해 주세요.")
+            else:
+                qc.save_recording(pts)
+                self.say(f"\n✅ {len(pts)}번의 클릭을 기억했어요!")
+                self.say("   이제 '2. 그대로 반복하기'를 누르면 됩니다.")
+            self.root.after(0, self._end_record)
+
+        self.start_worker(job)
+
+    def _end_record(self):
+        self.recording = False
+        self.btn_rec.config(text="🔴  1. 녹화 시작", bg="#ff5a5a", state="normal")
+        self._refresh_rec_label()
+
+    # ---------- 따라하기: 반복 실행 ----------
+    def on_play(self):
+        pts = qc.load_recording()
+        if not pts:
+            messagebox.showinfo("먼저 녹화해 주세요",
+                                "'1. 녹화 시작'을 눌러서\n게임을 한 번 해 보여주세요.")
+            return
+        repeat = None if self.e_inf.get() else max(1, self._int(self.e_repeat.get(), 10))
+        speed = self._float(self.e_speed.get(), 1.0)
+
+        def job():
+            self.say("\n3초 뒤 시작합니다. 마우스에서 손 떼고 기다려 주세요.")
+            for n in (3, 2, 1):
+                self.say(f"   {n}...")
+                qc.nap(1)
+            qc.play_clicks(pts, repeat, log=self.say, speed=speed)
+        self.start_worker(job)
+
+    @staticmethod
+    def _int(v, d):
+        try:
+            return int(v)
+        except ValueError:
+            return d
+
+    @staticmethod
+    def _float(v, d):
+        try:
+            return float(v)
+        except ValueError:
+            return d
 
     # ---------- ①-2 클릭 테스트 ----------
     def on_clicktest(self):

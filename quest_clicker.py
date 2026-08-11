@@ -188,6 +188,91 @@ def tap(x, y, hold=0.09, log=None):
 
 
 # ===========================================================================
+# 따라하기 (녹화 → 반복)
+#   사용자가 직접 누른 자리를 순서대로 기억했다가, 똑같이 반복합니다.
+#   글자인식(OCR)도, 위치 학습도 필요 없어요.
+# ===========================================================================
+def rec_file():
+    return os.path.join(HERE, "recording.json")
+
+
+def mouse_is_down():
+    """지금 마우스 왼쪽 버튼이 눌려 있으면 True"""
+    try:
+        import Quartz
+        return bool(Quartz.CGEventSourceButtonState(1, 0))  # 1=HID상태, 0=왼쪽버튼
+    except Exception:
+        return False
+
+
+def record_clicks(log=print, exclude_rect=None, max_clicks=100):
+    """사용자가 누르는 위치를 순서대로 기록.
+       exclude_rect=(x, y, w, h) 안에서 누른 건 무시 (매크로 창 자기 자신)."""
+    pts, prev, last_t = [], mouse_is_down(), None
+
+    def inside(x, y):
+        if not exclude_rect:
+            return False
+        rx, ry, rw, rh = exclude_rect
+        return rx <= x <= rx + rw and ry <= y <= ry + rh
+
+    try:
+        while len(pts) < max_clicks:
+            check_stop()
+            down = mouse_is_down()
+            if down and not prev:  # 막 누른 순간
+                x, y = pyautogui.position()
+                if not inside(x, y):
+                    now = time.time()
+                    gap = 0.0 if last_t is None else min(round(now - last_t, 2), 10.0)
+                    pts.append({"x": int(x), "y": int(y), "gap": gap})
+                    last_t = now
+                    log(f"   ● {len(pts)}번째 기록 ({int(x)}, {int(y)})")
+            prev = down
+            time.sleep(0.03)
+    except Stopped:
+        pass
+    return pts
+
+
+def save_recording(pts):
+    with open(rec_file(), "w", encoding="utf-8") as f:
+        json.dump(pts, f, ensure_ascii=False, indent=2)
+
+
+def load_recording():
+    try:
+        with open(rec_file(), encoding="utf-8") as f:
+            pts = json.load(f)
+        return pts if pts else None
+    except Exception:
+        return None
+
+
+def play_clicks(pts, repeat, log=print, speed=1.0, min_gap=0.3):
+    """기록한 순서대로 반복 클릭."""
+    log(f"\n▶ 따라하기 시작 — {('무한' if repeat is None else str(repeat)+'회')} 반복")
+    log("   ⏹  멈추려면 ESC 키 또는 정지 버튼")
+    loop = 0
+    try:
+        while repeat is None or loop < repeat:
+            loop += 1
+            rep = f"{loop}/{repeat}" if repeat else str(loop)
+            for i, p in enumerate(pts, 1):
+                check_stop()
+                if i > 1:
+                    nap(max(min_gap, p.get("gap", 1.0) * speed))
+                log(f"[반복 {rep}] {i}/{len(pts)} · ({p['x']}, {p['y']}) 클릭")
+                tap(p["x"], p["y"], log=log)
+            nap(max(min_gap, 1.0 * speed))
+    except Stopped:
+        log("\n⏹  중단했습니다."); return
+    except pyautogui.FailSafeException:
+        log("\n⏹  안전장치 발동 — 중단했습니다."); return
+    log("\n✅ 완료.")
+
+
+# ===========================================================================
 # 글자 인식 (Apple Vision)
 # ===========================================================================
 def read_screen_text():
