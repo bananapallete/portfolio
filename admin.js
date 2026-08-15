@@ -11,7 +11,8 @@ let data = null;
 const previewProjects = new Set();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
-// 편집 팝업이 열려 있는 대상 { cat, project, projIndex }
+// 편집 팝업이 열려 있는 대상 { cat, projIndex, original, project, dirty }
+// project는 편집용 복사본 — "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
 let editingContext = null;
 
 // iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
@@ -93,6 +94,12 @@ function slugify(text, fallback) {
 }
 
 function saveDraft() {
+  // 편집 팝업이 열려 있는 동안의 saveDraft 호출은 전부 팝업 안에서의 수정이므로
+  // "저장되지 않은 변경사항" 상태로 표시한다 (복사본 수정이라 draft에는 아직 안 들어감)
+  if (editingContext) {
+    editingContext.dirty = true;
+    updateModalSaveState();
+  }
   const status = document.getElementById("autosaveStatus");
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
@@ -566,15 +573,48 @@ function renderProjectThumbCard(cat, project, projIndex) {
 /* ---------------------------------- 프로젝트 편집 팝업 ---------------------------------- */
 
 function openProjectEditor(cat, project, projIndex) {
-  editingContext = { cat, project, projIndex };
+  editingContext = {
+    cat,
+    projIndex,
+    original: project,
+    // 복사본을 편집하다가 "저장 · 사이트에 반영"을 눌러야 실제 데이터로 들어간다
+    project: JSON.parse(JSON.stringify(project)),
+    dirty: false,
+  };
+  updateModalSaveState();
   renderEditModalBody();
   document.getElementById("projectEditOverlay").classList.remove("hidden");
 }
 
-function closeProjectEditor() {
+// force=true면 확인 없이 닫는다 (저장 완료 후, 프로젝트 삭제 후)
+function closeProjectEditor(force = false) {
+  if (!force && editingContext && editingContext.dirty) {
+    if (!confirm("저장하지 않은 변경사항이 있어요.\n저장하지 않고 닫으면 이번에 수정한 내용은 사라져요. 그래도 닫을까요?")) {
+      return;
+    }
+  }
   editingContext = null;
   document.getElementById("projectEditOverlay").classList.add("hidden");
   renderCategories();
+}
+
+function updateModalSaveState() {
+  const el = document.getElementById("modalSaveState");
+  if (!el) return;
+  const dirty = !!(editingContext && editingContext.dirty);
+  el.textContent = dirty ? "● 저장되지 않은 변경사항이 있어요" : "";
+  el.classList.toggle("visible", dirty);
+}
+
+// 편집 팝업의 복사본을 실제 데이터에 반영하고 곧바로 사이트에 배포한다
+async function saveProjectAndPublish() {
+  if (!editingContext) return;
+  const { cat, projIndex, project } = editingContext;
+  cat.projects[projIndex] = project;
+  saveDraft();
+  const ok = await publishToGithub();
+  if (ok) closeProjectEditor(true);
+  // 실패하면(토큰 없음/네트워크 오류) 팝업을 유지해 다시 시도할 수 있게 한다
 }
 
 function renderEditModalBody() {
@@ -603,7 +643,7 @@ function renderEditModalBody() {
     if (confirm(`"${project.title}" 프로젝트를 삭제할까요?`)) {
       cat.projects.splice(projIndex, 1);
       saveDraft();
-      closeProjectEditor();
+      closeProjectEditor(true);
     }
   });
 
@@ -1398,7 +1438,8 @@ document.getElementById("addCategoryBtn").addEventListener("click", () => {
   renderCategories();
 });
 
-document.getElementById("projectEditClose").addEventListener("click", closeProjectEditor);
+document.getElementById("projectEditClose").addEventListener("click", () => closeProjectEditor());
+document.getElementById("projectEditSave").addEventListener("click", saveProjectAndPublish);
 document.getElementById("projectEditOverlay").addEventListener("click", (e) => {
   if (e.target.id === "projectEditOverlay") closeProjectEditor();
 });
@@ -1427,6 +1468,12 @@ const MIME_EXT = {
 
 function setPublishStatus(text) {
   document.getElementById("autosaveStatus").textContent = text;
+  // 편집 팝업이 열려 있으면 진행 상황을 팝업 상단에도 보여준다 (헤더는 오버레이에 가려짐)
+  const m = document.getElementById("modalSaveState");
+  if (m && editingContext) {
+    m.textContent = text;
+    m.classList.add("visible");
+  }
 }
 
 function getGithubToken(forceAsk = false) {
@@ -1544,16 +1591,20 @@ function collectPendingMedia() {
   return refs;
 }
 
+// 성공하면 true, 실패·중단하면 false를 돌려준다
 async function publishToGithub() {
   if (!data) {
     alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 반영해주세요.");
-    return;
+    return false;
   }
   const token = getGithubToken();
-  if (!token) return;
+  if (!token) return false;
 
-  const btn = document.getElementById("publishBtn");
-  btn.disabled = true;
+  const btns = [
+    document.getElementById("publishBtn"),
+    document.getElementById("projectEditSave"),
+  ].filter(Boolean);
+  btns.forEach((b) => { b.disabled = true; });
   try {
     // 1) 새로 추가된 이미지/영상을 assets/ 폴더에 업로드
     const refs = collectPendingMedia();
@@ -1585,11 +1636,13 @@ async function publishToGithub() {
 
     setPublishStatus("✅ 배포 완료! 1~2분 뒤 실제 사이트에 반영돼요.");
     alert("배포 완료!\n\nGitHub Pages가 사이트를 다시 빌드하는 데 1~2분 걸려요.\n잠시 후 사이트를 새로고침해서 확인해주세요.");
+    return true;
   } catch (e) {
     setPublishStatus("⚠️ 배포 실패: " + e.message);
     alert("배포에 실패했어요.\n\n" + e.message);
+    return false;
   } finally {
-    btn.disabled = false;
+    btns.forEach((b) => { b.disabled = false; });
   }
 }
 

@@ -34,8 +34,10 @@
 
   <div class="container">
     <div class="admin-notice">
-      ✨ 수정한 내용은 브라우저에 자동 임시저장되고, 상단 <strong>🚀 사이트에 반영</strong> 버튼을 누르면
-      GitHub에 자동으로 커밋되어 <strong>1~2분 안에 실제 사이트에 반영</strong>돼요.<br/>
+      ✨ 프로젝트 내용은 편집 팝업 오른쪽 위 <strong>🚀 저장 · 사이트에 반영</strong> 버튼을 눌러야
+      실제 사이트에 반영돼요. 저장하지 않고 닫으면 그 팝업에서 수정한 내용은 사라져요.<br/>
+      프로필 등 팝업 밖에서 수정한 내용은 상단 <strong>🚀 사이트에 반영</strong> 버튼으로 반영하며,
+      반영 후 <strong>1~2분 안에 실제 사이트에 적용</strong>돼요.
       처음 한 번만 GitHub 토큰을 입력하면 이 브라우저에 저장됩니다(토큰이 없는 사람은 배포할 수 없어요).
       <strong>내보내기(백업)</strong>는 data.json을 파일로 받아두는 백업용이에요.
     </div>
@@ -55,7 +57,11 @@
 
 <div class="admin-modal-overlay hidden" id="projectEditOverlay">
   <div class="admin-modal">
-    <button class="admin-modal-close" id="projectEditClose">✕</button>
+    <div class="admin-modal-topbar">
+      <span class="admin-modal-savestate" id="modalSaveState"></span>
+      <button class="btn btn-primary btn-small" id="projectEditSave">🚀 저장 · 사이트에 반영</button>
+      <button class="admin-modal-close" id="projectEditClose" title="저장하지 않고 닫기">✕</button>
+    </div>
     <div id="projectEditBody"></div>
   </div>
 </div>

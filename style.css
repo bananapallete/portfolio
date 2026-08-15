@@ -685,10 +685,30 @@ input, textarea, select { font-family: inherit; }
   margin-bottom: 40px;
 }
 
+/* 팝업 상단 바: [저장되지 않음 표시] ... [저장 버튼] [닫기 버튼] */
+.admin-modal-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-modal-savestate {
+  margin-right: auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sun);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-modal-savestate.visible { opacity: 1; }
+
 .admin-modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -700,6 +720,7 @@ input, textarea, select { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: none;
 }
 
 .project-card-head {
@@ -708,7 +729,6 @@ input, textarea, select { font-family: inherit; }
   align-items: center;
   margin-bottom: 12px;
   gap: 10px;
-  padding-right: 40px;
 }
 
 .project-card-head strong {
