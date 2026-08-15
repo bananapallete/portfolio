@@ -72,6 +72,10 @@ async function initProject() {
   wrap.innerHTML = "";
   stopSliders();
 
+  // 콘텐츠 블록 사이 간격 (프로젝트별 설정, 최소 0px — 미설정이면 CSS 기본 28px)
+  const blockGap = normalizeGap(project.blockGap);
+  if (blockGap != null) wrap.style.gap = blockGap + "px";
+
   const blocks = blocksOf(project);
   let rendered = 0;
   blocks.forEach((block) => {
