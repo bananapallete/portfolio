@@ -692,9 +692,9 @@ function renderEditModalBody() {
   summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
   card.appendChild(summaryInput);
 
-  // ---- 콘텐츠 블록 사이 간격 ----
+  // ---- 콘텐츠 간격 (블록 사이 + 그리드/이미지 사이에 함께 적용) ----
   const gapLabel = document.createElement("label");
-  gapLabel.textContent = "콘텐츠 블록 사이 간격 (상세 페이지에서 블록과 블록 사이, 최소 0px · 기본 28px)";
+  gapLabel.textContent = "콘텐츠 간격 (블록 사이와 그리드 이미지 사이에 함께 적용, 최소 0px · 기본 28px)";
   gapLabel.className = "mini-label";
   gapLabel.style.marginTop = "16px";
   card.appendChild(gapLabel);
@@ -953,8 +953,10 @@ function renderBlockBody(project, block, blockIndex) {
     body.appendChild(segRow);
 
     // 이미지 사이 간격 (슬라이드는 한 장씩 보여서 간격 개념이 없음)
+    // 비워두면 프로젝트의 "콘텐츠 간격"을 따르고, 그것도 없으면 레이아웃 기본값 사용
     if (block.layout !== "slider") {
-      const defGap = block.layout === "grid" ? "10" : "0";
+      const projGap = normalizeGap(project.blockGap);
+      const defGap = projGap != null ? String(projGap) : (block.layout === "grid" ? "10" : "0");
       body.appendChild(buildGapField(
         "이미지 간격",
         () => block.gap,
@@ -1129,7 +1131,9 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div.textContent = "(이미지가 없는 블록)";
       return div;
     }
-    const gap = normalizeGap(block.gap);
+    // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다
+    const ownGap = normalizeGap(block.gap);
+    const gap = ownGap != null ? ownGap : normalizeGap(project.blockGap);
     if (block.layout === "slider") {
       div = document.createElement("div");
       div.className = "pv-slider-strip";

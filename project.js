@@ -79,7 +79,8 @@ async function initProject() {
   const blocks = blocksOf(project);
   let rendered = 0;
   blocks.forEach((block) => {
-    const el = renderBlock(block);
+    // 콘텐츠 간격 설정이 있으면 그리드/이미지 사이 간격에도 함께 적용
+    const el = renderBlock(block, blockGap);
     if (!el) return;
     rendered++;
     if (block.type === "text") {
