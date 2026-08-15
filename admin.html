@@ -6,21 +6,24 @@
 <title>관리자 페이지 — Unlimit_Cho Portfolio</title>
 <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="theme-dark">
 
 <div class="admin-shell">
   <header class="admin-header">
     <div class="container">
-      <h1>✎ 관리자 페이지 — 콘텐츠 수정</h1>
+      <div class="brand">
+        <h1 class="brand-name">✎ 관리자 페이지</h1>
+        <span class="brand-role">Unlimit_Cho Portfolio — 콘텐츠 수정</span>
+      </div>
       <div class="admin-actions">
-        <button class="btn btn-outline file-btn btn-small" style="color:#fff;border-color:rgba(250,249,246,0.3)">
+        <button class="btn btn-outline file-btn btn-small">
           불러오기(json)
           <input type="file" id="importFile" accept="application/json" />
         </button>
         <button class="btn btn-ghost btn-small" id="resetBtn">원본 다시 불러오기</button>
         <button class="btn btn-ghost btn-small" id="previewBtn">미리보기</button>
         <button class="btn btn-ghost btn-small" id="tokenBtn">GitHub 토큰 설정</button>
-        <button class="btn btn-outline btn-small" id="exportBtn" style="color:#fff;border-color:rgba(250,249,246,0.3)">내보내기(백업)</button>
+        <button class="btn btn-outline btn-small" id="exportBtn">내보내기(백업)</button>
         <button class="btn btn-primary btn-small" id="publishBtn">🚀 사이트에 반영</button>
       </div>
     </div>
@@ -56,6 +59,9 @@
     <div id="projectEditBody"></div>
   </div>
 </div>
+
+<!-- 지금 어느 부분을 수정 중인지 보여주는 안내 칩 (입력창에 포커스하면 나타남) -->
+<div class="editing-indicator" id="editingIndicator" aria-live="polite"></div>
 
 <script src="admin.js"></script>
 </body>

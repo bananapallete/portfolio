@@ -749,7 +749,8 @@ function renderBlockBody(project, block, blockIndex) {
     ta.value = block.content || "";
     ta.className = "block-textarea";
     ta.style.fontSize = (block.size || 15) + "px";
-    ta.style.color = block.color || "#14121a";
+    // 색을 지정하지 않은 블록은 사이트 기본색(밝은 글자)을 따르므로 그대로 상속
+    if (block.color) ta.style.color = block.color;
     ta.placeholder = "내용을 입력하세요 (프리텐다드 폰트로 표시돼요)";
     ta.addEventListener("input", () => { block.content = ta.value; saveDraft(); });
     body.appendChild(ta);
@@ -784,7 +785,7 @@ function renderBlockBody(project, block, blockIndex) {
     colorLabel.style.marginLeft = "12px";
 
     const colorField = buildColorField(
-      block.color || "#14121a",
+      block.color || "#f5f4f0",
       (v) => {
         block.color = v;
         ta.style.color = v;
@@ -1114,6 +1115,123 @@ function renderAll() {
   renderProfile();
   renderCategories();
 }
+
+/* ------------------- 지금 어느 부분을 수정 중인지 표시 ------------------- */
+
+// 입력창에서 가장 가까운 라벨 텍스트를 찾는다.
+// .field 안이면 그 라벨, 아니면(편집 팝업/프로필처럼 라벨→컨트롤이 평평하게 붙는 구조)
+// 컨테이너 직계 조상에서부터 앞쪽 형제를 거슬러 올라가며 처음 만나는 라벨을 쓴다.
+function findNearestLabel(target) {
+  // "카드 설명 (목록 화면 제목 아래 표시…)" 같은 괄호 부연설명은 칩에서는 생략
+  const clean = (t) => t.trim().replace(/\s*\([^)]*\)\s*$/, "");
+  const field = target.closest(".field");
+  if (field) {
+    const l = field.querySelector("label");
+    if (l) return clean(l.textContent);
+  }
+  const scope = target.closest("#projectEditBody, #profileFields");
+  if (!scope) return null;
+  let node = target;
+  while (node && node.parentElement && node.parentElement !== scope) node = node.parentElement;
+  while (node) {
+    if (node.matches && node.matches("label")) return clean(node.textContent);
+    node = node.previousElementSibling;
+  }
+  return null;
+}
+
+// 포커스된 입력창이 문서 어디에 속하는지 "카테고리 › 프로젝트 › 블록" 식으로 설명한다.
+function describeEditingTarget(target) {
+  if (!target || !target.closest) return null;
+  const parts = [];
+
+  // 프로젝트 편집 팝업 안
+  if (target.closest("#projectEditBody")) {
+    if (editingContext) {
+      parts.push(editingContext.cat.name || "카테고리");
+      parts.push(editingContext.project.title || "(제목 없음)");
+    }
+    const blockItem = target.closest(".block-item");
+    const pvBlock = target.closest(".pv-block");
+    if (blockItem) {
+      const siblings = Array.from(blockItem.parentElement.querySelectorAll(":scope > .block-item"));
+      const idx = siblings.indexOf(blockItem);
+      const lbl = blockItem.querySelector(".block-type-label");
+      parts.push(`블록 ${idx + 1}${lbl ? " (" + lbl.textContent.trim() + ")" : ""}`);
+    } else if (pvBlock) {
+      const lbl = pvBlock.querySelector(".pv-chip");
+      if (lbl) parts.push(lbl.textContent.trim());
+    } else if (target.closest(".project-card-head")) {
+      parts.push("프로젝트 제목");
+    } else {
+      const lbl = findNearestLabel(target);
+      if (lbl) parts.push(lbl);
+    }
+    return parts;
+  }
+
+  // 프로필 섹션
+  if (target.closest("#profileSection")) {
+    parts.push("프로필 & 연락처");
+    const lbl = findNearestLabel(target);
+    if (lbl) parts.push(lbl);
+    return parts;
+  }
+
+  // 카테고리 섹션 (팝업 밖)
+  if (target.closest("#categoriesSection")) {
+    const catBlock = target.closest(".category-block");
+    if (catBlock) {
+      const nameInput = catBlock.querySelector(".category-block-head input[type='text']");
+      parts.push((nameInput && nameInput.value.trim()) || "카테고리");
+      if (target.closest(".category-block-head")) parts.push("카테고리 이름/색상");
+    } else {
+      parts.push("카테고리 & 프로젝트");
+    }
+    return parts;
+  }
+
+  return null;
+}
+
+function showEditingIndicator(target) {
+  const chip = document.getElementById("editingIndicator");
+  if (!chip) return;
+  const parts = describeEditingTarget(target);
+  if (!parts || !parts.length) {
+    chip.classList.remove("visible");
+    return;
+  }
+  chip.innerHTML = "";
+  const dot = document.createElement("span");
+  dot.className = "ei-dot";
+  const text = document.createElement("span");
+  text.className = "ei-text";
+  text.textContent = "수정 중 · " + parts.join(" › ");
+  chip.appendChild(dot);
+  chip.appendChild(text);
+  chip.classList.add("visible");
+}
+
+document.addEventListener("focusin", (e) => {
+  const t = e.target;
+  if (!t.matches || !t.matches("input, textarea, select")) return;
+  if (t.type === "file") return;
+  showEditingIndicator(t);
+});
+
+document.addEventListener("focusout", () => {
+  // 버튼 클릭 등으로 포커스가 잠깐 이동할 때 칩이 깜빡이지 않도록 약간 기다렸다 숨긴다
+  setTimeout(() => {
+    const a = document.activeElement;
+    const stillEditing =
+      a && a.matches && a.matches("input, textarea, select") && a.type !== "file";
+    if (!stillEditing) {
+      const chip = document.getElementById("editingIndicator");
+      if (chip) chip.classList.remove("visible");
+    }
+  }, 150);
+});
 
 /* ---------------------------------- Top actions ---------------------------------- */
 
