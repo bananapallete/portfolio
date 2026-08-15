@@ -177,7 +177,9 @@ function normalizeGap(v) {
   return Math.max(0, n);
 }
 
-function renderBlock(block) {
+// defaultGap: 블록에 자체 간격(block.gap)이 없을 때 쓸 기본 간격
+// (프로젝트의 "콘텐츠 간격" 설정 — 블록 사이와 이미지 사이가 같이 조절된다)
+function renderBlock(block, defaultGap = null) {
   if (block.type === "text") {
     if (!block.content) return null;
     const p = document.createElement("p");
@@ -193,7 +195,9 @@ function renderBlock(block) {
     if (!images.length) return null;
     if (block.layout === "slider" && images.length > 1) return renderSlider(images);
     const div = document.createElement("div");
-    const gap = normalizeGap(block.gap); // 블록별 이미지 사이 간격 (최소 0px)
+    // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다 (최소 0px)
+    const ownGap = normalizeGap(block.gap);
+    const gap = ownGap != null ? ownGap : normalizeGap(defaultGap);
     const isMasonry = block.layout === "grid" && block.grid === "masonry";
     if (block.layout === "grid") {
       if (isMasonry) {
