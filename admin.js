@@ -28,6 +28,60 @@ function normalizeEmbedInput(raw) {
   return v;
 }
 
+// 간격 값(px)을 0 이상 정수로 정규화. 미설정이면 null (CSS 기본값 사용)
+function normalizeGap(v) {
+  if (v == null || v === "") return null;
+  const n = parseInt(v, 10);
+  if (isNaN(n)) return null;
+  return Math.max(0, n);
+}
+
+// "간격 ___ px [기본값]" 형태의 조절 필드. 빈 값이면 기본값(CSS 지정) 사용.
+// getVal/setVal로 데이터에 읽고 쓰고, onApply(gap|null)로 즉시 반영한다.
+function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
+  const row = document.createElement("div");
+  row.className = "block-controls-row";
+
+  const label = document.createElement("span");
+  label.className = "control-label";
+  label.textContent = labelText;
+
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = 0;
+  input.max = 300;
+  input.className = "size-input";
+  input.placeholder = placeholder;
+  const cur = normalizeGap(getVal());
+  input.value = cur == null ? "" : cur;
+  input.addEventListener("input", () => {
+    const g = normalizeGap(input.value);
+    setVal(g);
+    saveDraft();
+    if (onApply) onApply(g);
+  });
+
+  const px = document.createElement("span");
+  px.className = "control-label";
+  px.textContent = "px";
+
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "btn btn-outline btn-small";
+  clearBtn.textContent = "기본값";
+  clearBtn.addEventListener("click", () => {
+    input.value = "";
+    setVal(null);
+    saveDraft();
+    if (onApply) onApply(null);
+  });
+
+  row.appendChild(label);
+  row.appendChild(input);
+  row.appendChild(px);
+  row.appendChild(clearBtn);
+  return row;
+}
+
 function slugify(text, fallback) {
   const base = (text || fallback || "item")
     .toString()
@@ -598,6 +652,19 @@ function renderEditModalBody() {
   summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
   card.appendChild(summaryInput);
 
+  // ---- 콘텐츠 블록 사이 간격 ----
+  const gapLabel = document.createElement("label");
+  gapLabel.textContent = "콘텐츠 블록 사이 간격 (상세 페이지에서 블록과 블록 사이, 최소 0px · 기본 28px)";
+  gapLabel.className = "mini-label";
+  gapLabel.style.marginTop = "16px";
+  card.appendChild(gapLabel);
+  card.appendChild(buildGapField(
+    "간격",
+    () => project.blockGap,
+    (g) => { if (g == null) delete project.blockGap; else project.blockGap = g; },
+    "28"
+  ));
+
   // ---- 모드 전환: 블록 편집 / 미리보기·순서 조절 ----
   const isPreview = previewProjects.has(project.id);
   const modeSeg = document.createElement("div");
@@ -845,6 +912,17 @@ function renderBlockBody(project, block, blockIndex) {
     }
     body.appendChild(segRow);
 
+    // 이미지 사이 간격 (슬라이드는 한 장씩 보여서 간격 개념이 없음)
+    if (block.layout !== "slider") {
+      const defGap = block.layout === "grid" ? "10" : "0";
+      body.appendChild(buildGapField(
+        "이미지 간격",
+        () => block.gap,
+        (g) => { if (g == null) delete block.gap; else block.gap = g; },
+        defGap
+      ));
+    }
+
     // 썸네일 (드래그로 순서 변경)
     const imgGroup = `imgs-${project.id}-${blockIndex}`;
     const row = document.createElement("div");
@@ -950,6 +1028,10 @@ function renderProjectPreview(project) {
   pane.className = "preview-pane";
   project.blocks = project.blocks || [];
 
+  // 설정한 블록 사이 간격을 미리보기에도 반영
+  const blockGap = normalizeGap(project.blockGap);
+  if (blockGap != null) pane.style.gap = blockGap + "px";
+
   if (!project.blocks.length) {
     const empty = document.createElement("div");
     empty.className = "block-hint";
@@ -1007,20 +1089,30 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div.textContent = "(이미지가 없는 블록)";
       return div;
     }
+    const gap = normalizeGap(block.gap);
     if (block.layout === "slider") {
       div = document.createElement("div");
       div.className = "pv-slider-strip";
     } else if (block.layout === "grid") {
       div = document.createElement("div");
       div.className = gridClassName(block);
+      if (gap != null) {
+        if (block.grid === "masonry") div.style.columnGap = gap + "px";
+        else div.style.gap = gap + "px";
+      }
     } else {
       div = document.createElement("div");
       div.className = "blk-images-single";
+      if (gap != null) div.style.gap = gap + "px";
     }
 
     images.forEach((src, j) => {
       const w = document.createElement("div");
       w.className = "pv-img-wrap";
+      // 모자이크(컬럼) 레이아웃의 세로 간격은 margin-bottom으로 정해진다
+      if (block.layout === "grid" && block.grid === "masonry" && gap != null) {
+        w.style.marginBottom = gap + "px";
+      }
       const img = document.createElement("img");
       img.src = src;
       img.alt = "";

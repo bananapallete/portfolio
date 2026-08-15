@@ -169,6 +169,14 @@ function renderSlider(images) {
   return wrap;
 }
 
+// 간격 값(px)을 0 이상 정수로 정규화. 미설정이면 null (CSS 기본값 사용)
+function normalizeGap(v) {
+  if (v == null || v === "") return null;
+  const n = parseInt(v, 10);
+  if (isNaN(n)) return null;
+  return Math.max(0, n);
+}
+
 function renderBlock(block) {
   if (block.type === "text") {
     if (!block.content) return null;
@@ -185,20 +193,27 @@ function renderBlock(block) {
     if (!images.length) return null;
     if (block.layout === "slider" && images.length > 1) return renderSlider(images);
     const div = document.createElement("div");
+    const gap = normalizeGap(block.gap); // 블록별 이미지 사이 간격 (최소 0px)
+    const isMasonry = block.layout === "grid" && block.grid === "masonry";
     if (block.layout === "grid") {
-      if (block.grid === "masonry") {
+      if (isMasonry) {
         div.className = "blk-images-masonry";
+        if (gap != null) div.style.columnGap = gap + "px";
       } else {
         const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
         div.className = `blk-images-grid blk-grid-${cols}`;
+        if (gap != null) div.style.gap = gap + "px";
       }
     } else {
       div.className = "blk-images-single";
+      if (gap != null) div.style.gap = gap + "px";
     }
     images.forEach((src) => {
       const img = document.createElement("img");
       img.src = src;
       img.alt = "";
+      // 모자이크(컬럼) 레이아웃은 세로 간격이 margin-bottom으로 정해진다
+      if (isMasonry && gap != null) img.style.marginBottom = gap + "px";
       div.appendChild(img);
     });
     return div;
