@@ -413,10 +413,7 @@ input, textarea, select { font-family: inherit; }
 
 .footer-admin-link:hover { color: color-mix(in srgb, var(--ink) 60%, transparent); }
 
-/* ------------- 콘텐츠 배경색: 블록을 누르면 전체 배경이 서서히 바뀐다 ------------- */
-
-/* 배경색이 지정된 블록은 누를 수 있다는 걸 커서로 알린다 */
-.has-bg-toggle { cursor: pointer; }
+/* --------- 프로젝트 배경색: 그 프로젝트를 여는 동안 전체 배경이 서서히 바뀐다 --------- */
 
 /* 배경이 켜져 있는 동안에는 페이지의 기본 배경(--paper) 대신 인라인 색이 쓰인다.
    본문 영역들이 자기 배경으로 덮어버리지 않도록 투명 처리 */
