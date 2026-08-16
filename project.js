@@ -79,8 +79,9 @@ async function initProject() {
   const blocks = blocksOf(project);
   let rendered = 0;
   blocks.forEach((block) => {
-    // 콘텐츠 간격 설정이 있으면 그리드/이미지 사이 간격에도 함께 적용
-    const el = renderBlock(block, blockGap);
+    // 콘텐츠 간격 설정이 있으면 그리드/이미지 사이 간격에도 함께 적용.
+    // 첫 블록만 즉시 로드하고 나머지 이미지는 스크롤할 때 받아온다.
+    const el = renderBlock(block, blockGap, rendered === 0);
     if (!el) return;
     rendered++;
     if (block.type === "text") {

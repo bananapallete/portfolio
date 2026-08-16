@@ -513,42 +513,6 @@ input, textarea, select { font-family: inherit; }
   cursor: pointer;
 }
 
-.admin-notice {
-  margin: 22px 0;
-  padding: 16px 20px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--sun) 10%, var(--paper));
-  border: 1px solid color-mix(in srgb, var(--sun) 40%, transparent);
-  font-size: 13px;
-  line-height: 1.6;
-  font-weight: 600;
-}
-
-.admin-section {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  padding: 26px;
-  margin-top: 24px;
-  transition: border-color 0.2s ease;
-}
-
-.admin-section h2 {
-  font-size: 15px;
-  font-weight: 800;
-  margin: 0 0 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
 .field-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -679,13 +643,6 @@ input, textarea, select { font-family: inherit; }
   color: var(--sun);
 }
 
-/* 탭 옆 관리자 전용 요소 */
-.tab-edit {
-  margin-left: 6px;
-  font-size: 12px;
-  opacity: 0.65;
-}
-
 .tab-add {
   width: 26px;
   height: 26px;
@@ -707,69 +664,6 @@ input, textarea, select { font-family: inherit; }
   border-color: var(--sun);
   color: var(--sun);
   transform: none;
-}
-
-/* ---- 프로젝트 썸네일 카드 그리드 (목록) ---- */
-
-.project-thumb-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.project-thumb-card {
-  position: relative;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--paper-soft);
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.project-thumb-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
-}
-
-.project-thumb-media {
-  aspect-ratio: 4 / 3;
-  width: 100%;
-  background: var(--panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: color-mix(in srgb, var(--ink) 35%, transparent);
-  font-size: 12px;
-  font-weight: 700;
-  overflow: hidden;
-}
-
-.project-thumb-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.project-thumb-body {
-  padding: 10px 12px 12px;
-}
-
-.project-thumb-title {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.project-thumb-meta {
-  font-size: 11px;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
-  margin-top: 3px;
 }
 
 .project-thumb-delete {
@@ -966,64 +860,9 @@ input, textarea, select { font-family: inherit; }
   line-height: 1;
 }
 
-.video-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--panel);
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin-top: 8px;
-  font-size: 13px;
-}
-
-.video-row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.add-video-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-
-.add-video-row input {
-  flex: 1;
-  min-width: 200px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--line);
-  font-size: 13px;
-}
-
-.category-block { margin-bottom: 30px; }
-.category-block:last-child { margin-bottom: 0; }
-
-.category-block-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.category-block-head h3 {
-  font-size: 15px;
-  font-weight: 800;
-  margin: 0;
-}
-
 .autosave-status {
   font-size: 12px;
   color: var(--muted);
-}
-
-/* ---------------------------- 콘텐츠 블록 (공개 사이트) ---------------------------- */
-
-.modal-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  margin-top: 8px;
 }
 
 .blk-text {
@@ -1234,32 +1073,12 @@ input, textarea, select { font-family: inherit; }
   border-radius: 0;
 }
 
-/* ---------------------------- 블록 에디터 (관리자) ---------------------------- */
-
-.project-summary {
-  font-size: 12px;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
-}
-
 .mini-label {
   display: block;
   font-size: 12px;
   font-weight: 700;
   color: var(--muted);
   margin: 14px 0 5px;
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
-.toggle-row label {
-  margin-bottom: 0;
 }
 
 /* .field label { display:block } 규칙보다 우선하도록 .field .toggle-switch로 명시 */
@@ -1272,51 +1091,6 @@ input, textarea, select { font-family: inherit; }
   cursor: pointer;
   flex: none;
   vertical-align: middle;
-}
-
-.toggle-switch input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: relative;
-  width: 38px;
-  height: 22px;
-  border-radius: 999px;
-  background: var(--line);
-  transition: background 0.15s ease;
-  flex: none;
-}
-
-.toggle-slider::before {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(20, 18, 26, 0.3);
-  transition: transform 0.15s ease;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: var(--ink);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(16px);
-}
-
-.toggle-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  white-space: nowrap;
 }
 
 .block-list { margin-top: 4px; }
@@ -1617,11 +1391,6 @@ input, textarea, select { font-family: inherit; }
 }
 
 .block-item:focus-within .block-type-label { color: var(--sun); }
-
-/* 편집 중인 섹션(프로필/카테고리)의 테두리도 살짝 강조 */
-.admin-section:focus-within {
-  border-color: color-mix(in srgb, var(--sun) 45%, var(--line));
-}
 
 /* 화면 하단에 떠 있는 "수정 중 · 위치" 안내 칩 */
 .editing-indicator {
