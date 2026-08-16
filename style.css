@@ -245,7 +245,41 @@ input, textarea, select { font-family: inherit; }
 .work {
   background: var(--paper);
   transition: background 0.2s ease;
+  padding-bottom: 40px;
 }
+
+/* 카테고리별 단(섹션): 제목 줄 + 카드 그리드 */
+.work-section {
+  scroll-margin-top: calc(var(--header-h) + 8px);
+}
+
+.work-section-head {
+  padding: 44px 0 18px;
+}
+
+.work-section-head .container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.work-section-head h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.ws-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+  flex: none;
+}
+
+/* 관리자 전용: 섹션 머리의 카테고리 설정 버튼 */
+.ws-edit { margin-left: 10px; }
 
 .work-grid {
   display: grid;
@@ -1602,6 +1636,8 @@ input, textarea, select { font-family: inherit; }
   .container { padding: 0 18px; }
   .container-narrow { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
+  .work-section-head { padding: 28px 0 12px; }
+  .work-section-head h2 { font-size: 17px; }
   .footer-grid { flex-direction: column; align-items: flex-start; }
 
   /* 관리자 페이지 */
