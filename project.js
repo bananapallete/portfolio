@@ -95,6 +95,8 @@ async function initProject() {
     }
   });
 
+  initScrollReveal(wrap);
+
   if (rendered === 0) {
     wrap.innerHTML = `<div class="empty-state">No content yet.</div>`;
   }

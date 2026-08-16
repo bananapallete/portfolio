@@ -27,6 +27,35 @@ function isPreviewMode() {
   return new URLSearchParams(location.search).get("preview") === "1";
 }
 
+/* ------------------- 스크롤 리빌 애니메이션 (공개 사이트 공용) -------------------
+   .reveal 클래스가 붙은 요소는 화면에 들어오는 순간 슬라이드 인 된다.
+   한 번 나타난 요소는 다시 관찰하지 않는다 (재방문 시 매번 재생되지 않도록). */
+
+let revealObserver = null;
+
+function initScrollReveal(root) {
+  const els = (root || document).querySelectorAll(".reveal:not(.reveal-in)");
+  if (!els.length) return;
+  // 동작 최소화를 원하는 사용자에게는 애니메이션 없이 바로 보여준다
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    els.forEach((el) => el.classList.add("reveal-in"));
+    return;
+  }
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("reveal-in");
+          revealObserver.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.01, rootMargin: "0px 0px -10% 0px" }
+    );
+  }
+  els.forEach((el) => revealObserver.observe(el));
+}
+
 async function loadSiteData() {
   if (isPreviewMode()) {
     const draft = localStorage.getItem("portfolioDraftData");
@@ -128,7 +157,7 @@ function withAutoplayParams(url) {
 
 function renderSlider(images, firstEager = false) {
   const wrap = document.createElement("div");
-  wrap.className = "blk-slider";
+  wrap.className = "blk-slider reveal";
   const track = document.createElement("div");
   track.className = "blk-slider-track";
   images.forEach((src, i) => {
@@ -296,15 +325,16 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     if (!images.length) return null;
     if (block.layout === "slider" && images.length > 1) return renderSlider(images, firstEager);
     const div = document.createElement("div");
+    div.classList.add("reveal");
     // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다 (최소 0px)
     const ownGap = normalizeGap(block.gap);
     const gap = ownGap != null ? ownGap : normalizeGap(defaultGap);
     const isMasonry = block.layout === "grid" && block.grid === "masonry";
     if (block.layout === "grid") {
-      div.className = gridClassName(block);
+      div.classList.add(...gridClassName(block).split(" "));
       if (gap != null) div.style[isMasonry ? "columnGap" : "gap"] = gap + "px";
     } else {
-      div.className = "blk-images-single";
+      div.classList.add("blk-images-single");
       if (gap != null) div.style.gap = gap + "px";
     }
     images.forEach((src, i) => {
