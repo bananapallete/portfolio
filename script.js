@@ -137,12 +137,8 @@ function renderSections() {
     head.className = "work-section-head";
     const headInner = document.createElement("div");
     headInner.className = "container";
-    const dot = document.createElement("span");
-    dot.className = "ws-dot";
-    if (cat.accent) dot.style.background = cat.accent;
     const h2 = document.createElement("h2");
     h2.textContent = cat.name || "";
-    headInner.appendChild(dot);
     headInner.appendChild(h2);
     head.appendChild(headInner);
     section.appendChild(head);
