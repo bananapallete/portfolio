@@ -30,6 +30,13 @@
           "coverImage": "assets/f6b264f3ccaf6f1a1cbd.webp",
           "blocks": [
             {
+              "type": "text",
+              "content": "프로젝트 주제\n2030년을 향한 새로운 항해와 도약\n\n디자인 의도 및 설명\n'Sail to VISION 2030'이라는 슬로건 아래, 미래를 향해 나아가는 굳건한 의지와 희망을 담아낸 행사 메인 비주얼입니다. 끝없이 펼쳐진 수평선 너머로 눈부신 빛이 떠오르는 'Beyond the Horizon' 콘셉트를 적용해 하반기를 향한 기대감과 비전을 시각화했습니다.\n\n심연의 바다에서 수면 위로 뻗어나가는 듯한 빛의 궤적과 공간감을 주는 부드러운 곡선 그래픽은 거친 파도를 헤치고 전진하는 항해의 역동성을 상징합니다. 신뢰와 무한한 가능성을 의미하는 깊은 블루 톤을 메인 컬러로 사용하고, 중앙의 밝은 그러데이션으로 시선을 집중시켜 목표를 향해 흔들림 없이 나아가는 명확한 방향성을 강조했습니다.",
+              "size": 13,
+              "color": "#444446",
+              "align": "left"
+            },
+            {
               "type": "embed",
               "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             },
