@@ -1019,7 +1019,7 @@ function renderBlocksEditor(project) {
     });
     return b;
   };
-  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#f5f4f0" })));
+  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#f5f4f0", align: "left" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
   addRow.appendChild(mkAdd("+ 비디오 임베드", () => ({ type: "embed", src: "" })));
   wrap.appendChild(addRow);
@@ -1038,6 +1038,7 @@ function renderBlockBody(project, block, blockIndex) {
     ta.style.fontSize = (block.size || 15) + "px";
     // 색을 지정하지 않은 블록은 사이트 기본색(밝은 글자)을 따르므로 그대로 상속
     if (block.color) ta.style.color = block.color;
+    ta.style.textAlign = block.align || "left";
     ta.placeholder = "내용을 입력하세요 (프리텐다드 폰트로 표시돼요)";
     ta.addEventListener("input", () => { block.content = ta.value; saveDraft(); });
     body.appendChild(ta);
@@ -1081,11 +1082,34 @@ function renderBlockBody(project, block, blockIndex) {
       { swatches: true, rerender: renderEditModalBody }
     );
 
+    const alignLabel = document.createElement("span");
+    alignLabel.className = "control-label";
+    alignLabel.textContent = "정렬";
+    alignLabel.style.marginLeft = "12px";
+
+    const alignSeg = document.createElement("div");
+    alignSeg.className = "layout-seg";
+    [["left", "왼쪽"], ["center", "가운데"], ["right", "오른쪽"]].forEach(([value, text]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = text;
+      if ((block.align || "left") === value) b.classList.add("active");
+      b.addEventListener("click", () => {
+        block.align = value;
+        ta.style.textAlign = value;
+        saveDraft();
+        renderEditModalBody();
+      });
+      alignSeg.appendChild(b);
+    });
+
     controls.appendChild(sizeLabel);
     controls.appendChild(sizeInput);
     controls.appendChild(pxLabel);
     controls.appendChild(colorLabel);
     controls.appendChild(colorField.field);
+    controls.appendChild(alignLabel);
+    controls.appendChild(alignSeg);
     body.appendChild(controls);
     return body;
   }
@@ -1282,6 +1306,7 @@ function renderPreviewBlockContent(project, block, blockIndex) {
     p.textContent = block.content || "(빈 텍스트 블록)";
     p.style.fontSize = (block.size || 15) + "px";
     if (block.color) p.style.color = block.color;
+    if (block.align && block.align !== "left") p.style.textAlign = block.align;
     if (!block.content) p.style.opacity = "0.4";
     return p;
   }
