@@ -743,12 +743,13 @@ input, textarea, select { font-family: inherit; }
 
 .admin-modal-overlay.hidden { display: none; }
 
+/* 화면 폭에 따라 유동적으로 넓어지되 1920px을 넘지 않는다.
+   웹에서 주로 편집하므로 넓은 모니터에서는 그만큼 넓게 써서 스크롤을 줄인다 */
 .admin-modal {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  max-width: 720px;
-  width: 100%;
+  width: min(90vw, 1920px);
   padding: 32px;
   position: relative;
   box-shadow: var(--shadow-pop);
@@ -1522,6 +1523,6 @@ input, textarea, select { font-family: inherit; }
   .pv-slider-strip .pv-img-wrap { height: 100px; }
   .project-thumb-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
   .admin-modal-overlay { padding: 0; }
-  .admin-modal { max-width: 100%; min-height: 100%; border-radius: 0; padding: 24px 16px; margin-bottom: 0; }
+  .admin-modal { width: 100%; min-height: 100%; border-radius: 0; padding: 24px 16px; margin-bottom: 0; }
   .editing-indicator { left: 12px; bottom: 12px; max-width: calc(100vw - 24px); font-size: 11px; }
 }
