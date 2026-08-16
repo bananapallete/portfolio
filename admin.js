@@ -11,9 +11,12 @@ let data = null;
 const previewProjects = new Set();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
-// 편집 팝업이 열려 있는 대상 { cat, projIndex, original, project, dirty }
-// project는 편집용 복사본 — "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
+// 편집 팝업이 열려 있는 대상. type: "project" | "profile" | "category"
+// 편집은 복사본에서 이루어지고 "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
 let editingContext = null;
+// 실제 사이트와 동일한 카테고리 탭 필터
+const ALL_KEY = "__all__";
+let currentFilter = ALL_KEY;
 
 // iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
 function normalizeEmbedInput(raw) {
@@ -142,8 +145,8 @@ function showLoadFailure() {
       먼저 데이터를 꼭 불러온 뒤에 편집해주세요.
     </div>
   `;
-  document.getElementById("profileFields").innerHTML = msg;
-  document.getElementById("categoriesContainer").innerHTML = "";
+  document.getElementById("workGrid").innerHTML = msg;
+  document.getElementById("tabs").innerHTML = "";
   document.getElementById("autosaveStatus").textContent =
     "data.json 로딩 실패 — 편집 전에 파일을 먼저 불러와주세요.";
 }
@@ -322,16 +325,16 @@ function buildColorField(initial, onChange, options = {}) {
 
 /* ---------------------------------- Profile ---------------------------------- */
 
-function renderProfile() {
-  const wrap = document.getElementById("profileFields");
-  wrap.innerHTML = "";
+// 프로필 편집 필드들을 wrap 안에 그린다. profile은 편집용 복사본.
+function renderProfileFields(wrap, profile) {
+  profile.contact = profile.contact || {};
 
   const row1 = document.createElement("div");
   row1.className = "field-row";
 
-  row1.appendChild(makeTextField("이름", data.profile.name, (v) => { data.profile.name = v; saveDraft(); }));
-  row1.appendChild(makeTextField("닉네임", data.profile.nickname, (v) => { data.profile.nickname = v; saveDraft(); }));
-  row1.appendChild(makeTextField("역할/타이틀", data.profile.role, (v) => { data.profile.role = v; saveDraft(); }));
+  row1.appendChild(makeTextField("이름", profile.name, (v) => { profile.name = v; saveDraft(); }));
+  row1.appendChild(makeTextField("닉네임", profile.nickname, (v) => { profile.nickname = v; saveDraft(); }));
+  row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; saveDraft(); }));
   wrap.appendChild(row1);
 
   const row2 = document.createElement("div");
@@ -342,9 +345,9 @@ function renderProfile() {
   const label = document.createElement("label");
   label.textContent = "소개 문구(태그라인)";
   const ta = document.createElement("textarea");
-  ta.value = data.profile.tagline || "";
+  ta.value = profile.tagline || "";
   ta.rows = 2;
-  ta.addEventListener("input", () => { data.profile.tagline = ta.value; saveDraft(); });
+  ta.addEventListener("input", () => { profile.tagline = ta.value; saveDraft(); });
   taglineField.appendChild(label);
   taglineField.appendChild(ta);
   row2.appendChild(taglineField);
@@ -352,7 +355,7 @@ function renderProfile() {
 
   const row3 = document.createElement("div");
   row3.className = "field-row";
-  row3.appendChild(makeTextField("전화번호", data.profile.contact.phone, (v) => { data.profile.contact.phone = v; saveDraft(); }));
+  row3.appendChild(makeTextField("전화번호", profile.contact.phone, (v) => { profile.contact.phone = v; saveDraft(); }));
 
   const emailField = document.createElement("div");
   emailField.className = "field";
@@ -360,9 +363,9 @@ function renderProfile() {
   emailLabel.textContent = "이메일 (줄바꿈으로 여러 개 입력 가능)";
   const emailTa = document.createElement("textarea");
   emailTa.rows = 2;
-  emailTa.value = (data.profile.contact.emails || []).join("\n");
+  emailTa.value = (profile.contact.emails || []).join("\n");
   emailTa.addEventListener("input", () => {
-    data.profile.contact.emails = emailTa.value
+    profile.contact.emails = emailTa.value
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
@@ -387,11 +390,11 @@ function renderProfile() {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = text;
-    if (String(data.profile.projectTitleWeight || "900") === value) b.classList.add("active");
+    if (String(profile.projectTitleWeight || "900") === value) b.classList.add("active");
     b.addEventListener("click", () => {
-      data.profile.projectTitleWeight = value;
+      profile.projectTitleWeight = value;
       saveDraft();
-      renderProfile();
+      renderEditModalBody();
     });
     twSeg.appendChild(b);
   });
@@ -407,9 +410,9 @@ function renderProfile() {
   const workBgRow = document.createElement("div");
   workBgRow.className = "block-controls-row";
   const workBgField = buildColorField(
-    data.profile.workBg || "#0d0d0d",
-    (v) => { data.profile.workBg = v; saveDraft(); },
-    { swatches: true, rerender: renderProfile }
+    profile.workBg || "#0d0d0d",
+    (v) => { profile.workBg = v; saveDraft(); },
+    { swatches: true, rerender: renderEditModalBody }
   );
   workBgRow.appendChild(workBgField.field);
 
@@ -417,9 +420,9 @@ function renderProfile() {
   workBgClear.className = "btn btn-outline btn-small";
   workBgClear.textContent = "기본값";
   workBgClear.addEventListener("click", () => {
-    delete data.profile.workBg;
+    delete profile.workBg;
     saveDraft();
-    renderProfile();
+    renderEditModalBody();
   });
   workBgRow.appendChild(workBgClear);
   wrap.appendChild(workBgRow);
@@ -439,106 +442,193 @@ function makeTextField(labelText, value, onChange) {
   return field;
 }
 
-/* ---------------------------------- Categories ---------------------------------- */
+/* ---------------------- 실제 사이트와 동일한 화면 (헤더·탭·그리드·푸터) ---------------------- */
 
-function renderCategories() {
-  const container = document.getElementById("categoriesContainer");
-  container.innerHTML = "";
+function renderSiteHeader() {
+  const p = data.profile || {};
+  document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
+  document.getElementById("brandRole").textContent = p.role || "";
+  document.getElementById("footerName").textContent = p.name || p.nickname || "";
 
-  data.categories.forEach((cat, catIndex) => {
-    const block = document.createElement("div");
-    block.className = "category-block";
+  const work = document.querySelector(".work");
+  if (work) work.style.background = p.workBg || "";
 
-    const head = document.createElement("div");
-    head.className = "category-block-head";
-
-    const accentField = buildColorField(
-      cat.accent || "#6c5ce7",
-      (v) => { cat.accent = v; saveDraft(); }
-    );
-
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.value = cat.name || "";
-    nameInput.style.fontWeight = "800";
-    nameInput.style.fontSize = "15px";
-    nameInput.style.border = "1.5px solid var(--line)";
-    nameInput.style.borderRadius = "10px";
-    nameInput.style.padding = "8px 12px";
-    nameInput.addEventListener("input", () => { cat.name = nameInput.value; saveDraft(); });
-
-    const deleteCatBtn = document.createElement("button");
-    deleteCatBtn.className = "btn btn-danger btn-small";
-    deleteCatBtn.textContent = "카테고리 삭제";
-    deleteCatBtn.style.marginLeft = "auto";
-    deleteCatBtn.addEventListener("click", () => {
-      if (confirm(`"${cat.name}" 카테고리와 그 안의 모든 프로젝트를 삭제할까요?`)) {
-        data.categories.splice(catIndex, 1);
-        saveDraft();
-        renderCategories();
-      }
-    });
-
-    head.appendChild(accentField.field);
-    head.appendChild(nameInput);
-    head.appendChild(deleteCatBtn);
-    block.appendChild(head);
-
-    const projectsGrid = document.createElement("div");
-    projectsGrid.className = "project-thumb-grid";
-    (cat.projects || []).forEach((project, projIndex) => {
-      projectsGrid.appendChild(renderProjectThumbCard(cat, project, projIndex));
-    });
-    block.appendChild(projectsGrid);
-
-    const addProjectBtn = document.createElement("button");
-    addProjectBtn.className = "btn btn-outline btn-small";
-    addProjectBtn.textContent = "+ 프로젝트 추가";
-    addProjectBtn.addEventListener("click", () => {
-      const project = {
-        id: slugify("new-project"),
-        title: "새 프로젝트",
-        coverImage: "",
-        blocks: [],
-        summary: "",
-      };
-      cat.projects.push(project);
-      saveDraft();
-      renderCategories();
-      openProjectEditor(cat, project, cat.projects.length - 1);
-    });
-    block.appendChild(addProjectBtn);
-
-    container.appendChild(block);
+  const contactEl = document.getElementById("footerContact");
+  contactEl.innerHTML = "";
+  const contact = p.contact || {};
+  if (contact.phone) {
+    const a = document.createElement("a");
+    a.href = `tel:${contact.phone.replace(/\s+/g, "")}`;
+    a.textContent = contact.phone;
+    contactEl.appendChild(a);
+  }
+  (contact.emails || []).forEach((email) => {
+    const a = document.createElement("a");
+    a.href = `mailto:${email}`;
+    a.textContent = email;
+    contactEl.appendChild(a);
   });
 }
 
-function renderProjectThumbCard(cat, project, projIndex) {
+// 공개 사이트(script.js)와 동일한 탭 마크업 (볼드/레귤러 크로스페이드)
+function makeTab(text, isActive, onClick) {
+  const btn = document.createElement("button");
+  btn.className = "tab" + (isActive ? " active" : "");
+  const label = document.createElement("span");
+  label.className = "tab-label";
+  const bold = document.createElement("span");
+  bold.className = "tl-bold";
+  bold.textContent = text;
+  const reg = document.createElement("span");
+  reg.className = "tl-reg";
+  reg.textContent = text;
+  label.appendChild(bold);
+  label.appendChild(reg);
+  btn.appendChild(label);
+  btn.addEventListener("click", onClick);
+  return btn;
+}
+
+function renderTabs() {
+  // 필터 대상 카테고리가 삭제됐으면 All로 복귀
+  if (currentFilter !== ALL_KEY && !(data.categories || []).find((c) => c.id === currentFilter)) {
+    currentFilter = ALL_KEY;
+  }
+
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+
+  tabs.appendChild(makeTab("All", currentFilter === ALL_KEY, () => {
+    currentFilter = ALL_KEY;
+    renderTabs();
+    renderGrid();
+  }));
+
+  (data.categories || []).forEach((cat) => {
+    const active = currentFilter === cat.id;
+    const tab = makeTab(cat.name || "(이름 없음)", active, () => {
+      if (currentFilter === cat.id) {
+        // 활성 탭을 한 번 더 누르면 카테고리 설정(이름·색상·삭제) 팝업
+        openCategoryEditor(cat);
+        return;
+      }
+      currentFilter = cat.id;
+      renderTabs();
+      renderGrid();
+    });
+    if (active) {
+      const edit = document.createElement("span");
+      edit.className = "tab-edit";
+      edit.textContent = "✎";
+      tab.title = "한 번 더 누르면 카테고리 설정(이름·색상·삭제)을 열어요";
+      tab.appendChild(edit);
+    }
+    tabs.appendChild(tab);
+  });
+
+  // 관리자 전용: 카테고리 추가 탭
+  const add = document.createElement("button");
+  add.className = "tab tab-add";
+  add.textContent = "＋";
+  add.title = "카테고리 추가";
+  add.addEventListener("click", () => {
+    const cat = {
+      id: slugify("new-category"),
+      name: "새 카테고리",
+      accent: "#6c5ce7",
+      projects: [],
+    };
+    data.categories.push(cat);
+    currentFilter = cat.id;
+    saveDraft();
+    renderTabs();
+    renderGrid();
+    openCategoryEditor(cat);
+  });
+  tabs.appendChild(add);
+}
+
+function renderGrid() {
+  const grid = document.getElementById("workGrid");
+  grid.innerHTML = "";
+
+  const cats = (data.categories || []).filter(
+    (c) => currentFilter === ALL_KEY || c.id === currentFilter
+  );
+
+  let count = 0;
+  cats.forEach((cat) => {
+    (cat.projects || []).forEach((project, projIndex) => {
+      grid.appendChild(renderAdminCard(cat, project, projIndex));
+      count++;
+    });
+  });
+
+  // 카테고리 탭을 선택했을 때는 그리드 끝에 "+ 프로젝트 추가" 카드
+  if (currentFilter !== ALL_KEY) {
+    const cat = (data.categories || []).find((c) => c.id === currentFilter);
+    if (cat) {
+      const addCard = document.createElement("button");
+      addCard.type = "button";
+      addCard.className = "card card-add";
+      addCard.textContent = "＋ 프로젝트 추가";
+      addCard.addEventListener("click", () => {
+        const project = {
+          id: slugify("new-project"),
+          title: "새 프로젝트",
+          coverImage: "",
+          blocks: [],
+          summary: "",
+        };
+        cat.projects.push(project);
+        saveDraft();
+        renderGrid();
+        openProjectEditor(cat, project, cat.projects.length - 1);
+      });
+      grid.appendChild(addCard);
+    }
+  } else if (count === 0) {
+    grid.innerHTML = `<div class="empty-state">아직 프로젝트가 없어요. 카테고리 탭을 선택하면 추가할 수 있어요.</div>`;
+  }
+}
+
+// 공개 사이트와 같은 카드 + 관리자용 삭제/드래그 핸들. 클릭하면 편집 팝업.
+function renderAdminCard(cat, project, projIndex) {
   const card = document.createElement("div");
-  card.className = "project-thumb-card";
+  card.className = "card admin-card";
   card.addEventListener("click", () => openProjectEditor(cat, project, projIndex));
 
   const media = document.createElement("div");
-  media.className = "project-thumb-media";
+  media.className = "card-media";
   if (project.coverImage) {
     const img = document.createElement("img");
     img.src = project.coverImage;
+    img.alt = project.title || "";
     media.appendChild(img);
   } else {
-    media.textContent = "커버 없음";
+    const ph = document.createElement("div");
+    ph.className = "card-empty-title";
+    ph.textContent = `${project.title || "(제목 없음)"} · 커버 없음`;
+    media.appendChild(ph);
   }
   card.appendChild(media);
 
   const body = document.createElement("div");
-  body.className = "project-thumb-body";
+  body.className = "card-body";
   const title = document.createElement("div");
-  title.className = "project-thumb-title";
+  title.className = "card-title";
   title.textContent = project.title || "(제목 없음)";
-  const meta = document.createElement("div");
-  meta.className = "project-thumb-meta";
-  meta.textContent = `블록 ${(project.blocks || []).length}개`;
   body.appendChild(title);
-  body.appendChild(meta);
+  if (project.summary) {
+    const desc = document.createElement("div");
+    desc.className = "card-desc";
+    desc.textContent = project.summary;
+    body.appendChild(desc);
+  }
+  const hint = document.createElement("div");
+  hint.className = "card-edit-hint";
+  hint.textContent = "✎ 클릭해서 편집";
+  body.appendChild(hint);
   card.appendChild(body);
 
   const deleteBtn = document.createElement("button");
@@ -550,7 +640,7 @@ function renderProjectThumbCard(cat, project, projIndex) {
     if (confirm(`"${project.title}" 프로젝트를 삭제할까요?`)) {
       cat.projects.splice(projIndex, 1);
       saveDraft();
-      renderCategories();
+      renderGrid();
     }
   });
   card.appendChild(deleteBtn);
@@ -565,7 +655,7 @@ function renderProjectThumbCard(cat, project, projIndex) {
     card.draggable = false; // 드래그 없이 핸들만 클릭했다면 draggable 상태를 되돌린다
   });
   card.appendChild(handle);
-  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderCategories);
+  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderGrid);
 
   return card;
 }
@@ -574,6 +664,7 @@ function renderProjectThumbCard(cat, project, projIndex) {
 
 function openProjectEditor(cat, project, projIndex) {
   editingContext = {
+    type: "project",
     cat,
     projIndex,
     original: project,
@@ -581,12 +672,36 @@ function openProjectEditor(cat, project, projIndex) {
     project: JSON.parse(JSON.stringify(project)),
     dirty: false,
   };
+  openEditModal();
+}
+
+function openProfileEditor() {
+  if (!data) return;
+  editingContext = {
+    type: "profile",
+    profile: JSON.parse(JSON.stringify(data.profile || {})),
+    dirty: false,
+  };
+  openEditModal();
+}
+
+function openCategoryEditor(cat) {
+  editingContext = {
+    type: "category",
+    cat,
+    copy: { name: cat.name || "", accent: cat.accent || "#6c5ce7" },
+    dirty: false,
+  };
+  openEditModal();
+}
+
+function openEditModal() {
   updateModalSaveState();
   renderEditModalBody();
   document.getElementById("projectEditOverlay").classList.remove("hidden");
 }
 
-// force=true면 확인 없이 닫는다 (저장 완료 후, 프로젝트 삭제 후)
+// force=true면 확인 없이 닫는다 (저장 완료 후, 삭제 후)
 function closeProjectEditor(force = false) {
   if (!force && editingContext && editingContext.dirty) {
     if (!confirm("저장하지 않은 변경사항이 있어요.\n저장하지 않고 닫으면 이번에 수정한 내용은 사라져요. 그래도 닫을까요?")) {
@@ -595,7 +710,7 @@ function closeProjectEditor(force = false) {
   }
   editingContext = null;
   document.getElementById("projectEditOverlay").classList.add("hidden");
-  renderCategories();
+  renderAll();
 }
 
 function updateModalSaveState() {
@@ -607,10 +722,17 @@ function updateModalSaveState() {
 }
 
 // 편집 팝업의 복사본을 실제 데이터에 반영하고 곧바로 사이트에 배포한다
-async function saveProjectAndPublish() {
+async function saveModalAndPublish() {
   if (!editingContext) return;
-  const { cat, projIndex, project } = editingContext;
-  cat.projects[projIndex] = project;
+  const ctx = editingContext;
+  if (ctx.type === "project") {
+    ctx.cat.projects[ctx.projIndex] = ctx.project;
+  } else if (ctx.type === "profile") {
+    data.profile = ctx.profile;
+  } else if (ctx.type === "category") {
+    ctx.cat.name = ctx.copy.name;
+    ctx.cat.accent = ctx.copy.accent;
+  }
   saveDraft();
   const ok = await publishToGithub();
   if (ok) closeProjectEditor(true);
@@ -619,6 +741,8 @@ async function saveProjectAndPublish() {
 
 function renderEditModalBody() {
   if (!editingContext) return;
+  if (editingContext.type === "profile") return renderProfileModalBody();
+  if (editingContext.type === "category") return renderCategoryModalBody();
   const { cat, project, projIndex } = editingContext;
   const card = document.getElementById("projectEditBody");
   card.innerHTML = "";
@@ -775,6 +899,72 @@ function renderEditModalBody() {
   card.appendChild(blocksLabel);
 
   card.appendChild(renderBlocksEditor(project));
+}
+
+// 프로필 편집 팝업 본문
+function renderProfileModalBody() {
+  const card = document.getElementById("projectEditBody");
+  card.innerHTML = "";
+
+  const head = document.createElement("div");
+  head.className = "project-card-head";
+  const title = document.createElement("strong");
+  title.textContent = "프로필 & 연락처";
+  head.appendChild(title);
+  card.appendChild(head);
+
+  renderProfileFields(card, editingContext.profile);
+}
+
+// 카테고리 설정 팝업 본문 (이름·색상·삭제)
+function renderCategoryModalBody() {
+  const { cat, copy } = editingContext;
+  const card = document.getElementById("projectEditBody");
+  card.innerHTML = "";
+
+  const head = document.createElement("div");
+  head.className = "project-card-head";
+  const title = document.createElement("strong");
+  title.textContent = "카테고리 설정";
+  head.appendChild(title);
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "btn btn-danger btn-small";
+  deleteBtn.textContent = "카테고리 삭제";
+  deleteBtn.addEventListener("click", () => {
+    if (confirm(`"${cat.name}" 카테고리와 그 안의 모든 프로젝트를 삭제할까요?`)) {
+      const idx = data.categories.indexOf(cat);
+      if (idx >= 0) data.categories.splice(idx, 1);
+      currentFilter = ALL_KEY;
+      saveDraft();
+      closeProjectEditor(true);
+    }
+  });
+  head.appendChild(deleteBtn);
+  card.appendChild(head);
+
+  const row = document.createElement("div");
+  row.className = "field-row";
+  row.appendChild(makeTextField("카테고리 이름 (헤더 탭과 상세 페이지 태그에 표시)", copy.name, (v) => {
+    copy.name = v;
+    saveDraft();
+  }));
+  card.appendChild(row);
+
+  const accentLabel = document.createElement("label");
+  accentLabel.textContent = "포인트 색상";
+  accentLabel.className = "mini-label";
+  card.appendChild(accentLabel);
+
+  const accentRow = document.createElement("div");
+  accentRow.className = "block-controls-row";
+  const accentField = buildColorField(
+    copy.accent,
+    (v) => { copy.accent = v; saveDraft(); },
+    { swatches: true, rerender: renderEditModalBody }
+  );
+  accentRow.appendChild(accentField.field);
+  card.appendChild(accentRow);
 }
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */
@@ -1247,9 +1437,11 @@ function readFileAsDataURL(file) {
 }
 
 function renderAll() {
+  if (!data) return;
   ensureShape();
-  renderProfile();
-  renderCategories();
+  renderSiteHeader();
+  renderTabs();
+  renderGrid();
 }
 
 /* ------------------- 지금 어느 부분을 수정 중인지 표시 ------------------- */
@@ -1265,7 +1457,7 @@ function findNearestLabel(target) {
     const l = field.querySelector("label");
     if (l) return clean(l.textContent);
   }
-  const scope = target.closest("#projectEditBody, #profileFields");
+  const scope = target.closest("#projectEditBody");
   if (!scope) return null;
   let node = target;
   while (node && node.parentElement && node.parentElement !== scope) node = node.parentElement;
@@ -1279,55 +1471,45 @@ function findNearestLabel(target) {
 // 포커스된 입력창이 문서 어디에 속하는지 "카테고리 › 프로젝트 › 블록" 식으로 설명한다.
 function describeEditingTarget(target) {
   if (!target || !target.closest) return null;
+  if (!target.closest("#projectEditBody") || !editingContext) return null;
   const parts = [];
 
-  // 프로젝트 편집 팝업 안
-  if (target.closest("#projectEditBody")) {
-    if (editingContext) {
-      parts.push(editingContext.cat.name || "카테고리");
-      parts.push(editingContext.project.title || "(제목 없음)");
-    }
-    const blockItem = target.closest(".block-item");
-    const pvBlock = target.closest(".pv-block");
-    if (blockItem) {
-      const siblings = Array.from(blockItem.parentElement.querySelectorAll(":scope > .block-item"));
-      const idx = siblings.indexOf(blockItem);
-      const lbl = blockItem.querySelector(".block-type-label");
-      parts.push(`블록 ${idx + 1}${lbl ? " (" + lbl.textContent.trim() + ")" : ""}`);
-    } else if (pvBlock) {
-      const lbl = pvBlock.querySelector(".pv-chip");
-      if (lbl) parts.push(lbl.textContent.trim());
-    } else if (target.closest(".project-card-head")) {
-      parts.push("프로젝트 제목");
-    } else {
-      const lbl = findNearestLabel(target);
-      if (lbl) parts.push(lbl);
-    }
-    return parts;
-  }
-
-  // 프로필 섹션
-  if (target.closest("#profileSection")) {
+  // 프로필 편집 팝업
+  if (editingContext.type === "profile") {
     parts.push("프로필 & 연락처");
     const lbl = findNearestLabel(target);
     if (lbl) parts.push(lbl);
     return parts;
   }
 
-  // 카테고리 섹션 (팝업 밖)
-  if (target.closest("#categoriesSection")) {
-    const catBlock = target.closest(".category-block");
-    if (catBlock) {
-      const nameInput = catBlock.querySelector(".category-block-head input[type='text']");
-      parts.push((nameInput && nameInput.value.trim()) || "카테고리");
-      if (target.closest(".category-block-head")) parts.push("카테고리 이름/색상");
-    } else {
-      parts.push("카테고리 & 프로젝트");
-    }
+  // 카테고리 설정 팝업
+  if (editingContext.type === "category") {
+    parts.push((editingContext.copy.name || "카테고리") + " 설정");
+    const lbl = findNearestLabel(target);
+    if (lbl) parts.push(lbl);
     return parts;
   }
 
-  return null;
+  // 프로젝트 편집 팝업
+  parts.push(editingContext.cat.name || "카테고리");
+  parts.push(editingContext.project.title || "(제목 없음)");
+  const blockItem = target.closest(".block-item");
+  const pvBlock = target.closest(".pv-block");
+  if (blockItem) {
+    const siblings = Array.from(blockItem.parentElement.querySelectorAll(":scope > .block-item"));
+    const idx = siblings.indexOf(blockItem);
+    const lbl = blockItem.querySelector(".block-type-label");
+    parts.push(`블록 ${idx + 1}${lbl ? " (" + lbl.textContent.trim() + ")" : ""}`);
+  } else if (pvBlock) {
+    const lbl = pvBlock.querySelector(".pv-chip");
+    if (lbl) parts.push(lbl.textContent.trim());
+  } else if (target.closest(".project-card-head")) {
+    parts.push("프로젝트 제목");
+  } else {
+    const lbl = findNearestLabel(target);
+    if (lbl) parts.push(lbl);
+  }
+  return parts;
 }
 
 function showEditingIndicator(target) {
@@ -1427,23 +1609,16 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-document.getElementById("addCategoryBtn").addEventListener("click", () => {
+document.getElementById("profileEditBtn").addEventListener("click", () => {
   if (!data) {
-    alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 카테고리를 추가해주세요.");
+    alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 편집해주세요.");
     return;
   }
-  data.categories.push({
-    id: slugify("new-category"),
-    name: "새 카테고리",
-    accent: "#6c5ce7",
-    projects: [],
-  });
-  saveDraft();
-  renderCategories();
+  openProfileEditor();
 });
 
 document.getElementById("projectEditClose").addEventListener("click", () => closeProjectEditor());
-document.getElementById("projectEditSave").addEventListener("click", saveProjectAndPublish);
+document.getElementById("projectEditSave").addEventListener("click", saveModalAndPublish);
 document.getElementById("projectEditOverlay").addEventListener("click", (e) => {
   if (e.target.id === "projectEditOverlay") closeProjectEditor();
 });
