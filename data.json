@@ -41,7 +41,8 @@
               ]
             }
           ],
-          "summary": ""
+          "summary": "",
+          "blockGap": 0
         },
         {
           "id": "branding-inhr-plus",
