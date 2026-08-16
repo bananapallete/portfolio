@@ -215,8 +215,8 @@ input, textarea, select { font-family: inherit; }
 
 .tab.active { color: var(--ink); }
 
-/* 선택된 메뉴가 볼드체로 자연스럽게 전환되도록 레귤러↔볼드 두 겹을 크로스페이드.
-   볼드 글자가 폭을 결정하므로 활성/비활성 전환 시 레이아웃이 흔들리지 않고 겹침도 없음 */
+/* 카테고리 이름은 레귤러 두께로 통일하고, 선택 여부는 색으로만 구분한다.
+   두 겹 크로스페이드 구조는 그대로 두어 레이아웃이 흔들리지 않게 유지 */
 .tab-label {
   position: relative;
   display: inline-block;
@@ -224,7 +224,7 @@ input, textarea, select { font-family: inherit; }
 }
 
 .tab-label .tl-bold {
-  font-weight: 700;
+  font-weight: 400;
   opacity: 0;
   transition: opacity 0.25s ease;
 }
@@ -263,10 +263,12 @@ input, textarea, select { font-family: inherit; }
   gap: 10px;
 }
 
+/* 바디에 표시되는 카테고리 이름은 레귤러 + 전부 대문자 */
 .work-section-head h2 {
   font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   margin: 0;
 }
 
@@ -365,7 +367,7 @@ input, textarea, select { font-family: inherit; }
 .modal-tag {
   display: inline-block;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 5px 12px;
