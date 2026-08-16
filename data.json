@@ -25,10 +25,22 @@
       "accent": "#FF4D6D",
       "projects": [
         {
-          "id": "branding-h-dot",
-          "title": "H.DOT",
-          "coverImage": "",
-          "blocks": [],
+          "id": "branding-midas-week-2026",
+          "title": "MIDAS WEEK 2026",
+          "coverImage": "assets/f6b264f3ccaf6f1a1cbd.webp",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/de6acb77b5d5dbca9181.webp"
+              ]
+            }
+          ],
           "summary": ""
         },
         {
@@ -46,15 +58,10 @@
           "summary": ""
         },
         {
-          "id": "branding-midas-week-2026",
-          "title": "MIDAS WEEK 2026",
+          "id": "branding-h-dot",
+          "title": "H.DOT",
           "coverImage": "",
-          "blocks": [
-            {
-              "type": "embed",
-              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
-            }
-          ],
+          "blocks": [],
           "summary": ""
         },
         {
