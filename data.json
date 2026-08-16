@@ -76,8 +76,14 @@
           "id": "branding-h-dot",
           "title": "H.DOT",
           "coverImage": "",
-          "blocks": [],
-          "summary": ""
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479"
+            }
+          ],
+          "summary": "",
+          "bgColor": "#EBF0F7"
         },
         {
           "id": "branding-jobda-dev",
