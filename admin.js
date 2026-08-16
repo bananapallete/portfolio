@@ -542,9 +542,6 @@ function renderSections() {
     head.className = "work-section-head";
     const headInner = document.createElement("div");
     headInner.className = "container";
-    const dot = document.createElement("span");
-    dot.className = "ws-dot";
-    if (cat.accent) dot.style.background = cat.accent;
     const h2 = document.createElement("h2");
     h2.textContent = cat.name || "(이름 없음)";
     const editBtn = document.createElement("button");
@@ -552,7 +549,6 @@ function renderSections() {
     editBtn.textContent = "✎ 설정";
     editBtn.title = "카테고리 이름·색상·삭제";
     editBtn.addEventListener("click", () => openCategoryEditor(cat));
-    headInner.appendChild(dot);
     headInner.appendChild(h2);
     headInner.appendChild(editBtn);
     head.appendChild(headInner);

@@ -272,14 +272,6 @@ input, textarea, select { font-family: inherit; }
   margin: 0;
 }
 
-.ws-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--line);
-  flex: none;
-}
-
 /* 관리자 전용: 섹션 머리의 카테고리 설정 버튼 */
 .ws-edit { margin-left: 10px; }
 
