@@ -1045,7 +1045,53 @@ body.bg-takeover-light {
   background: color-mix(in srgb, var(--paper) 85%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
-  transition: background-color 0.65s ease, border-color 0.65s ease, color 0.65s ease;
+  transition: background-color 0.65s ease, border-color 0.65s ease, color 0.65s ease,
+    transform 0.35s ease;
+}
+
+/* 아래로 스크롤하는 동안에는 상단바를 감춘다 (위로 올리면 다시 나타남) */
+.proj-topbar-hidden { transform: translateY(-100%); }
+
+/* ---------------------------- 맨 위로 가기 버튼 ---------------------------- */
+
+.to-top {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 60;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 어느 정도 내려가기 전에는 감춰둔다 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s,
+    background-color 0.65s ease, color 0.65s ease, border-color 0.65s ease;
+}
+
+.to-top.to-top-show {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.to-top:hover {
+  border-color: color-mix(in srgb, var(--ink) 45%, transparent);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proj-topbar, .to-top { transition: none; }
 }
 
 .proj-topbar-inner {
@@ -1516,6 +1562,8 @@ body.bg-takeover-light {
 
   /* 좁은 화면에서는 카테고리 뱃지를 아예 표시하지 않는다 */
   .proj-hero .modal-tag { display: none; }
+
+  .to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; font-size: 16px; }
   .tabs {
     /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
     flex: 0 1 auto;
