@@ -911,8 +911,11 @@ body.bg-takeover-light {
   color: var(--muted);
 }
 
+/* 좌우 여백은 화면 폭의 5% — % 단위라 화면이 좁아지면 여백도 함께 줄어든다.
+   블록 자체 폭은 이미지와 같게 두고 안쪽 여백만 주므로 정렬 기준선은 유지된다 */
 .blk-text {
   margin: 0;
+  padding: 0 5%;
   white-space: pre-wrap;
   line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 80%, transparent);
