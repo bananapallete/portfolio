@@ -14,9 +14,9 @@ let dragCtx = null;
 // 편집 팝업이 열려 있는 대상. type: "project" | "profile" | "category"
 // 편집은 복사본에서 이루어지고 "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
 let editingContext = null;
-// 실제 사이트와 동일한 카테고리 탭 필터
-const ALL_KEY = "__all__";
-let currentFilter = ALL_KEY;
+// 탭은 필터가 아니라 해당 카테고리 섹션으로 스크롤하는 앵커.
+// activeCatId는 현재 화면에 보이는 섹션의 카테고리 id (null = 최상단/All)
+let activeCatId = null;
 
 // iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
 function normalizeEmbedInput(raw) {
@@ -145,7 +145,7 @@ function showLoadFailure() {
       먼저 데이터를 꼭 불러온 뒤에 편집해주세요.
     </div>
   `;
-  document.getElementById("workGrid").innerHTML = msg;
+  document.getElementById("workSections").innerHTML = msg;
   document.getElementById("tabs").innerHTML = "";
   document.getElementById("autosaveStatus").textContent =
     "data.json 로딩 실패 — 편집 전에 파일을 먼저 불러와주세요.";
@@ -489,41 +489,65 @@ function makeTab(text, isActive, onClick) {
   return btn;
 }
 
-function renderTabs() {
-  // 필터 대상 카테고리가 삭제됐으면 All로 복귀
-  if (currentFilter !== ALL_KEY && !(data.categories || []).find((c) => c.id === currentFilter)) {
-    currentFilter = ALL_KEY;
-  }
+/* ---------------- 카테고리 섹션으로 스크롤 + 스크롤 위치에 따른 활성 탭 ---------------- */
 
+// 고정된 유틸 바 + 사이트 헤더 아래 여백을 고려한 스크롤 오프셋
+function headerOffset() {
+  const h = document.querySelector(".site-header");
+  return h ? h.getBoundingClientRect().bottom + 6 : 140;
+}
+
+function scrollToCategory(catId) {
+  if (!catId) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const el = document.getElementById(`cat-${catId}`);
+  if (!el) return;
+  const y = el.getBoundingClientRect().top + window.scrollY - headerOffset();
+  window.scrollTo({ top: y, behavior: "smooth" });
+}
+
+// 스크롤 위치에 맞춰 활성 탭을 갱신 (스크롤 스파이)
+function updateActiveTab() {
+  const threshold = headerOffset() + 30;
+  let current = null;
+  // 최상단 근처에서는 All 활성 (첫 섹션이 헤더 바로 아래에서 시작하므로)
+  if (window.scrollY > 40) {
+    const secs = document.querySelectorAll(".work-section");
+    secs.forEach((sec) => {
+      if (sec.getBoundingClientRect().top <= threshold) current = sec.dataset.catId;
+    });
+    // 페이지 끝에 도달하면 마지막 섹션 활성
+    // (마지막 섹션은 스크롤이 끝까지 가도 헤더에 못 닿을 수 있음)
+    if (secs.length && window.innerHeight + window.scrollY >= document.body.scrollHeight - 40) {
+      current = secs[secs.length - 1].dataset.catId;
+    }
+  }
+  if (current !== activeCatId) {
+    activeCatId = current;
+    renderTabs();
+  }
+}
+
+let scrollTick = false;
+window.addEventListener("scroll", () => {
+  if (scrollTick) return;
+  scrollTick = true;
+  requestAnimationFrame(() => {
+    scrollTick = false;
+    if (data) updateActiveTab();
+  });
+}, { passive: true });
+
+function renderTabs() {
   const tabs = document.getElementById("tabs");
   tabs.innerHTML = "";
 
-  tabs.appendChild(makeTab("All", currentFilter === ALL_KEY, () => {
-    currentFilter = ALL_KEY;
-    renderTabs();
-    renderGrid();
-  }));
+  tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
 
   (data.categories || []).forEach((cat) => {
-    const active = currentFilter === cat.id;
-    const tab = makeTab(cat.name || "(이름 없음)", active, () => {
-      if (currentFilter === cat.id) {
-        // 활성 탭을 한 번 더 누르면 카테고리 설정(이름·색상·삭제) 팝업
-        openCategoryEditor(cat);
-        return;
-      }
-      currentFilter = cat.id;
-      renderTabs();
-      renderGrid();
-    });
-    if (active) {
-      const edit = document.createElement("span");
-      edit.className = "tab-edit";
-      edit.textContent = "✎";
-      tab.title = "한 번 더 누르면 카테고리 설정(이름·색상·삭제)을 열어요";
-      tab.appendChild(edit);
-    }
-    tabs.appendChild(tab);
+    tabs.appendChild(makeTab(cat.name || "(이름 없음)", activeCatId === cat.id, () => scrollToCategory(cat.id)));
   });
 
   // 관리자 전용: 카테고리 추가 탭
@@ -539,56 +563,78 @@ function renderTabs() {
       projects: [],
     };
     data.categories.push(cat);
-    currentFilter = cat.id;
     saveDraft();
     renderTabs();
-    renderGrid();
+    renderSections();
+    scrollToCategory(cat.id);
     openCategoryEditor(cat);
   });
   tabs.appendChild(add);
 }
 
-function renderGrid() {
-  const grid = document.getElementById("workGrid");
-  grid.innerHTML = "";
+// 카테고리별로 단(섹션)을 나눠서 렌더링. 공개 사이트와 같은 구조에
+// 관리자 전용으로 섹션 머리의 "✎ 설정" 버튼과 "+ 프로젝트 추가" 카드가 붙는다.
+function renderSections() {
+  const wrap = document.getElementById("workSections");
+  wrap.innerHTML = "";
 
-  const cats = (data.categories || []).filter(
-    (c) => currentFilter === ALL_KEY || c.id === currentFilter
-  );
+  (data.categories || []).forEach((cat) => {
+    const section = document.createElement("section");
+    section.className = "work-section";
+    section.id = `cat-${cat.id}`;
+    section.dataset.catId = cat.id;
 
-  let count = 0;
-  cats.forEach((cat) => {
+    const head = document.createElement("div");
+    head.className = "work-section-head";
+    const headInner = document.createElement("div");
+    headInner.className = "container";
+    const dot = document.createElement("span");
+    dot.className = "ws-dot";
+    if (cat.accent) dot.style.background = cat.accent;
+    const h2 = document.createElement("h2");
+    h2.textContent = cat.name || "(이름 없음)";
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-outline btn-small ws-edit";
+    editBtn.textContent = "✎ 설정";
+    editBtn.title = "카테고리 이름·색상·삭제";
+    editBtn.addEventListener("click", () => openCategoryEditor(cat));
+    headInner.appendChild(dot);
+    headInner.appendChild(h2);
+    headInner.appendChild(editBtn);
+    head.appendChild(headInner);
+    section.appendChild(head);
+
+    const grid = document.createElement("div");
+    grid.className = "work-grid";
     (cat.projects || []).forEach((project, projIndex) => {
       grid.appendChild(renderAdminCard(cat, project, projIndex));
-      count++;
     });
+
+    const addCard = document.createElement("button");
+    addCard.type = "button";
+    addCard.className = "card card-add";
+    addCard.textContent = "＋ 프로젝트 추가";
+    addCard.addEventListener("click", () => {
+      const project = {
+        id: slugify("new-project"),
+        title: "새 프로젝트",
+        coverImage: "",
+        blocks: [],
+        summary: "",
+      };
+      cat.projects.push(project);
+      saveDraft();
+      renderSections();
+      openProjectEditor(cat, project, cat.projects.length - 1);
+    });
+    grid.appendChild(addCard);
+
+    section.appendChild(grid);
+    wrap.appendChild(section);
   });
 
-  // 카테고리 탭을 선택했을 때는 그리드 끝에 "+ 프로젝트 추가" 카드
-  if (currentFilter !== ALL_KEY) {
-    const cat = (data.categories || []).find((c) => c.id === currentFilter);
-    if (cat) {
-      const addCard = document.createElement("button");
-      addCard.type = "button";
-      addCard.className = "card card-add";
-      addCard.textContent = "＋ 프로젝트 추가";
-      addCard.addEventListener("click", () => {
-        const project = {
-          id: slugify("new-project"),
-          title: "새 프로젝트",
-          coverImage: "",
-          blocks: [],
-          summary: "",
-        };
-        cat.projects.push(project);
-        saveDraft();
-        renderGrid();
-        openProjectEditor(cat, project, cat.projects.length - 1);
-      });
-      grid.appendChild(addCard);
-    }
-  } else if (count === 0) {
-    grid.innerHTML = `<div class="empty-state">아직 프로젝트가 없어요. 카테고리 탭을 선택하면 추가할 수 있어요.</div>`;
+  if (!(data.categories || []).length) {
+    wrap.innerHTML = `<div class="empty-state">아직 카테고리가 없어요. 탭의 ＋ 버튼으로 추가해보세요.</div>`;
   }
 }
 
@@ -640,7 +686,7 @@ function renderAdminCard(cat, project, projIndex) {
     if (confirm(`"${project.title}" 프로젝트를 삭제할까요?`)) {
       cat.projects.splice(projIndex, 1);
       saveDraft();
-      renderGrid();
+      renderSections();
     }
   });
   card.appendChild(deleteBtn);
@@ -655,7 +701,7 @@ function renderAdminCard(cat, project, projIndex) {
     card.draggable = false; // 드래그 없이 핸들만 클릭했다면 draggable 상태를 되돌린다
   });
   card.appendChild(handle);
-  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderGrid);
+  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderSections);
 
   return card;
 }
@@ -935,7 +981,6 @@ function renderCategoryModalBody() {
     if (confirm(`"${cat.name}" 카테고리와 그 안의 모든 프로젝트를 삭제할까요?`)) {
       const idx = data.categories.indexOf(cat);
       if (idx >= 0) data.categories.splice(idx, 1);
-      currentFilter = ALL_KEY;
       saveDraft();
       closeProjectEditor(true);
     }
@@ -1441,7 +1486,8 @@ function renderAll() {
   ensureShape();
   renderSiteHeader();
   renderTabs();
-  renderGrid();
+  renderSections();
+  updateActiveTab();
 }
 
 /* ------------------- 지금 어느 부분을 수정 중인지 표시 ------------------- */
