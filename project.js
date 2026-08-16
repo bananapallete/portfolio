@@ -22,6 +22,43 @@ function setPageBg(color) {
   });
 }
 
+/* ------------- 상단바 자동 숨김 + 맨 위로 버튼 (상세 페이지 전용) -------------
+   내려갈 때는 상단바를 감춰 콘텐츠에 집중하게 하고, 올릴 때 다시 꺼낸다. */
+
+function initScrollChrome() {
+  const bar = document.querySelector(".proj-topbar");
+  const toTop = document.getElementById("toTopBtn");
+  if (!bar || !toTop) return;
+
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  const update = () => {
+    const y = Math.max(0, window.scrollY);
+    const delta = y - lastY;
+    // 미세한 흔들림으로 상단바가 깜빡이지 않도록 일정 이상 움직였을 때만 반응
+    if (Math.abs(delta) > 4) {
+      // 맨 위 근처에서는 항상 보이게 둔다
+      bar.classList.toggle("proj-topbar-hidden", delta > 0 && y > 120);
+      lastY = y;
+    }
+    toTop.classList.toggle("to-top-show", y > 400);
+  };
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  }, { passive: true });
+
+  toTop.addEventListener("click", () => {
+    if (window.lenis) window.lenis.scrollTo(0);
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  update();
+}
+
 async function initProject() {
   const wrap = document.getElementById("projectBlocks");
   const siteData = await loadSiteData();
@@ -118,4 +155,6 @@ async function initProject() {
   }
 }
 
+// 데이터 로딩과 무관하게 동작해야 하므로 따로 초기화한다
+initScrollChrome();
 initProject();
