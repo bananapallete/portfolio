@@ -287,6 +287,7 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     p.textContent = block.content;
     if (block.size) p.style.fontSize = block.size + "px";
     if (block.color) p.style.color = block.color;
+    if (block.align && block.align !== "left") p.style.textAlign = block.align;
     return p;
   }
 
