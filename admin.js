@@ -44,7 +44,7 @@ function normalizeGap(v) {
 // getVal/setVal로 데이터에 읽고 쓰고, onApply(gap|null)로 즉시 반영한다.
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   const row = document.createElement("div");
-  row.className = "block-controls-row";
+  row.className = "gap-field";
 
   const label = document.createElement("span");
   label.className = "control-label";
@@ -70,7 +70,7 @@ function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   px.textContent = "px";
 
   const clearBtn = document.createElement("button");
-  clearBtn.className = "btn btn-outline btn-small";
+  clearBtn.className = "btn btn-outline btn-xs";
   clearBtn.textContent = "기본값";
   clearBtn.addEventListener("click", () => {
     input.value = "";
@@ -914,12 +914,15 @@ function renderEditModalBody() {
   gapLabel.className = "mini-label";
   gapLabel.style.marginTop = "16px";
   card.appendChild(gapLabel);
-  card.appendChild(buildGapField(
+  const gapRow = document.createElement("div");
+  gapRow.className = "block-controls-row";
+  gapRow.appendChild(buildGapField(
     "간격",
     () => project.blockGap,
     (g) => { if (g == null) delete project.blockGap; else project.blockGap = g; },
     "28"
   ));
+  card.appendChild(gapRow);
 
   // ---- 모드 전환: 블록 편집 / 미리보기·순서 조절 ----
   const isPreview = previewProjects.has(project.id);
@@ -964,24 +967,15 @@ function renderEditModalBody() {
       renderEditModalBody();
     }));
   }
-  const coverUploadBtn = document.createElement("button");
-  coverUploadBtn.className = "btn btn-outline btn-small file-btn";
-  coverUploadBtn.textContent = "커버 이미지 업로드";
-  const coverInput = document.createElement("input");
-  coverInput.type = "file";
-  coverInput.accept = "image/*";
-  coverInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    readFileAsDataURL(file).then((dataUrl) => {
+  coverRow.appendChild(makeUploadTile(project.coverImage ? "교체" : "커버 업로드", {}, (files) => {
+    if (!files.length) return;
+    readFileAsDataURL(files[0]).then((dataUrl) => {
       project.coverImage = dataUrl;
       saveDraft();
       renderEditModalBody();
     });
-  });
-  coverUploadBtn.appendChild(coverInput);
+  }));
   card.appendChild(coverRow);
-  card.appendChild(coverUploadBtn);
 
   // ---- 콘텐츠 블록 ----
   const blocksLabel = document.createElement("label");
@@ -1087,7 +1081,7 @@ function renderBlocksEditor(project) {
       : "비디오 임베드";
 
     const del = document.createElement("button");
-    del.className = "btn btn-danger btn-small";
+    del.className = "btn btn-danger btn-xs";
     del.textContent = "블록 삭제";
     del.style.marginLeft = "auto";
     del.addEventListener("click", () => {
@@ -1192,9 +1186,9 @@ function renderBlockBody(project, block, blockIndex) {
   }
 
   if (block.type === "images") {
-    // 레이아웃 선택
+    // 레이아웃 · 그리드 형태 · 이미지 간격을 한 줄에 모아 배치
     const segRow = document.createElement("div");
-    segRow.className = "seg-row";
+    segRow.className = "block-controls-row";
 
     const seg = document.createElement("div");
     seg.className = "layout-seg";
@@ -1231,20 +1225,20 @@ function renderBlockBody(project, block, blockIndex) {
       });
       segRow.appendChild(gseg);
     }
-    body.appendChild(segRow);
 
     // 이미지 사이 간격 (슬라이드는 한 장씩 보여서 간격 개념이 없음)
     // 비워두면 프로젝트의 "콘텐츠 간격"을 따르고, 그것도 없으면 레이아웃 기본값 사용
     if (block.layout !== "slider") {
       const projGap = normalizeGap(project.blockGap);
       const defGap = projGap != null ? String(projGap) : (block.layout === "grid" ? "10" : "0");
-      body.appendChild(buildGapField(
-        "이미지 간격",
+      segRow.appendChild(buildGapField(
+        "간격",
         () => block.gap,
         (g) => { if (g == null) delete block.gap; else block.gap = g; },
         defGap
       ));
     }
+    body.appendChild(segRow);
 
     // 썸네일 (드래그로 순서 변경)
     const imgGroup = `imgs-${project.id}-${blockIndex}`;
@@ -1277,27 +1271,17 @@ function renderBlockBody(project, block, blockIndex) {
       attachDrag(thumb, miniHandle, imgGroup, block.images, j);
       row.appendChild(thumb);
     });
-    body.appendChild(row);
 
-    const uploadBtn = document.createElement("button");
-    uploadBtn.className = "btn btn-outline btn-small file-btn";
-    uploadBtn.style.marginTop = "8px";
-    uploadBtn.textContent = "이미지 업로드 (여러 장 가능)";
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.multiple = true;
-    input.addEventListener("change", async (e) => {
-      const files = Array.from(e.target.files || []);
+    // 업로드 타일을 썸네일 옆에 붙여 한 줄로 정리
+    row.appendChild(makeUploadTile("이미지 추가", { multiple: true }, async (files) => {
       for (const file of files) {
         const dataUrl = await readFileAsDataURL(file);
         block.images.push(dataUrl);
       }
       saveDraft();
       renderEditModalBody();
-    });
-    uploadBtn.appendChild(input);
-    body.appendChild(uploadBtn);
+    }));
+    body.appendChild(row);
 
     if (block.layout === "slider") {
       const hint = document.createElement("div");
@@ -1502,6 +1486,30 @@ function renderPreviewBlockContent(project, block, blockIndex) {
   }
 
   return document.createElement("div");
+}
+
+// 썸네일 줄 안에 함께 놓이는 "＋ 추가" 타일. 버튼이 따로 한 줄을 차지하지 않는다.
+function makeUploadTile(text, { multiple = false, accept = "image/*" } = {}, onFiles) {
+  const tile = document.createElement("button");
+  tile.type = "button";
+  tile.className = "thumb-add file-btn";
+
+  const plus = document.createElement("span");
+  plus.className = "thumb-add-plus";
+  plus.textContent = "＋";
+  const label = document.createElement("span");
+  label.className = "thumb-add-text";
+  label.textContent = text;
+  tile.appendChild(plus);
+  tile.appendChild(label);
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = accept;
+  if (multiple) input.multiple = true;
+  input.addEventListener("change", (e) => onFiles(Array.from(e.target.files || [])));
+  tile.appendChild(input);
+  return tile;
 }
 
 function makeThumb(src, kind, onRemove) {
