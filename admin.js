@@ -199,7 +199,41 @@ function ensureShape() {
 
 /* ------------------------------ 드래그 정렬 공통 ------------------------------ */
 
+const DROP_CLASSES = ["drop-before", "drop-after", "drop-x", "drop-y"];
+
+// 화면에 떠 있는 삽입 위치 표시를 모두 지운다
+function clearDropMarkers() {
+  document.querySelectorAll(".drop-before, .drop-after").forEach((el) => {
+    el.classList.remove(...DROP_CLASSES);
+  });
+}
+
+// 이웃한 형제와의 위치 관계로 배치 방향을 판단한다.
+// 같은 줄에 나란히 있으면 가로("x"), 아니면 세로("y").
+function dragAxis(itemEl) {
+  const r = itemEl.getBoundingClientRect();
+  for (const sib of [itemEl.previousElementSibling, itemEl.nextElementSibling]) {
+    if (!sib) continue;
+    const s = sib.getBoundingClientRect();
+    if (!s.width && !s.height) continue;
+    if (Math.abs(s.top - r.top) < Math.max(8, r.height / 2)) return "x";
+  }
+  return "y";
+}
+
+// 포인터가 항목의 앞쪽 절반에 있으면 그 앞에, 뒤쪽 절반이면 그 뒤에 끼워 넣는다.
+// to는 "빼내기 전" 기준의 삽입 위치.
+function dropTargetAt(itemEl, index, e) {
+  const axis = dragAxis(itemEl);
+  const r = itemEl.getBoundingClientRect();
+  const before = axis === "x"
+    ? e.clientX < r.left + r.width / 2
+    : e.clientY < r.top + r.height / 2;
+  return { axis, before, to: before ? index : index + 1 };
+}
+
 // handle을 잡고 끌면 itemEl을 같은 group/list 안에서 순서를 바꿀 수 있다.
+// 끄는 동안 실제로 끼워질 자리(항목과 항목 사이)를 색 막대로 표시한다.
 // onChange: 순서가 바뀐 뒤 다시 그릴 함수 (기본값은 편집 팝업 새로고침)
 function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditModalBody) {
   handleEl.addEventListener("mousedown", () => { itemEl.draggable = true; });
@@ -213,7 +247,7 @@ function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditM
   itemEl.addEventListener("dragend", () => {
     itemEl.draggable = false;
     itemEl.classList.remove("dragging");
-    document.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    clearDropMarkers();
     dragCtx = null;
   });
   itemEl.addEventListener("dragover", (e) => {
@@ -221,18 +255,30 @@ function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditM
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
-    itemEl.classList.add("drag-over");
+    const { axis, before, to } = dropTargetAt(itemEl, index, e);
+    clearDropMarkers();
+    // 놓아도 순서가 그대로인 자리(집어 든 카드의 양옆)에는 표시하지 않는다
+    if (to === dragCtx.from || to === dragCtx.from + 1) return;
+    itemEl.classList.add(axis === "x" ? "drop-x" : "drop-y", before ? "drop-before" : "drop-after");
   });
-  itemEl.addEventListener("dragleave", () => itemEl.classList.remove("drag-over"));
+  itemEl.addEventListener("dragleave", (e) => {
+    // 같은 항목 안의 자식 요소끼리 오갈 때는 표시를 유지한다
+    if (e.relatedTarget && itemEl.contains(e.relatedTarget)) return;
+    itemEl.classList.remove(...DROP_CLASSES);
+  });
   itemEl.addEventListener("drop", (e) => {
     if (!dragCtx || dragCtx.group !== group) return;
     e.preventDefault();
     e.stopPropagation();
     const from = dragCtx.from;
+    const { to } = dropTargetAt(itemEl, index, e);
     dragCtx = null;
-    if (from === index) return;
+    clearDropMarkers();
+    // 원래 자리를 빼내면 뒤쪽 인덱스가 하나씩 당겨진다
+    const target = to > from ? to - 1 : to;
+    if (target === from) return;
     const [moved] = list.splice(from, 1);
-    list.splice(index, 0, moved);
+    list.splice(target, 0, moved);
     saveDraft();
     onChange();
   });

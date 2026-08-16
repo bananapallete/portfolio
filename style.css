@@ -610,9 +610,45 @@ input, textarea, select { font-family: inherit; }
 
 .admin-card.dragging { opacity: 0.4; }
 
-.admin-card.drag-over {
-  outline: 3px solid var(--sun);
-  outline-offset: -3px;
+/* ---- 드래그로 옮길 자리를 색 막대로 표시 (카드·블록·이미지 공통) ---- */
+
+.drop-before::after,
+.drop-after::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  background: var(--sun);
+  border-radius: 999px;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--sun) 75%, transparent);
+  pointer-events: none;
+  animation: drop-pop 0.14s ease-out;
+}
+
+/* 가로로 나열된 항목: 왼쪽/오른쪽 경계에 세로 막대 */
+.drop-x.drop-before::after,
+.drop-x.drop-after::after {
+  top: 5%;
+  bottom: 5%;
+  width: 4px;
+}
+
+.drop-x.drop-before::after { left: 0; }
+.drop-x.drop-after::after { right: 0; }
+
+/* 세로로 쌓인 항목: 위/아래 경계에 가로 막대 */
+.drop-y.drop-before::after,
+.drop-y.drop-after::after {
+  left: 2%;
+  right: 2%;
+  height: 4px;
+}
+
+.drop-y.drop-before::after { top: 0; }
+.drop-y.drop-after::after { bottom: 0; }
+
+@keyframes drop-pop {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: none; }
 }
 
 /* "+ 프로젝트 추가" 카드 */
@@ -773,11 +809,6 @@ input, textarea, select { font-family: inherit; }
 .project-thumb-handle:active { cursor: grabbing; }
 
 .project-thumb-card.dragging { opacity: 0.4; }
-
-.project-thumb-card.drag-over {
-  border-color: var(--illustration);
-  box-shadow: 0 0 0 2px var(--illustration);
-}
 
 /* ---- 프로젝트 편집 팝업 ---- */
 
@@ -1247,6 +1278,7 @@ input, textarea, select { font-family: inherit; }
 .block-list { margin-top: 4px; }
 
 .block-item {
+  position: relative;
   background: var(--panel);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
@@ -1256,11 +1288,6 @@ input, textarea, select { font-family: inherit; }
 }
 
 .block-item.dragging { opacity: 0.4; }
-
-.block-item.drag-over {
-  border-color: var(--illustration);
-  box-shadow: 0 -3px 0 0 var(--illustration);
-}
 
 .block-head {
   display: flex;
@@ -1480,11 +1507,6 @@ input, textarea, select { font-family: inherit; }
 .pv-block:hover { border-color: var(--line); }
 .pv-block.dragging { opacity: 0.4; }
 
-.pv-block.drag-over {
-  border-color: var(--illustration);
-  box-shadow: 0 -3px 0 0 var(--illustration);
-}
-
 .pv-handle {
   position: absolute;
   top: 4px;
@@ -1503,11 +1525,6 @@ input, textarea, select { font-family: inherit; }
 
 .pv-img-wrap { position: relative; }
 .pv-img-wrap.dragging { opacity: 0.4; }
-
-.pv-img-wrap.drag-over img {
-  outline: 3px solid var(--illustration);
-  outline-offset: -3px;
-}
 
 .pv-slider-strip {
   display: flex;
