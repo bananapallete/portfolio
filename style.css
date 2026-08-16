@@ -1463,9 +1463,8 @@ input, textarea, select { font-family: inherit; }
   .brand-role { display: none; }
   .brand-name { font-size: 14px; }
 
-  /* 좁은 화면에서는 뱃지를 타이틀 위로 되돌린다 (나란히 두면 타이틀 폭이 너무 좁아짐) */
-  .proj-hero { flex-direction: column-reverse; gap: 10px; }
-  .proj-hero .modal-tag { margin-top: 0; }
+  /* 좁은 화면에서는 카테고리 뱃지를 아예 표시하지 않는다 */
+  .proj-hero .modal-tag { display: none; }
   .tabs {
     /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
     flex: 0 1 auto;
