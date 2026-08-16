@@ -16,6 +16,39 @@ let dragCtx = null;
 let editingContext = null;
 // 탭 내비게이션(activeCatId · scrollToCategory · updateActiveTab · makeTab)은 blocks.js 공용
 
+// 블록 배경색 조절 줄. 지정하면 공개 페이지에서 그 블록을 눌렀을 때
+// 페이지 전체 배경이 이 색으로 서서히 바뀐다 (다시 누르면 해제).
+function buildBlockBgField(block) {
+  const row = document.createElement("div");
+  row.className = "block-controls-row";
+
+  const label = document.createElement("span");
+  label.className = "control-label";
+  label.textContent = block.bgColor
+    ? "배경색 (누르면 전체 배경 전환)"
+    : "배경색 (누르면 전체 배경 전환) · 미설정";
+
+  const field = buildColorField(
+    block.bgColor || "#0d0d0d",
+    (v) => { block.bgColor = v; saveDraft(); },
+    { swatches: true, rerender: renderEditModalBody }
+  );
+
+  const clear = document.createElement("button");
+  clear.className = "btn btn-outline btn-xs";
+  clear.textContent = "배경 없음";
+  clear.addEventListener("click", () => {
+    delete block.bgColor;
+    saveDraft();
+    renderEditModalBody();
+  });
+
+  row.appendChild(label);
+  row.appendChild(field.field);
+  row.appendChild(clear);
+  return row;
+}
+
 // "간격 ___ px [기본값]" 형태의 조절 필드. 빈 값이면 기본값(CSS 지정) 사용.
 // getVal/setVal로 데이터에 읽고 쓰고, onApply(gap|null)로 즉시 반영한다.
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
@@ -1111,6 +1144,7 @@ function renderBlockBody(project, block, blockIndex) {
     controls.appendChild(alignLabel);
     controls.appendChild(alignSeg);
     body.appendChild(controls);
+    body.appendChild(buildBlockBgField(block));
     return body;
   }
 
@@ -1219,6 +1253,7 @@ function renderBlockBody(project, block, blockIndex) {
       hint.textContent = "사이트에서 3.5초 간격으로 자동으로 넘어가요. 점을 눌러 이동할 수도 있어요.";
       body.appendChild(hint);
     }
+    body.appendChild(buildBlockBgField(block));
     return body;
   }
 
