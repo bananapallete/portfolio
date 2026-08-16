@@ -1025,13 +1025,29 @@ input, textarea, select { font-family: inherit; }
   border-color: rgba(255, 255, 255, 0.35);
 }
 
-.proj-hero { padding-top: 0; }
+/* 카테고리 뱃지가 타이틀 우측 상단에 오도록 가로 배치.
+   DOM 순서는 타이틀 → 뱃지이고, space-between으로 좌/우에 자동 배치된다 */
+.proj-hero {
+  padding-top: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px 24px;
+}
 
 .proj-title {
   font-size: clamp(30px, 5vw, 52px);
   font-weight: 900;
   letter-spacing: -0.02em;
-  margin: 12px 0 0;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.proj-hero .modal-tag {
+  flex: none;
+  margin-bottom: 0;
+  margin-top: 6px;
 }
 
 .proj-blocks {
@@ -1446,6 +1462,10 @@ input, textarea, select { font-family: inherit; }
   .brand { flex-direction: row; align-items: baseline; gap: 6px; flex: none; }
   .brand-role { display: none; }
   .brand-name { font-size: 14px; }
+
+  /* 좁은 화면에서는 뱃지를 타이틀 위로 되돌린다 (나란히 두면 타이틀 폭이 너무 좁아짐) */
+  .proj-hero { flex-direction: column-reverse; gap: 10px; }
+  .proj-hero .modal-tag { margin-top: 0; }
   .tabs {
     /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
     flex: 0 1 auto;
