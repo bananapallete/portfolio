@@ -2,11 +2,9 @@
    Unlimit_Cho Portfolio — 프로젝트 상세 페이지 (블록 렌더링은 blocks.js 공용)
    ========================================================================== */
 
-/* ------------------- 콘텐츠 배경색 (클릭하면 전체 배경이 바뀜) -------------------
-   배경색이 지정된 블록을 누르면 페이지 전체 배경이 그 색으로 서서히 바뀌고,
-   다시 누르거나 다른 블록을 누르면 원래 색으로 돌아온다. */
-
-let activeBgEl = null;
+/* ------------------- 프로젝트 배경색 (카드 하나마다 지정) -------------------
+   목록에서 카드를 눌러 이 프로젝트를 여는 동안에만 페이지 전체 배경이
+   그 프로젝트의 색으로 서서히 바뀐다. 목록으로 돌아가면 원래대로 돌아온다. */
 
 function setPageBg(color) {
   const body = document.body;
@@ -15,26 +13,12 @@ function setPageBg(color) {
     body.classList.remove("bg-takeover", "bg-takeover-light");
     return;
   }
-  body.style.backgroundColor = color;
-  body.classList.add("bg-takeover");
-  // 밝은 배경으로 덮으면 글자·선 색을 어두운 쪽으로 뒤집어 대비를 유지한다
-  body.classList.toggle("bg-takeover-light", !isDarkColor(color));
-}
-
-function attachBgToggle(el, color) {
-  if (!color) return;
-  el.classList.add("has-bg-toggle");
-  el.addEventListener("click", () => {
-    if (activeBgEl === el) {
-      activeBgEl = null;
-      el.classList.remove("bg-on");
-      setPageBg(null);
-      return;
-    }
-    if (activeBgEl) activeBgEl.classList.remove("bg-on");
-    activeBgEl = el;
-    el.classList.add("bg-on");
-    setPageBg(color);
+  // 기본 배경에서 지정한 색으로 서서히 넘어가도록 다음 프레임에 적용한다
+  requestAnimationFrame(() => {
+    body.style.backgroundColor = color;
+    body.classList.add("bg-takeover");
+    // 밝은 배경으로 덮으면 글자·선 색을 어두운 쪽으로 뒤집어 대비를 유지한다
+    body.classList.toggle("bg-takeover-light", !isDarkColor(color));
   });
 }
 
@@ -105,6 +89,9 @@ async function initProject() {
     if (isDarkColor(project.heroBg)) heroWrap.classList.add("proj-hero-dark");
   }
 
+  // 이 프로젝트를 여는 동안 페이지 전체 배경색 적용
+  setPageBg(project.bgColor);
+
   wrap.innerHTML = "";
   stopSliders();
 
@@ -120,8 +107,6 @@ async function initProject() {
     const el = renderBlock(block, blockGap, rendered === 0);
     if (!el) return;
     rendered++;
-    // 임베드는 iframe이 클릭을 가져가므로 배경 전환 대상에서 제외한다
-    if (block.type !== "embed") attachBgToggle(el, block.bgColor);
     // 텍스트도 이미지·영상과 같은 폭을 쓴다 (좌/우 정렬 기준선이 서로 맞도록)
     wrap.appendChild(el);
   });
