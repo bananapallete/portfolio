@@ -80,7 +80,7 @@ function renderTabs() {
 // eager: 첫 화면에 보이는 카드만 즉시 로드하고 나머지는 스크롤할 때 받아온다.
 function buildCard(project, eager) {
   const card = document.createElement("div");
-  card.className = "card";
+  card.className = "card reveal";
 
   const media = document.createElement("div");
   media.className = "card-media";
@@ -157,6 +157,8 @@ function renderSections() {
 
   if (total === 0) {
     wrap.innerHTML = `<div class="empty-state">No projects yet.</div>`;
+  } else {
+    initScrollReveal(wrap);
   }
 }
 
