@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Unlimit_Cho Portfolio — 공용 블록 렌더링 (index.html, project.html에서 사용)
+   Unlimit_Cho Portfolio — 공용 모듈 (index / project / admin 세 페이지가 공유)
+   데이터 로딩 · 임베드 주소 정규화 · 블록 렌더링 · 카테고리 탭 내비게이션
    ========================================================================== */
 
 let sliderTimers = [];
@@ -125,15 +126,17 @@ function withAutoplayParams(url) {
   }
 }
 
-function renderSlider(images) {
+function renderSlider(images, firstEager = false) {
   const wrap = document.createElement("div");
   wrap.className = "blk-slider";
   const track = document.createElement("div");
   track.className = "blk-slider-track";
-  images.forEach((src) => {
+  images.forEach((src, i) => {
     const img = document.createElement("img");
     img.src = src;
     img.alt = "";
+    // 첫 장만 즉시, 나머지는 넘어가기 전에 받아온다 (3.5초 간격이라 충분)
+    setImgLoading(img, firstEager && i === 0);
     track.appendChild(img);
   });
   wrap.appendChild(track);
@@ -177,9 +180,106 @@ function normalizeGap(v) {
   return Math.max(0, n);
 }
 
+// 이미지 블록의 그리드 레이아웃 클래스명
+function gridClassName(block) {
+  if (block.grid === "masonry") return "blk-images-masonry";
+  const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
+  return `blk-images-grid blk-grid-${cols}`;
+}
+
+// 화면 밖 이미지는 스크롤해서 다가갈 때 받아온다.
+// eager=true인 첫 이미지만 즉시 로드해 첫 화면이 늦지 않게 한다.
+function setImgLoading(img, eager) {
+  img.decoding = "async";
+  img.loading = eager ? "eager" : "lazy";
+  if (eager) img.fetchPriority = "high";
+}
+
 // defaultGap: 블록에 자체 간격(block.gap)이 없을 때 쓸 기본 간격
-// (프로젝트의 "콘텐츠 간격" 설정 — 블록 사이와 이미지 사이가 같이 조절된다)
-function renderBlock(block, defaultGap = null) {
+//   (프로젝트의 "콘텐츠 간격" 설정 — 블록 사이와 이미지 사이가 같이 조절된다)
+// firstEager: 첫 화면에 보이는 블록이면 true — 그 블록의 첫 이미지만 즉시 로드한다
+/* ------------------- 카테고리 탭 내비게이션 (공개 사이트 · 관리자 공용) -------------------
+   탭은 필터가 아니라 해당 카테고리 섹션으로 스크롤하는 앵커다.
+   각 페이지는 renderTabs()를 자기 방식대로 정의하고, 아래 함수들을 공유한다. */
+
+// 현재 화면에 보이는 섹션의 카테고리 id (null = 최상단 / All)
+let activeCatId = null;
+
+// 고정 헤더 아래 여백을 고려한 스크롤 오프셋
+function headerOffset() {
+  const h = document.querySelector(".site-header");
+  return h ? h.getBoundingClientRect().bottom + 6 : 90;
+}
+
+function scrollToCategory(catId) {
+  if (!catId) {
+    if (window.lenis) window.lenis.scrollTo(0);
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const el = document.getElementById(`cat-${catId}`);
+  if (!el) return;
+  // 엘리먼트 대신 숫자 좌표를 넘겨야 고정 헤더 오프셋이 정확히 적용된다
+  const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerOffset());
+  if (window.lenis) window.lenis.scrollTo(y);
+  else window.scrollTo({ top: y, behavior: "smooth" });
+}
+
+// 스크롤 위치에 맞춰 활성 탭을 갱신 (스크롤 스파이)
+function updateActiveTab() {
+  const threshold = headerOffset() + 30;
+  let current = null;
+  // 최상단 근처에서는 All 활성 (첫 섹션이 헤더 바로 아래에서 시작하므로)
+  if (window.scrollY > 40) {
+    const secs = document.querySelectorAll(".work-section");
+    secs.forEach((sec) => {
+      if (sec.getBoundingClientRect().top <= threshold) current = sec.dataset.catId;
+    });
+    // 페이지 끝에 도달하면 마지막 섹션 활성
+    // (마지막 섹션은 스크롤이 끝까지 가도 헤더에 못 닿을 수 있음)
+    if (secs.length && window.innerHeight + window.scrollY >= document.body.scrollHeight - 40) {
+      current = secs[secs.length - 1].dataset.catId;
+    }
+  }
+  if (current !== activeCatId) {
+    activeCatId = current;
+    renderTabs();
+  }
+}
+
+// 볼드 글자가 폭을 정하고(레이아웃 안 흔들림) 레귤러 글자가 그 위에 겹쳐 크로스페이드
+function makeTab(text, isActive, onClick) {
+  const btn = document.createElement("button");
+  btn.className = "tab" + (isActive ? " active" : "");
+  const label = document.createElement("span");
+  label.className = "tab-label";
+  const bold = document.createElement("span");
+  bold.className = "tl-bold";
+  bold.textContent = text;
+  const reg = document.createElement("span");
+  reg.className = "tl-reg";
+  reg.textContent = text;
+  label.appendChild(bold);
+  label.appendChild(reg);
+  btn.appendChild(label);
+  btn.addEventListener("click", onClick);
+  return btn;
+}
+
+// 스크롤 스파이는 프레임당 한 번만 계산한다
+let scrollTick = false;
+window.addEventListener("scroll", () => {
+  if (scrollTick) return;
+  scrollTick = true;
+  requestAnimationFrame(() => {
+    scrollTick = false;
+    if (document.querySelector(".work-section")) updateActiveTab();
+  });
+}, { passive: true });
+
+/* ---------------------------------- 블록 렌더링 ---------------------------------- */
+
+function renderBlock(block, defaultGap = null, firstEager = false) {
   if (block.type === "text") {
     if (!block.content) return null;
     const p = document.createElement("p");
@@ -193,29 +293,24 @@ function renderBlock(block, defaultGap = null) {
   if (block.type === "images") {
     const images = block.images || [];
     if (!images.length) return null;
-    if (block.layout === "slider" && images.length > 1) return renderSlider(images);
+    if (block.layout === "slider" && images.length > 1) return renderSlider(images, firstEager);
     const div = document.createElement("div");
     // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다 (최소 0px)
     const ownGap = normalizeGap(block.gap);
     const gap = ownGap != null ? ownGap : normalizeGap(defaultGap);
     const isMasonry = block.layout === "grid" && block.grid === "masonry";
     if (block.layout === "grid") {
-      if (isMasonry) {
-        div.className = "blk-images-masonry";
-        if (gap != null) div.style.columnGap = gap + "px";
-      } else {
-        const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
-        div.className = `blk-images-grid blk-grid-${cols}`;
-        if (gap != null) div.style.gap = gap + "px";
-      }
+      div.className = gridClassName(block);
+      if (gap != null) div.style[isMasonry ? "columnGap" : "gap"] = gap + "px";
     } else {
       div.className = "blk-images-single";
       if (gap != null) div.style.gap = gap + "px";
     }
-    images.forEach((src) => {
+    images.forEach((src, i) => {
       const img = document.createElement("img");
       img.src = src;
       img.alt = "";
+      setImgLoading(img, firstEager && i === 0);
       // 모자이크(컬럼) 레이아웃은 세로 간격이 margin-bottom으로 정해진다
       if (isMasonry && gap != null) img.style.marginBottom = gap + "px";
       div.appendChild(img);

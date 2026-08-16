@@ -2,9 +2,7 @@
    Unlimit_Cho Portfolio — 목록 페이지 로직 (블록 렌더링은 blocks.js 공용)
    ========================================================================== */
 
-// 탭은 필터가 아니라 해당 카테고리 섹션으로 스크롤하는 앵커.
-// activeCatId는 현재 화면에 보이는 섹션의 카테고리 id (null = 최상단/All)
-let activeCatId = null;
+// 탭 내비게이션(activeCatId · scrollToCategory · updateActiveTab · makeTab)은 blocks.js 공용
 let siteData = null;
 
 function renderFallback() {
@@ -66,79 +64,6 @@ function renderHeader() {
   });
 }
 
-function makeTab(text, isActive, onClick) {
-  const btn = document.createElement("button");
-  btn.className = "tab" + (isActive ? " active" : "");
-  const label = document.createElement("span");
-  label.className = "tab-label";
-  // 볼드 글자가 폭을 정하고(레이아웃 안 흔들림), 레귤러 글자는 그 위에 겹쳐 크로스페이드
-  const bold = document.createElement("span");
-  bold.className = "tl-bold";
-  bold.textContent = text;
-  const reg = document.createElement("span");
-  reg.className = "tl-reg";
-  reg.textContent = text;
-  label.appendChild(bold);
-  label.appendChild(reg);
-  btn.appendChild(label);
-  btn.addEventListener("click", onClick);
-  return btn;
-}
-
-/* ---------------- 카테고리 섹션으로 스크롤 + 스크롤 위치에 따른 활성 탭 ---------------- */
-
-// 고정 헤더 아래 여백을 고려한 스크롤 오프셋
-function headerOffset() {
-  const h = document.querySelector(".site-header");
-  return h ? h.getBoundingClientRect().bottom + 6 : 90;
-}
-
-function scrollToCategory(catId) {
-  if (!catId) {
-    if (window.lenis) window.lenis.scrollTo(0);
-    else window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-  const el = document.getElementById(`cat-${catId}`);
-  if (!el) return;
-  // 엘리먼트 대신 숫자 좌표를 넘겨야 고정 헤더 오프셋이 정확히 적용된다
-  const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerOffset());
-  if (window.lenis) window.lenis.scrollTo(y);
-  else window.scrollTo({ top: y, behavior: "smooth" });
-}
-
-// 스크롤 위치에 맞춰 활성 탭을 갱신 (스크롤 스파이)
-function updateActiveTab() {
-  const threshold = headerOffset() + 30;
-  let current = null;
-  // 최상단 근처에서는 All 활성 (첫 섹션이 헤더 바로 아래에서 시작하므로)
-  if (window.scrollY > 40) {
-    const secs = document.querySelectorAll(".work-section");
-    secs.forEach((sec) => {
-      if (sec.getBoundingClientRect().top <= threshold) current = sec.dataset.catId;
-    });
-    // 페이지 끝에 도달하면 마지막 섹션 활성
-    // (마지막 섹션은 스크롤이 끝까지 가도 헤더에 못 닿을 수 있음)
-    if (secs.length && window.innerHeight + window.scrollY >= document.body.scrollHeight - 40) {
-      current = secs[secs.length - 1].dataset.catId;
-    }
-  }
-  if (current !== activeCatId) {
-    activeCatId = current;
-    renderTabs();
-  }
-}
-
-let scrollTick = false;
-window.addEventListener("scroll", () => {
-  if (scrollTick) return;
-  scrollTick = true;
-  requestAnimationFrame(() => {
-    scrollTick = false;
-    if (siteData) updateActiveTab();
-  });
-}, { passive: true });
-
 function renderTabs() {
   const tabs = document.getElementById("tabs");
   tabs.innerHTML = "";
@@ -151,11 +76,39 @@ function renderTabs() {
   });
 }
 
-function projectMediaHTML(project) {
+// 제목·설명에 <, & 같은 글자가 들어가도 깨지지 않도록 DOM으로 직접 만든다.
+// eager: 첫 화면에 보이는 카드만 즉시 로드하고 나머지는 스크롤할 때 받아온다.
+function buildCard(project, eager) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const media = document.createElement("div");
+  media.className = "card-media";
   if (project.coverImage) {
-    return `<img src="${project.coverImage}" alt="${project.title}" />`;
+    const img = document.createElement("img");
+    img.src = project.coverImage;
+    img.alt = project.title || "";
+    setImgLoading(img, eager);
+    media.appendChild(img);
   }
-  return "";
+  card.appendChild(media);
+
+  const body = document.createElement("div");
+  body.className = "card-body";
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = project.title || "";
+  body.appendChild(title);
+  if (project.summary) {
+    const desc = document.createElement("div");
+    desc.className = "card-desc";
+    desc.textContent = project.summary;
+    body.appendChild(desc);
+  }
+  card.appendChild(body);
+
+  card.addEventListener("click", () => goToProject(project));
+  return card;
 }
 
 function goToProject(project) {
@@ -169,11 +122,11 @@ function renderSections() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
 
+  // 지금까지 그린 카드 수 — 첫 두 장만 즉시 로드할지 판단하는 데 쓴다
   let total = 0;
   (siteData.categories || []).forEach((cat) => {
     const projects = cat.projects || [];
     if (!projects.length) return;
-    total += projects.length;
 
     const section = document.createElement("section");
     section.className = "work-section";
@@ -197,19 +150,9 @@ function renderSections() {
     const grid = document.createElement("div");
     grid.className = "work-grid";
     projects.forEach((project) => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="card-media">
-          ${projectMediaHTML(project)}
-        </div>
-        <div class="card-body">
-          <div class="card-title">${project.title}</div>
-          ${project.summary ? `<div class="card-desc">${project.summary}</div>` : ""}
-        </div>
-      `;
-      card.addEventListener("click", () => goToProject(project));
-      grid.appendChild(card);
+      // 2열 그리드라 처음 두 장만 첫 화면에 걸린다
+      grid.appendChild(buildCard(project, total < 2));
+      total++;
     });
     section.appendChild(grid);
 

@@ -14,31 +14,7 @@ let dragCtx = null;
 // 편집 팝업이 열려 있는 대상. type: "project" | "profile" | "category"
 // 편집은 복사본에서 이루어지고 "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
 let editingContext = null;
-// 탭은 필터가 아니라 해당 카테고리 섹션으로 스크롤하는 앵커.
-// activeCatId는 현재 화면에 보이는 섹션의 카테고리 id (null = 최상단/All)
-let activeCatId = null;
-
-// iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
-function normalizeEmbedInput(raw) {
-  let v = (raw || "").trim();
-  const m = /<iframe[^>]*\ssrc=["']([^"']+)["']/i.exec(v);
-  if (m) v = m[1];
-  // iframe 코드를 그대로 붙여넣으면 속성 안의 &가 &amp;로 인코딩되어 있어 쿼리 파라미터가 깨짐
-  v = v.replace(/&amp;/g, "&");
-  if (!v) return "";
-  if (v.startsWith("//")) return "https:" + v;
-  if (v.startsWith("data:") || v.startsWith("assets/") || /^https?:\/\//i.test(v)) return v;
-  if (/^[\w.-]+\.[a-z]{2,}([\/?#]|$)/i.test(v)) return "https://" + v;
-  return v;
-}
-
-// 간격 값(px)을 0 이상 정수로 정규화. 미설정이면 null (CSS 기본값 사용)
-function normalizeGap(v) {
-  if (v == null || v === "") return null;
-  const n = parseInt(v, 10);
-  if (isNaN(n)) return null;
-  return Math.max(0, n);
-}
+// 탭 내비게이션(activeCatId · scrollToCategory · updateActiveTab · makeTab)은 blocks.js 공용
 
 // "간격 ___ px [기본값]" 형태의 조절 필드. 빈 값이면 기본값(CSS 지정) 사용.
 // getVal/setVal로 데이터에 읽고 쓰고, onApply(gap|null)로 즉시 반영한다.
@@ -191,7 +167,7 @@ function ensureShape() {
       delete p.videos;
       // 잘못 저장된 임베드(iframe 코드, https 누락)를 정리
       p.blocks.forEach((b) => {
-        if (b.type === "embed" && b.src) b.src = normalizeEmbedInput(b.src);
+        if (b.type === "embed" && b.src) b.src = normalizeEmbedSrc(b.src);
       });
     });
   });
@@ -516,75 +492,7 @@ function renderSiteHeader() {
   });
 }
 
-// 공개 사이트(script.js)와 동일한 탭 마크업 (볼드/레귤러 크로스페이드)
-function makeTab(text, isActive, onClick) {
-  const btn = document.createElement("button");
-  btn.className = "tab" + (isActive ? " active" : "");
-  const label = document.createElement("span");
-  label.className = "tab-label";
-  const bold = document.createElement("span");
-  bold.className = "tl-bold";
-  bold.textContent = text;
-  const reg = document.createElement("span");
-  reg.className = "tl-reg";
-  reg.textContent = text;
-  label.appendChild(bold);
-  label.appendChild(reg);
-  btn.appendChild(label);
-  btn.addEventListener("click", onClick);
-  return btn;
-}
-
-/* ---------------- 카테고리 섹션으로 스크롤 + 스크롤 위치에 따른 활성 탭 ---------------- */
-
-// 고정된 유틸 바 + 사이트 헤더 아래 여백을 고려한 스크롤 오프셋
-function headerOffset() {
-  const h = document.querySelector(".site-header");
-  return h ? h.getBoundingClientRect().bottom + 6 : 140;
-}
-
-function scrollToCategory(catId) {
-  if (!catId) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return;
-  }
-  const el = document.getElementById(`cat-${catId}`);
-  if (!el) return;
-  const y = el.getBoundingClientRect().top + window.scrollY - headerOffset();
-  window.scrollTo({ top: y, behavior: "smooth" });
-}
-
-// 스크롤 위치에 맞춰 활성 탭을 갱신 (스크롤 스파이)
-function updateActiveTab() {
-  const threshold = headerOffset() + 30;
-  let current = null;
-  // 최상단 근처에서는 All 활성 (첫 섹션이 헤더 바로 아래에서 시작하므로)
-  if (window.scrollY > 40) {
-    const secs = document.querySelectorAll(".work-section");
-    secs.forEach((sec) => {
-      if (sec.getBoundingClientRect().top <= threshold) current = sec.dataset.catId;
-    });
-    // 페이지 끝에 도달하면 마지막 섹션 활성
-    // (마지막 섹션은 스크롤이 끝까지 가도 헤더에 못 닿을 수 있음)
-    if (secs.length && window.innerHeight + window.scrollY >= document.body.scrollHeight - 40) {
-      current = secs[secs.length - 1].dataset.catId;
-    }
-  }
-  if (current !== activeCatId) {
-    activeCatId = current;
-    renderTabs();
-  }
-}
-
-let scrollTick = false;
-window.addEventListener("scroll", () => {
-  if (scrollTick) return;
-  scrollTick = true;
-  requestAnimationFrame(() => {
-    scrollTick = false;
-    if (data) updateActiveTab();
-  });
-}, { passive: true });
+/* -------- 카테고리 탭 (스크롤 이동·스크롤 스파이·makeTab은 blocks.js 공용) -------- */
 
 function renderTabs() {
   const tabs = document.getElementById("tabs");
@@ -696,6 +604,7 @@ function renderAdminCard(cat, project, projIndex) {
     const img = document.createElement("img");
     img.src = project.coverImage;
     img.alt = project.title || "";
+    setImgLoading(img, false);
     media.appendChild(img);
   } else {
     const ph = document.createElement("div");
@@ -1250,6 +1159,7 @@ function renderBlockBody(project, block, blockIndex) {
       const img = document.createElement("img");
       img.src = src;
       img.draggable = false;
+      setImgLoading(img, false);
       thumb.appendChild(img);
 
       const miniHandle = document.createElement("button");
@@ -1305,12 +1215,12 @@ function renderBlockBody(project, block, blockIndex) {
       body.appendChild(note);
     }
     input.addEventListener("input", () => {
-      block.src = normalizeEmbedInput(input.value);
+      block.src = normalizeEmbedSrc(input.value);
       saveDraft();
     });
     // 붙여넣기를 마치면 정리된 주소를 입력창에도 보여준다
     input.addEventListener("change", () => {
-      const v = normalizeEmbedInput(input.value);
+      const v = normalizeEmbedSrc(input.value);
       input.value = v;
       block.src = v;
       saveDraft();
@@ -1323,12 +1233,6 @@ function renderBlockBody(project, block, blockIndex) {
 }
 
 /* ------------------------- 미리보기 · 순서 조절 모드 ------------------------- */
-
-function gridClassName(block) {
-  if (block.grid === "masonry") return "blk-images-masonry";
-  const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
-  return `blk-images-grid blk-grid-${cols}`;
-}
 
 function renderProjectPreview(project) {
   const pane = document.createElement("div");
@@ -1426,6 +1330,7 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       img.src = src;
       img.alt = "";
       img.draggable = false;
+      setImgLoading(img, false);
       w.appendChild(img);
 
       const h = document.createElement("button");
@@ -1459,8 +1364,8 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div.textContent = "(링크가 없는 임베드 블록)";
       return div;
     }
-    const isFile = block.src.startsWith("data:") || /\.(mp4|webm|mov|m4v)$/i.test(block.src);
-    if (isFile) {
+    // 실제 사이트와 같은 판별·변환 로직을 공용 함수로 사용
+    if (isVideoFile(block.src)) {
       const v = document.createElement("video");
       v.src = block.src;
       v.controls = false;
@@ -1469,16 +1374,7 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div.appendChild(v);
     } else {
       const iframe = document.createElement("iframe");
-      let embedSrc = block.src;
-      try {
-        const u = new URL(block.src);
-        const parts = u.pathname.split("/").filter(Boolean);
-        if (u.hostname.includes("youtu.be") && parts[0]) embedSrc = `https://www.youtube.com/embed/${parts[0]}`;
-        else if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) embedSrc = `https://www.youtube.com/embed/${u.searchParams.get("v")}`;
-        else if (u.hostname.includes("youtube.com") && ["shorts", "live", "embed"].includes(parts[0]) && parts[1]) embedSrc = `https://www.youtube.com/embed/${parts[1]}`;
-        else if (u.hostname.includes("vimeo.com") && !u.hostname.includes("player.")) embedSrc = `https://player.vimeo.com/video/${parts.pop()}`;
-      } catch (e) {}
-      iframe.src = embedSrc;
+      iframe.src = toEmbedUrl(block.src) || block.src;
       iframe.style.pointerEvents = "none"; // 드래그 방해 방지
       div.appendChild(iframe);
     }
@@ -1518,6 +1414,7 @@ function makeThumb(src, kind, onRemove) {
   const media = kind === "image" ? document.createElement("img") : document.createElement("video");
   media.src = src;
   media.draggable = false;
+  if (kind === "image") setImgLoading(media, false);
   thumb.appendChild(media);
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "✕";
