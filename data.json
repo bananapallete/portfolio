@@ -56,8 +56,14 @@
           "id": "branding-inhr-plus",
           "title": "INHR+",
           "coverImage": "",
-          "blocks": [],
-          "summary": ""
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
+            }
+          ],
+          "summary": "",
+          "bgColor": "#0017c2"
         },
         {
           "id": "branding-midas-week-2025",
