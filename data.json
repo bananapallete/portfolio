@@ -27,7 +27,7 @@
         {
           "id": "branding-midas-week-2026",
           "title": "MIDAS WEEK 2026",
-          "coverImage": "assets/f6b264f3ccaf6f1a1cbd.webp",
+          "coverImage": "assets/d539b9f2d6ce581d4572.png",
           "blocks": [
             {
               "type": "text",
@@ -44,7 +44,8 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/de6acb77b5d5dbca9181.webp"
+                "assets/de6acb77b5d5dbca9181.webp",
+                "assets/d539b9f2d6ce581d4572.png"
               ]
             }
           ],
