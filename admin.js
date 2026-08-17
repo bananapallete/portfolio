@@ -1276,10 +1276,78 @@ function renderBlockBody(project, block, blockIndex) {
       saveDraft();
     });
     body.appendChild(input);
+    body.appendChild(buildEmbedRatioField(block));
     return body;
   }
 
   return body;
+}
+
+// 임베드 영상 비율. 비워두면 16:9로 표시되는데, 16:9가 아닌 영상은
+// 플레이어가 위아래에 검은 여백을 만들므로 실제 가로/세로를 넣어준다.
+function buildEmbedRatioField(block) {
+  const row = document.createElement("div");
+  row.className = "block-controls-row";
+
+  const label = document.createElement("span");
+  label.className = "control-label";
+  label.textContent = "영상 비율 (가로 × 세로)";
+
+  const w = document.createElement("input");
+  w.type = "number";
+  w.min = 1;
+  w.className = "size-input";
+  w.placeholder = "16";
+  if (block.ratioW) w.value = block.ratioW;
+
+  const times = document.createElement("span");
+  times.className = "control-label";
+  times.textContent = "×";
+
+  const h = document.createElement("input");
+  h.type = "number";
+  h.min = 1;
+  h.className = "size-input";
+  h.placeholder = "9";
+  if (block.ratioH) h.value = block.ratioH;
+
+  const apply = () => {
+    const wv = parseFloat(w.value);
+    const hv = parseFloat(h.value);
+    if (wv > 0 && hv > 0) {
+      block.ratioW = wv;
+      block.ratioH = hv;
+    } else {
+      delete block.ratioW;
+      delete block.ratioH;
+    }
+    saveDraft();
+  };
+  w.addEventListener("input", apply);
+  h.addEventListener("input", apply);
+
+  const reset = document.createElement("button");
+  reset.className = "btn btn-outline btn-xs";
+  reset.textContent = "16:9";
+  reset.addEventListener("click", () => {
+    delete block.ratioW;
+    delete block.ratioH;
+    saveDraft();
+    renderEditModalBody();
+  });
+
+  const hint = document.createElement("span");
+  hint.className = "block-hint";
+  hint.style.marginTop = "0";
+  hint.textContent = "예: 1920 × 847 — 비워두면 16:9";
+
+  row.appendChild(label);
+  row.appendChild(w);
+  row.appendChild(times);
+  row.appendChild(h);
+  row.appendChild(reset);
+  row.appendChild(hint);
+  return row;
 }
 
 /* ------------------------- 미리보기 · 순서 조절 모드 ------------------------- */
@@ -1427,6 +1495,7 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       const iframe = document.createElement("iframe");
       iframe.src = toEmbedUrl(block.src) || block.src;
       iframe.style.pointerEvents = "none"; // 드래그 방해 방지
+      applyEmbedRatio(iframe, block);
       div.appendChild(iframe);
     }
     return div;

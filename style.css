@@ -1153,7 +1153,7 @@ body.bg-takeover-light {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  padding: 28px 0 90px;
+  padding: 0;
 }
 
 .proj-blocks .empty-state { padding: 80px 20px; }

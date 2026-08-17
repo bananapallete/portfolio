@@ -87,6 +87,15 @@ function normalizeEmbedSrc(raw) {
   return v;
 }
 
+// 임베드 영상의 비율을 iframe에 적용한다.
+// CSS 기본값은 16:9인데, 그보다 넓거나 좁은 영상은 플레이어가 위아래(또는 좌우)에
+// 검은 여백을 만든다. 관리자에서 실제 가로/세로를 넣어두면 딱 맞게 표시된다.
+function applyEmbedRatio(iframe, block) {
+  const w = parseFloat(block.ratioW);
+  const h = parseFloat(block.ratioH);
+  if (w > 0 && h > 0) iframe.style.aspectRatio = `${w} / ${h}`;
+}
+
 function toEmbedUrl(url) {
   if (!url) return null;
   try {
@@ -372,6 +381,8 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
         "allow",
         "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       );
+      // 16:9가 아닌 영상이 위아래 여백 없이 딱 맞게 들어가도록 실제 비율을 적용
+      applyEmbedRatio(iframe, block);
       div.appendChild(iframe);
     }
     return div;
