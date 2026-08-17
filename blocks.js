@@ -89,11 +89,24 @@ function normalizeEmbedSrc(raw) {
 
 // 임베드 영상의 비율을 iframe에 적용한다.
 // CSS 기본값은 16:9인데, 그보다 넓거나 좁은 영상은 플레이어가 위아래(또는 좌우)에
-// 검은 여백을 만든다. 관리자에서 실제 가로/세로를 넣어두면 딱 맞게 표시된다.
+// 검은 여백을 만든다. 보통은 관리자에서 저장해둔 비율을 그대로 쓰고(요청 0건),
+// 저장된 값이 없을 때만 원본에서 알아내 보정한다.
 function applyEmbedRatio(iframe, block) {
   const w = parseFloat(block.ratioW);
   const h = parseFloat(block.ratioH);
-  if (w > 0 && h > 0) iframe.style.aspectRatio = `${w} / ${h}`;
+  if (w > 0 && h > 0) {
+    iframe.style.aspectRatio = `${w} / ${h}`;
+    return;
+  }
+  // 비율이 저장되기 전에 올라간 영상도 스스로 맞도록 마지막 보정
+  const m = /vimeo\.com\/(?:video\/)?(\d+)/.exec(block.src || "");
+  if (!m) return;
+  fetch(`https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F${m[1]}`)
+    .then((res) => (res.ok ? res.json() : null))
+    .then((d) => {
+      if (d && d.width && d.height) iframe.style.aspectRatio = `${d.width} / ${d.height}`;
+    })
+    .catch(() => {});
 }
 
 function toEmbedUrl(url) {

@@ -38,11 +38,17 @@
             },
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioW": 426,
+              "ratioH": 240,
+              "ratioSrc": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             },
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1218827964?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              "src": "https://player.vimeo.com/video/1218827964?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioW": 426,
+              "ratioH": 178,
+              "ratioSrc": "https://player.vimeo.com/video/1218827964?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             }
           ],
           "summary": "MIDAS IT 국내외 임직원 대상 글로벌 사내 어워즈 키비주얼 및 현장 그래픽 디자인",
