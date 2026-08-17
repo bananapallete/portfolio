@@ -1274,6 +1274,9 @@ function renderBlockBody(project, block, blockIndex) {
       input.value = v;
       block.src = v;
       saveDraft();
+      // 다시 그리면서 비율을 새 주소 기준으로 자동 확인한다
+      // (어느 주소로 구한 비율인지는 block.ratioSrc가 기억한다)
+      renderEditModalBody();
     });
     body.appendChild(input);
     body.appendChild(buildEmbedRatioField(block));
@@ -1283,15 +1286,84 @@ function renderBlockBody(project, block, blockIndex) {
   return body;
 }
 
-// 임베드 영상 비율. 비워두면 16:9로 표시되는데, 16:9가 아닌 영상은
-// 플레이어가 위아래에 검은 여백을 만들므로 실제 가로/세로를 넣어준다.
+// 임베드 주소에서 원본 영상 비율을 자동으로 알아낸다.
+// - 업로드한 영상 파일: 브라우저가 직접 크기를 읽는다 (네트워크 불필요)
+// - Vimeo / YouTube: oEmbed가 원본 크기를 알려준다
+// 알아내지 못하면 null을 돌려주고, 그 경우 16:9 기본값이 쓰인다.
+async function detectEmbedRatio(src) {
+  if (!src) return null;
+
+  if (isVideoFile(src)) {
+    return new Promise((resolve) => {
+      const v = document.createElement("video");
+      v.preload = "metadata";
+      v.muted = true;
+      v.addEventListener("loadedmetadata", () => {
+        resolve(v.videoWidth && v.videoHeight ? { w: v.videoWidth, h: v.videoHeight } : null);
+      }, { once: true });
+      v.addEventListener("error", () => resolve(null), { once: true });
+      v.src = src;
+    });
+  }
+
+  let api = null;
+  try {
+    const u = new URL(src);
+    if (u.hostname.includes("vimeo.com")) {
+      const m = u.pathname.match(/\/(?:video\/)?(\d+)/);
+      if (m) api = `https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F${m[1]}`;
+    } else if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
+      api = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(src)}`;
+    }
+  } catch (e) {}
+  if (!api) return null;
+
+  try {
+    const res = await fetch(api);
+    if (!res.ok) return null;
+    const d = await res.json();
+    return d.width && d.height ? { w: d.width, h: d.height } : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 지금 주소에 대한 비율이 아직 없으면 원본에서 알아내 채운다.
+// ratioSrc(그 비율을 구한 주소)가 현재 주소와 같으면 건너뛰므로
+// 다시 그려도 반복 요청하지 않고, 주소가 바뀌면 자동으로 다시 확인한다.
+async function autoFillEmbedRatio(block, statusEl) {
+  if (!block.src) return;
+  if (block.ratioW && block.ratioH && block.ratioSrc === block.src) return;
+  const target = block.src;
+  if (statusEl) statusEl.textContent = "원본 비율 확인 중…";
+  const r = await detectEmbedRatio(target);
+  // 확인하는 동안 팝업이 닫혔거나 주소가 또 바뀌었으면 결과를 버린다
+  if (!editingContext || block.src !== target) return;
+  if (!r) {
+    // 못 알아낸 경우 이전 비율을 지워 16:9 기본값으로 돌린다
+    delete block.ratioW;
+    delete block.ratioH;
+    block.ratioSrc = target;
+    saveDraft();
+    if (statusEl) statusEl.textContent = "자동 확인 실패 — 16:9로 표시됩니다 (필요하면 직접 입력)";
+    return;
+  }
+  block.ratioW = r.w;
+  block.ratioH = r.h;
+  block.ratioSrc = target;
+  saveDraft();
+  renderEditModalBody();
+}
+
+// 임베드 영상 비율. 주소를 넣으면 원본 비율을 자동으로 채우고,
+// 자동 확인이 안 되는 경우에만 직접 넣을 수 있게 입력칸을 함께 둔다.
 function buildEmbedRatioField(block) {
   const row = document.createElement("div");
   row.className = "block-controls-row";
 
   const label = document.createElement("span");
   label.className = "control-label";
-  label.textContent = "영상 비율 (가로 × 세로)";
+  label.textContent = "영상 비율 (자동)";
 
   const w = document.createElement("input");
   w.type = "number";
@@ -1321,17 +1393,21 @@ function buildEmbedRatioField(block) {
       delete block.ratioW;
       delete block.ratioH;
     }
+    // 직접 넣은 값이 자동 감지에 덮이지 않도록 현재 주소에 귀속시킨다
+    block.ratioSrc = block.src;
     saveDraft();
   };
   w.addEventListener("input", apply);
   h.addEventListener("input", apply);
 
+  // 자동으로 알아낸 값이 마음에 안 들 때 16:9로 고정하는 버튼
   const reset = document.createElement("button");
   reset.className = "btn btn-outline btn-xs";
-  reset.textContent = "16:9";
+  reset.textContent = "16:9 고정";
   reset.addEventListener("click", () => {
-    delete block.ratioW;
-    delete block.ratioH;
+    block.ratioW = 16;
+    block.ratioH = 9;
+    block.ratioSrc = block.src;
     saveDraft();
     renderEditModalBody();
   });
@@ -1339,7 +1415,9 @@ function buildEmbedRatioField(block) {
   const hint = document.createElement("span");
   hint.className = "block-hint";
   hint.style.marginTop = "0";
-  hint.textContent = "예: 1920 × 847 — 비워두면 16:9";
+  hint.textContent = block.ratioW && block.ratioH
+    ? `원본 비율 ${block.ratioW} × ${block.ratioH} 적용됨`
+    : "주소를 넣으면 원본 비율을 자동으로 맞춰요";
 
   row.appendChild(label);
   row.appendChild(w);
@@ -1347,6 +1425,9 @@ function buildEmbedRatioField(block) {
   row.appendChild(h);
   row.appendChild(reset);
   row.appendChild(hint);
+
+  // 주소는 있는데 비율이 비어 있으면 원본에서 알아내 채운다
+  autoFillEmbedRatio(block, hint);
   return row;
 }
 
