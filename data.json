@@ -26,7 +26,7 @@
       "projects": [
         {
           "id": "branding-midas-week-2026",
-          "title": "MIDAS WEEK 2026",
+          "title": "2026 Global RPM Day",
           "coverImage": "assets/d539b9f2d6ce581d4572.png",
           "blocks": [
             {
@@ -48,7 +48,7 @@
               ]
             }
           ],
-          "summary": "",
+          "summary": "MIDAS 국내외 임직원 대상 글로벌 사내 어워즈 키비주얼 및 현장 그래픽 디자인",
           "blockGap": 0,
           "bgColor": "#0b2391"
         },
