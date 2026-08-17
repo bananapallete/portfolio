@@ -59,11 +59,9 @@
             },
             {
               "type": "images",
-              "layout": "grid",
+              "layout": "single",
               "images": [
-                "assets/765552c6221a9b9157bb.png",
-                "assets/e6a889895e0a03b7fc98.png",
-                "assets/9a05552d6877d173276d.png"
+                "assets/6003c2af94629f0144e4.png"
               ],
               "grid": "3",
               "gap": 2
