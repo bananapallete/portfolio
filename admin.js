@@ -783,6 +783,81 @@ async function saveModalAndPublish() {
   // 실패하면(토큰 없음/네트워크 오류) 팝업을 유지해 다시 시도할 수 있게 한다
 }
 
+/* 배경색·카드 설명·콘텐츠 간격처럼 한 번 정하면 잘 안 바꾸는 값들.
+   제목 줄의 "⚙ 설정"으로 여닫으며, 상태는 팝업을 다시 열어도 유지된다. */
+let projectSettingsOpen = false;
+
+function renderProjectSettings(project) {
+  const grid = document.createElement("div");
+  grid.className = "proj-settings";
+
+  // 라벨 + 내용 한 덩어리를 만든다
+  const field = (labelText, wide = false) => {
+    const box = document.createElement("div");
+    box.className = wide ? "proj-field proj-field-wide" : "proj-field";
+    const label = document.createElement("label");
+    label.className = "mini-label";
+    label.textContent = labelText;
+    box.appendChild(label);
+    grid.appendChild(box);
+    return box;
+  };
+
+  // 색상 + "지우기" 버튼을 한 줄에
+  const colorField = (labelText, get, set, clearText) => {
+    const box = field(labelText);
+    const row = document.createElement("div");
+    row.className = "block-controls-row";
+    row.style.marginTop = "6px";
+    row.appendChild(
+      buildColorField(get() || "#0d0d0d", (v) => { set(v); saveDraft(); },
+        { swatches: true, rerender: renderEditModalBody }).field
+    );
+    const clear = document.createElement("button");
+    clear.className = "btn btn-outline btn-small";
+    clear.textContent = clearText;
+    clear.addEventListener("click", () => { set(null); saveDraft(); renderEditModalBody(); });
+    row.appendChild(clear);
+    box.appendChild(row);
+  };
+
+  const summaryBox = field("카드 설명 (목록 카드의 제목 아래)", true);
+  const summaryInput = document.createElement("input");
+  summaryInput.type = "text";
+  summaryInput.value = project.summary || "";
+  summaryInput.placeholder = "예: Brand Concept & Strategy, Visual Identity Design";
+  summaryInput.className = "summary-input";
+  summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
+  summaryBox.appendChild(summaryInput);
+
+  colorField(
+    "상세 페이지 제목 영역 배경",
+    () => project.heroBg,
+    (v) => { if (v == null) delete project.heroBg; else project.heroBg = v; },
+    "배경 없음"
+  );
+  colorField(
+    project.bgColor ? "페이지 전체 배경" : "페이지 전체 배경 · 미설정",
+    () => project.bgColor,
+    (v) => { if (v == null) delete project.bgColor; else project.bgColor = v; },
+    "기본 배경"
+  );
+
+  const gapBox = field("콘텐츠 간격 (블록 사이 + 그리드 이미지 사이)");
+  const gapRow = document.createElement("div");
+  gapRow.className = "block-controls-row";
+  gapRow.style.marginTop = "6px";
+  gapRow.appendChild(buildGapField(
+    "간격",
+    () => project.blockGap,
+    (g) => { if (g == null) delete project.blockGap; else project.blockGap = g; },
+    "28"
+  ));
+  gapBox.appendChild(gapRow);
+
+  return grid;
+}
+
 function renderEditModalBody() {
   if (!editingContext) return;
   if (editingContext.type === "profile") return renderProfileModalBody();
@@ -815,101 +890,28 @@ function renderEditModalBody() {
     }
   });
 
+  const settingsBtn = document.createElement("button");
+  settingsBtn.className = "btn btn-ghost btn-small";
+  settingsBtn.textContent = projectSettingsOpen ? "⚙ 설정 접기" : "⚙ 설정";
+  settingsBtn.title = "배경색 · 카드 설명 · 콘텐츠 간격";
+  settingsBtn.addEventListener("click", () => {
+    projectSettingsOpen = !projectSettingsOpen;
+    renderEditModalBody();
+  });
+
   head.appendChild(titleInput);
+  head.appendChild(settingsBtn);
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
-  // ---- 상세 페이지 상단 배경색 ----
-  const bgLabel = document.createElement("label");
-  bgLabel.textContent = "상세 페이지 상단 배경색 (제목 영역)";
-  bgLabel.className = "mini-label";
-  bgLabel.style.marginTop = "10px";
-  card.appendChild(bgLabel);
-
-  const bgRow = document.createElement("div");
-  bgRow.className = "block-controls-row";
-
-  const bgField = buildColorField(
-    project.heroBg || "#0d0d0d",
-    (v) => { project.heroBg = v; saveDraft(); },
-    { swatches: true, rerender: renderEditModalBody }
-  );
-  bgRow.appendChild(bgField.field);
-
-  const bgClearBtn = document.createElement("button");
-  bgClearBtn.className = "btn btn-outline btn-small";
-  bgClearBtn.textContent = "배경 없음";
-  bgClearBtn.addEventListener("click", () => {
-    delete project.heroBg;
-    saveDraft();
-    renderEditModalBody();
-  });
-  bgRow.appendChild(bgClearBtn);
-  card.appendChild(bgRow);
-
-  // ---- 페이지 전체 배경색 (이 프로젝트를 보는 동안 적용) ----
-  const pageBgLabel = document.createElement("label");
-  pageBgLabel.textContent = project.bgColor
-    ? "페이지 전체 배경색 (이 프로젝트를 여는 동안 적용)"
-    : "페이지 전체 배경색 (이 프로젝트를 여는 동안 적용) · 미설정";
-  pageBgLabel.className = "mini-label";
-  pageBgLabel.style.marginTop = "16px";
-  card.appendChild(pageBgLabel);
-
-  const pageBgRow = document.createElement("div");
-  pageBgRow.className = "block-controls-row";
-
-  const pageBgField = buildColorField(
-    project.bgColor || "#0d0d0d",
-    (v) => { project.bgColor = v; saveDraft(); },
-    { swatches: true, rerender: renderEditModalBody }
-  );
-  pageBgRow.appendChild(pageBgField.field);
-
-  const pageBgClearBtn = document.createElement("button");
-  pageBgClearBtn.className = "btn btn-outline btn-small";
-  pageBgClearBtn.textContent = "기본 배경";
-  pageBgClearBtn.addEventListener("click", () => {
-    delete project.bgColor;
-    saveDraft();
-    renderEditModalBody();
-  });
-  pageBgRow.appendChild(pageBgClearBtn);
-  card.appendChild(pageBgRow);
-
-  const summaryLabel = document.createElement("label");
-  summaryLabel.textContent = "카드 설명 (목록 화면 제목 아래 표시, 1~2줄 권장)";
-  summaryLabel.className = "mini-label";
-  summaryLabel.style.marginTop = "16px";
-  card.appendChild(summaryLabel);
-  const summaryInput = document.createElement("input");
-  summaryInput.type = "text";
-  summaryInput.value = project.summary || "";
-  summaryInput.placeholder = "예: Brand Concept & Strategy, Visual Identity Design";
-  summaryInput.className = "summary-input";
-  summaryInput.addEventListener("input", () => { project.summary = summaryInput.value; saveDraft(); });
-  card.appendChild(summaryInput);
-
-  // ---- 콘텐츠 간격 (블록 사이 + 그리드/이미지 사이에 함께 적용) ----
-  const gapLabel = document.createElement("label");
-  gapLabel.textContent = "콘텐츠 간격 (블록 사이와 그리드 이미지 사이에 함께 적용, 최소 0px · 기본 28px)";
-  gapLabel.className = "mini-label";
-  gapLabel.style.marginTop = "16px";
-  card.appendChild(gapLabel);
-  const gapRow = document.createElement("div");
-  gapRow.className = "block-controls-row";
-  gapRow.appendChild(buildGapField(
-    "간격",
-    () => project.blockGap,
-    (g) => { if (g == null) delete project.blockGap; else project.blockGap = g; },
-    "28"
-  ));
-  card.appendChild(gapRow);
+  // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
+  if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
 
   // ---- 커버 이미지 ----
   const coverLabel = document.createElement("label");
   coverLabel.textContent = "커버 이미지 (목록 카드에 표시)";
   coverLabel.className = "mini-label";
+  coverLabel.style.marginTop = "14px";
   card.appendChild(coverLabel);
 
   const coverRow = document.createElement("div");

@@ -1355,6 +1355,23 @@ body.gate-locked { overflow: hidden; }
   margin-bottom: 8px;
 }
 
+/* 접어두는 프로젝트 설정 묶음 — 넓으면 두 칸, 좁으면 한 칸 */
+.proj-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px 24px;
+  margin-top: 12px;
+  padding: 16px 18px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+}
+
+.proj-settings .proj-field { min-width: 0; }
+.proj-settings .proj-field-wide { grid-column: 1 / -1; }
+.proj-settings .mini-label { margin-top: 0; }
+.proj-settings .block-controls-row { margin-top: 6px; }
+
 /* 종류 이름과 오른쪽 버튼들 사이를 벌린다 */
 .block-head-spacer { flex: 1 1 auto; }
 
