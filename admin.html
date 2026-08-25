@@ -26,6 +26,17 @@
   </div>
 </div>
 
+<!-- 임시저장 초안이 실제 사이트 내용과 다를 때만 나타나는 경고 -->
+<div class="admin-stale" id="staleBanner" hidden>
+  <div class="container">
+    <span class="admin-stale-msg" id="staleMsg"></span>
+    <div class="admin-stale-actions">
+      <button class="btn btn-outline btn-small" id="staleUseServer">사이트 내용 쓰기</button>
+      <button class="btn btn-ghost btn-small" id="staleKeepDraft">임시저장 유지</button>
+    </div>
+  </div>
+</div>
+
 <!-- 실제 사이트(index.html)와 동일한 헤더: 브랜드 + 카테고리 탭 -->
 <header class="site-header">
   <div class="container">

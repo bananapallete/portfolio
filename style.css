@@ -523,6 +523,39 @@ body.bg-takeover-light {
 
 .admin-utilbar .btn { white-space: nowrap; }
 
+/* 오래된 임시저장으로 사이트를 덮어쓰기 전에 띄우는 경고 배너 */
+.admin-stale {
+  background: #4a2b00;
+  border-bottom: 1px solid #7a4a00;
+  color: #ffe6bf;
+}
+
+.admin-stale[hidden] { display: none; }
+
+.admin-stale .container {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 28px;
+}
+
+.admin-stale-msg {
+  margin-right: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-stale-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+@media (max-width: 720px) {
+  .admin-stale .container { flex-direction: column; align-items: stretch; }
+  .admin-stale-actions { justify-content: flex-end; }
+}
+
 /* 사이트 헤더는 유틸 바 바로 아래에 붙어 스크롤 시 함께 고정 */
 .admin-body .site-header { top: 54px; }
 

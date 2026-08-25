@@ -93,21 +93,56 @@ function saveDraft() {
   }
 }
 
-async function loadInitial() {
-  const draft = localStorage.getItem(DRAFT_KEY);
-  if (draft) {
-    try {
-      return { data: JSON.parse(draft), source: "draft" };
-    } catch (e) {}
-  }
+async function fetchServerData() {
   try {
     const res = await fetch("data.json", { cache: "no-store" });
     if (!res.ok) throw new Error("fetch failed");
-    const json = await res.json();
-    return { data: json, source: "fetch" };
+    return await res.json();
   } catch (e) {
-    return { data: null, source: "none" };
+    return null;
   }
+}
+
+// 브라우저에 남은 임시저장(초안)과 실제 사이트의 data.json을 함께 읽는다.
+// 초안을 그대로 쓰되, 사이트 쪽이 그 사이 바뀌었으면 알려주기 위해 서버 내용도 넘긴다.
+async function loadInitial() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  let draft = null;
+  if (raw) {
+    try { draft = JSON.parse(raw); } catch (e) {}
+  }
+
+  const server = await fetchServerData();
+  if (draft) return { data: draft, source: "draft", server };
+  if (server) return { data: server, source: "fetch", server };
+  return { data: null, source: "none", server: null };
+}
+
+/* 오래된 초안으로 사이트를 덮어쓰는 사고를 막는 경고 배너.
+   예전에 열어둔 탭의 초안이 남아 있으면 그걸로 발행할 때 최신 내용이 통째로
+   날아가므로, 서버 내용과 다르면 반영 전에 어느 쪽을 쓸지 먼저 고르게 한다. */
+function checkStaleDraft(server) {
+  const banner = document.getElementById("staleBanner");
+  if (!banner || !server || !data) return;
+  if (JSON.stringify(data) === JSON.stringify(server)) return;
+
+  const count = (d) => (d.categories || []).reduce((n, c) => n + (c.projects || []).length, 0);
+  document.getElementById("staleMsg").innerHTML =
+    `⚠️ 브라우저에 남아 있던 <strong>임시저장 내용</strong>이 지금 사이트에 올라간 내용과 달라요. ` +
+    `(임시저장 프로젝트 ${count(data)}개 / 사이트 ${count(server)}개)<br/>` +
+    `이대로 "사이트에 반영"을 누르면 사이트 쪽 내용이 임시저장 내용으로 덮어써집니다.`;
+  banner.hidden = false;
+
+  document.getElementById("staleUseServer").addEventListener("click", () => {
+    localStorage.removeItem(DRAFT_KEY);
+    data = server;
+    renderAll();
+    banner.hidden = true;
+    document.getElementById("autosaveStatus").textContent = "사이트에 올라간 내용을 불러왔어요.";
+  });
+  document.getElementById("staleKeepDraft").addEventListener("click", () => {
+    banner.hidden = true;
+  });
 }
 
 function showLoadFailure() {
@@ -2038,7 +2073,7 @@ document.getElementById("tokenBtn").addEventListener("click", () => {
 
 /* ---------------------------------- Init ---------------------------------- */
 
-loadInitial().then(({ data: initial, source }) => {
+loadInitial().then(({ data: initial, source, server }) => {
   if (source === "none") {
     data = null;
     showLoadFailure();
@@ -2048,4 +2083,5 @@ loadInitial().then(({ data: initial, source }) => {
   renderAll();
   document.getElementById("autosaveStatus").textContent =
     source === "draft" ? "이전 임시저장 내용을 불러왔어요." : "data.json을 불러왔어요.";
+  if (source === "draft") checkStaleDraft(server);
 });
