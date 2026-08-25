@@ -403,3 +403,21 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
 
   return null;
 }
+
+/* ---------------------------- 푸터 연락처 (공용) ----------------------------
+   목록 화면과 상세 화면이 같은 마크업을 쓰므로 한 곳에서 만든다. */
+
+function renderFooterContact(profile) {
+  const el = document.getElementById("footerContact");
+  if (!el) return;
+  el.innerHTML = "";
+  const contact = (profile || {}).contact || {};
+  const link = (href, text) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    el.appendChild(a);
+  };
+  if (contact.phone) link(`tel:${contact.phone.replace(/\s+/g, "")}`, contact.phone);
+  (contact.emails || []).forEach((email) => link(`mailto:${email}`, email));
+}

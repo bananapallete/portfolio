@@ -1325,18 +1325,6 @@ body.gate-locked { overflow: hidden; }
   margin: 14px 0 5px;
 }
 
-/* .field label { display:block } 규칙보다 우선하도록 .field .toggle-switch로 명시 */
-.field .toggle-switch,
-.toggle-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 0;
-  cursor: pointer;
-  flex: none;
-  vertical-align: middle;
-}
-
 /* 실제 페이지처럼 블록이 이어지도록 세로로 쌓고, 간격은 JS가 넣어준다 */
 .block-list {
   margin-top: 4px;
@@ -1635,9 +1623,43 @@ body.gate-locked { overflow: hidden; }
   align-items: center;
   justify-content: center;
   cursor: grab;
+  /* 실제 페이지 모습을 가리지 않도록 조작 버튼은 사진 위에 올렸을 때만 보인다 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.pv-img-wrap:hover .drag-handle-mini,
+.pv-img-wrap:focus-within .drag-handle-mini {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .drag-handle-mini:active { cursor: grabbing; }
+
+/* 사진 위에 겹쳐 두는 "교체" 버튼 — 마우스를 올렸을 때만 나타난다 */
+.img-replace {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(20, 18, 26, 0.75);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.pv-img-wrap:hover .img-replace,
+.pv-img-wrap:focus-within .img-replace {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .add-block-row {
   display: flex;
@@ -1814,8 +1836,6 @@ body.gate-locked { overflow: hidden; }
   .admin-utilbar .container { height: 48px; gap: 10px; padding: 0 16px; }
   .admin-body .site-header { top: 48px; }
   .project-card-head { flex-wrap: wrap; }
-  .project-card-head input { min-width: 100%; }
-  .block-item { padding: 10px; }
   .block-controls-row { row-gap: 10px; column-gap: 10px; }
 
   /* 좁은 화면에서는 썸네일을 줄여 업로드 타일이 같은 줄에 남도록 */
@@ -1823,7 +1843,6 @@ body.gate-locked { overflow: hidden; }
   .thumb img, .thumb video { max-width: 150px; }
   .thumb-add { min-width: 78px; padding: 0 8px; }
   .pv-slider-strip .pv-img-wrap { height: 100px; }
-  .project-thumb-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
   .admin-modal-overlay { padding: 0; }
   .admin-modal { width: 100%; min-height: 100%; border-radius: 0; padding: 24px 16px; margin-bottom: 0; }
   .editing-indicator { left: 12px; bottom: 12px; max-width: calc(100vw - 24px); font-size: 11px; }

@@ -47,21 +47,7 @@ function renderHeader() {
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
   applyWorkBg(p);
 
-  const contactEl = document.getElementById("footerContact");
-  contactEl.innerHTML = "";
-  const contact = p.contact || {};
-  if (contact.phone) {
-    const a = document.createElement("a");
-    a.href = `tel:${contact.phone.replace(/\s+/g, "")}`;
-    a.textContent = contact.phone;
-    contactEl.appendChild(a);
-  }
-  (contact.emails || []).forEach((email) => {
-    const a = document.createElement("a");
-    a.href = `mailto:${email}`;
-    a.textContent = email;
-    contactEl.appendChild(a);
-  });
+  renderFooterContact(p);
 }
 
 function renderTabs() {

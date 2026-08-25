@@ -27,6 +27,25 @@ let editingContext = null;
 
 // "간격 ___ px [기본값]" 형태의 조절 필드. 빈 값이면 기본값(CSS 지정) 사용.
 // getVal/setVal로 데이터에 읽고 쓰고, onApply(gap|null)로 즉시 반영한다.
+/* [값, 표시글] 목록으로 만드는 분절 버튼 줄. 네 군데에서 같은 코드를 쓰고 있었다. */
+function buildSeg(options, current, onPick) {
+  const seg = document.createElement("div");
+  seg.className = "layout-seg";
+  options.forEach(([value, text]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if (String(current) === value) b.classList.add("active");
+    b.addEventListener("click", () => {
+      onPick(value);
+      saveDraft();
+      renderEditModalBody();
+    });
+    seg.appendChild(b);
+  });
+  return seg;
+}
+
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   const row = document.createElement("div");
   row.className = "gap-field";
@@ -451,21 +470,11 @@ function renderProfileFields(wrap, profile) {
   twLabel.style.marginTop = "18px";
   wrap.appendChild(twLabel);
 
-  const twSeg = document.createElement("div");
-  twSeg.className = "layout-seg";
-  [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]].forEach(([value, text]) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = text;
-    if (String(profile.projectTitleWeight || "900") === value) b.classList.add("active");
-    b.addEventListener("click", () => {
-      profile.projectTitleWeight = value;
-      saveDraft();
-      renderEditModalBody();
-    });
-    twSeg.appendChild(b);
-  });
-  wrap.appendChild(twSeg);
+  wrap.appendChild(buildSeg(
+    [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]],
+    profile.projectTitleWeight || "900",
+    (v) => { profile.projectTitleWeight = v; }
+  ));
 
   // ---- 홈 화면 프로젝트 영역 배경색 ----
   const workBgLabel = document.createElement("label");
@@ -1283,21 +1292,11 @@ function renderBlockBody(project, block, blockIndex) {
     alignLabel.textContent = "정렬";
     alignLabel.style.marginLeft = "12px";
 
-    const alignSeg = document.createElement("div");
-    alignSeg.className = "layout-seg";
-    [["left", "왼쪽"], ["center", "가운데"], ["right", "오른쪽"]].forEach(([value, text]) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = text;
-      if ((block.align || "left") === value) b.classList.add("active");
-      b.addEventListener("click", () => {
-        block.align = value;
-        pv.style.textAlign = value;
-        saveDraft();
-        renderEditModalBody();
-      });
-      alignSeg.appendChild(b);
-    });
+    const alignSeg = buildSeg(
+      [["left", "왼쪽"], ["center", "가운데"], ["right", "오른쪽"]],
+      block.align || "left",
+      (v) => { block.align = v; }
+    );
 
     controls.appendChild(sizeLabel);
     controls.appendChild(sizeInput);
@@ -1315,40 +1314,22 @@ function renderBlockBody(project, block, blockIndex) {
     const segRow = document.createElement("div");
     segRow.className = "block-controls-row";
 
-    const seg = document.createElement("div");
-    seg.className = "layout-seg";
-    [["single", "단일"], ["grid", "그리드"], ["slider", "자동 슬라이드"]].forEach(([value, text]) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = text;
-      if ((block.layout || "single") === value) b.classList.add("active");
-      b.addEventListener("click", () => {
-        block.layout = value;
-        if (value === "grid" && !block.grid) block.grid = "3";
-        saveDraft();
-        renderEditModalBody();
-      });
-      seg.appendChild(b);
-    });
-    segRow.appendChild(seg);
+    segRow.appendChild(buildSeg(
+      [["single", "단일"], ["grid", "그리드"], ["slider", "자동 슬라이드"]],
+      block.layout || "single",
+      (v) => {
+        block.layout = v;
+        if (v === "grid" && !block.grid) block.grid = "3";
+      }
+    ));
 
     // 그리드 형태 선택
     if (block.layout === "grid") {
-      const gseg = document.createElement("div");
-      gseg.className = "layout-seg";
-      [["2", "2열"], ["3", "3열"], ["4", "4열"], ["masonry", "모자이크"]].forEach(([value, text]) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = text;
-        if (String(block.grid || "3") === value) b.classList.add("active");
-        b.addEventListener("click", () => {
-          block.grid = value;
-          saveDraft();
-          renderEditModalBody();
-        });
-        gseg.appendChild(b);
-      });
-      segRow.appendChild(gseg);
+      segRow.appendChild(buildSeg(
+        [["2", "2열"], ["3", "3열"], ["4", "4열"], ["masonry", "모자이크"]],
+        block.grid || "3",
+        (v) => { block.grid = v; }
+      ));
     }
 
     // 이미지 사이 간격 (슬라이드는 한 장씩 보여서 간격 개념이 없음)
@@ -1678,6 +1659,13 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       h.textContent = "⠿";
       w.appendChild(h);
 
+      // 사진 위에 올리면 그 자리에서 바로 다른 파일로 갈아끼울 수 있다
+      w.appendChild(makeImageReplaceBtn((dataUrl) => {
+        block.images[j] = dataUrl;
+        saveDraft();
+        renderEditModalBody();
+      }));
+
       attachDrag(w, h, imgGroup, block.images, j);
       div.appendChild(w);
     });
@@ -1760,6 +1748,25 @@ function makeThumb(src, kind, onRemove) {
   removeBtn.addEventListener("click", onRemove);
   thumb.appendChild(removeBtn);
   return thumb;
+}
+
+// 사진 위에 겹쳐 두는 "교체" 버튼. 평소에는 숨어 있다가 마우스를 올리면 나타난다.
+function makeImageReplaceBtn(onImage) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "img-replace file-btn";
+  btn.title = "다른 이미지로 교체";
+  btn.appendChild(document.createTextNode("교체"));
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.addEventListener("change", (e) => {
+    const file = (e.target.files || [])[0];
+    if (file) readFileAsDataURL(file).then(onImage);
+  });
+  btn.appendChild(input);
+  return btn;
 }
 
 function readFileAsDataURL(file) {

@@ -84,20 +84,7 @@ async function initProject() {
   const profile = siteData.profile || {};
   document.getElementById("projBrand").textContent = profile.nickname || profile.name || "Portfolio";
   document.getElementById("footerName").textContent = profile.name || profile.nickname || "";
-  const contactEl = document.getElementById("footerContact");
-  const contact = profile.contact || {};
-  if (contact.phone) {
-    const a = document.createElement("a");
-    a.href = `tel:${contact.phone.replace(/\s+/g, "")}`;
-    a.textContent = contact.phone;
-    contactEl.appendChild(a);
-  }
-  (contact.emails || []).forEach((email) => {
-    const a = document.createElement("a");
-    a.href = `mailto:${email}`;
-    a.textContent = email;
-    contactEl.appendChild(a);
-  });
+  renderFooterContact(profile);
 
   // 미리보기 모드면 돌아갈 때도 미리보기 유지
   if (isPreviewMode()) {
