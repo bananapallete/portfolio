@@ -1895,21 +1895,55 @@ function setPublishStatus(text) {
   }
 }
 
+/* 이 탭이 살아 있는 동안만 쓰는 예비 보관함.
+   임시저장 초안이 커서 localStorage 용량(약 5MB)을 다 쓰면 토큰 쓰기까지
+   함께 실패한다. 그때 토큰이 통째로 날아가 매번 다시 묻게 되는 걸 막는다. */
+let memoryToken = null;
+
+function readStoredToken() {
+  try {
+    return localStorage.getItem(GH_TOKEN_KEY) || memoryToken;
+  } catch (e) {
+    return memoryToken;
+  }
+}
+
+function storeToken(token) {
+  memoryToken = token;
+  try {
+    localStorage.setItem(GH_TOKEN_KEY, token);
+    return true;
+  } catch (e) {
+    // 용량 초과 등으로 못 남긴 경우 — 이 탭에서는 계속 쓸 수 있게 두고 알려만 준다
+    return false;
+  }
+}
+
+function forgetToken() {
+  memoryToken = null;
+  try {
+    localStorage.removeItem(GH_TOKEN_KEY);
+  } catch (e) {}
+}
+
 function getGithubToken(forceAsk = false) {
-  let token = localStorage.getItem(GH_TOKEN_KEY);
-  if (token && !forceAsk) return token;
-  token = prompt(
+  const saved = readStoredToken();
+  if (saved && !forceAsk) return saved;
+  let token = prompt(
     "GitHub 토큰(ghp_...)을 입력해주세요.\n\n" +
       "발급 방법: github.com/settings/tokens → Generate new token (classic) → 'repo' 권한 체크\n\n" +
       "토큰은 이 브라우저에만 저장되며, 토큰이 없는 사람은 이 페이지를 열어도 사이트를 수정할 수 없어요.",
     ""
   );
-  if (token) {
-    token = token.trim();
-    localStorage.setItem(GH_TOKEN_KEY, token);
-    return token;
+  if (!token) return null;
+  token = token.trim();
+  if (!storeToken(token)) {
+    setPublishStatus(
+      "토큰을 브라우저에 저장하지 못했어요(용량 초과). 이 탭에서는 계속 쓸 수 있지만, " +
+        "탭을 닫으면 다시 입력해야 해요. \"사이트에 반영\"으로 이미지가 올라가면 용량이 줄어듭니다."
+    );
   }
-  return null;
+  return token;
 }
 
 async function ghRequest(path, token, options = {}) {
@@ -1922,8 +1956,15 @@ async function ghRequest(path, token, options = {}) {
     },
   });
   if (res.status === 401) {
-    localStorage.removeItem(GH_TOKEN_KEY);
+    // 토큰 자체가 잘못된 경우에만 지운다
+    forgetToken();
     throw new Error("토큰이 만료되었거나 잘못됐어요. \"사이트에 반영\"을 다시 눌러 새 토큰을 입력해주세요.");
+  }
+  if (res.status === 403) {
+    // 권한 부족·rate limit 등 — 토큰은 멀쩡하므로 지우지 않는다
+    throw new Error(
+      "GitHub이 요청을 거부했어요(403). 토큰의 'repo' 권한이 있는지, 잠시 뒤 다시 시도해보세요."
+    );
   }
   return res;
 }
@@ -2067,8 +2108,11 @@ async function publishToGithub() {
 
 document.getElementById("publishBtn").addEventListener("click", publishToGithub);
 document.getElementById("tokenBtn").addEventListener("click", () => {
+  const had = !!readStoredToken();
   if (getGithubToken(true)) {
     setPublishStatus("토큰을 저장했어요. 이제 \"사이트에 반영\"을 누르면 배포됩니다.");
+  } else if (had) {
+    setPublishStatus("토큰 입력을 취소했어요. 기존 토큰은 그대로 남아 있어요.");
   }
 });
 
