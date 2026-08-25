@@ -783,6 +783,63 @@ async function saveModalAndPublish() {
   // 실패하면(토큰 없음/네트워크 오류) 팝업을 유지해 다시 시도할 수 있게 한다
 }
 
+/* 상세 페이지 맨 위(배경 + 제목 + 카테고리 뱃지)를 실제 보이는 모습 그대로 그린다.
+   project.js의 상단 처리와 같은 클래스·같은 판별을 써서 눈으로 본 대로 저장된다. */
+/* 실제 페이지에서 이 자리에 깔리는 색을 미리보기에도 그대로 입힌다.
+   상단은 heroBg가 없으면 프로젝트 전체 배경색이 그대로 비쳐 보이고,
+   밝은 색을 깔면 사이트가 글자색을 뒤집으므로 여기서도 똑같이 뒤집는다. */
+function applyPreviewBg(el, color) {
+  if (!color) return false;
+  el.style.background = color;
+  el.style.setProperty("--preview-bg", color);
+  const light = !isDarkColor(color);
+  el.classList.toggle("preview-light", light);
+  return !light;
+}
+
+function renderHeroPreview(cat, project) {
+  const wrap = document.createElement("div");
+  wrap.className = "proj-hero-wrap hero-preview";
+  // heroBg를 안 정하면 실제 페이지에서는 전체 배경색이 그대로 보인다
+  const dark = applyPreviewBg(wrap, project.heroBg || project.bgColor);
+  if (dark || !(project.heroBg || project.bgColor)) wrap.classList.add("proj-hero-dark");
+
+  const inner = document.createElement("div");
+  inner.className = "container proj-hero";
+
+  const h1 = document.createElement("h1");
+  h1.className = "proj-title blk-text-edit";
+  h1.contentEditable = "true";
+  h1.spellcheck = false;
+  h1.dataset.placeholder = "프로젝트 제목";
+  h1.textContent = project.title || "";
+  // 폰트 두께는 프로필의 전역 설정을 따른다 (실제 페이지와 같은 규칙)
+  const weight = (data.profile || {}).projectTitleWeight || project.titleWeight;
+  if (weight) h1.style.fontWeight = weight;
+  h1.addEventListener("input", () => {
+    project.title = h1.innerText.replace(/\n/g, " ").trim();
+    saveDraft();
+  });
+  // 제목은 한 줄이므로 엔터로 줄을 늘리지 않는다
+  h1.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+  });
+  h1.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData("text/plain").replace(/\s+/g, " ");
+    document.execCommand("insertText", false, text);
+  });
+
+  const tag = document.createElement("span");
+  tag.className = "modal-tag";
+  tag.textContent = cat.name || "";
+
+  inner.appendChild(h1);
+  inner.appendChild(tag);
+  wrap.appendChild(inner);
+  return wrap;
+}
+
 /* 배경색·카드 설명·콘텐츠 간격처럼 한 번 정하면 잘 안 바꾸는 값들.
    제목 줄의 "⚙ 설정"으로 여닫으며, 상태는 팝업을 다시 열어도 유지된다. */
 let projectSettingsOpen = false;
@@ -869,15 +926,10 @@ function renderEditModalBody() {
   const head = document.createElement("div");
   head.className = "project-card-head";
 
-  const titleInput = document.createElement("input");
-  titleInput.type = "text";
-  titleInput.value = project.title || "";
-  titleInput.style.flex = "1";
-  titleInput.style.fontWeight = "700";
-  titleInput.style.border = "1.5px solid var(--line)";
-  titleInput.style.borderRadius = "8px";
-  titleInput.style.padding = "8px 10px";
-  titleInput.addEventListener("input", () => { project.title = titleInput.value; saveDraft(); });
+  const headLabel = document.createElement("span");
+  headLabel.className = "mini-label";
+  headLabel.textContent = "상세 페이지 상단 (제목을 눌러 바로 고칠 수 있어요)";
+  headLabel.style.marginTop = "0";
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "btn btn-danger btn-small";
@@ -899,10 +951,12 @@ function renderEditModalBody() {
     renderEditModalBody();
   });
 
-  head.appendChild(titleInput);
+  head.appendChild(headLabel);
   head.appendChild(settingsBtn);
   head.appendChild(deleteBtn);
   card.appendChild(head);
+
+  card.appendChild(renderHeroPreview(cat, project));
 
   // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
   if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
@@ -1122,6 +1176,7 @@ function renderBlocksEditor(project) {
       // 글은 길어도 안에서 스크롤되고, 이미지는 접었을 때 높이만 잘라 보여준다
       if (block.type === "text") preview.classList.add("block-preview-text");
       else if (canFold && !expanded) preview.classList.add("block-preview-capped");
+      applyPreviewBg(preview, project.bgColor);
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
     item.appendChild(preview);

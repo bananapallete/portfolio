@@ -428,8 +428,10 @@ body.bg-takeover .site-footer {
   background: transparent;
 }
 
-/* 밝은 색으로 덮었을 때는 글자·선을 어두운 쪽으로 뒤집어 대비를 유지 */
-body.bg-takeover-light {
+/* 밝은 색으로 덮었을 때는 글자·선을 어두운 쪽으로 뒤집어 대비를 유지
+   (.preview-light 는 관리자 미리보기에서 같은 규칙을 쓰기 위한 것) */
+body.bg-takeover-light,
+.preview-light {
   --ink: #14121a;
   --paper: #faf9f6;
   --paper-soft: #f1efe9;
@@ -1355,6 +1357,26 @@ body.gate-locked { overflow: hidden; }
   margin-bottom: 8px;
 }
 
+/* 편집 팝업 안에 실제 모습 그대로 그리는 상세 페이지 상단 */
+.hero-preview {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 34px 0 30px;
+  overflow: hidden;
+}
+
+/* 팝업 안에서는 제목이 지나치게 커지지 않도록 한 단계 줄인다.
+   색을 var(--ink)로 다시 잡아야 밝은 배경에서 .preview-light 뒤집기가 먹는다
+   (상속된 색은 이미 계산이 끝난 값이라 지역 변수를 다시 보지 않는다) */
+.hero-preview .proj-title {
+  font-size: clamp(26px, 3.2vw, 40px);
+  color: var(--ink);
+}
+
+/* 머리줄: 안내 문구가 왼쪽을 채우고 버튼이 오른쪽에 붙는다 */
+.project-card-head .mini-label { flex: 1 1 auto; }
+
 /* 접어두는 프로젝트 설정 묶음 — 넓으면 두 칸, 좁으면 한 칸 */
 .proj-settings {
   display: grid;
@@ -1396,7 +1418,7 @@ body.gate-locked { overflow: hidden; }
   inset: auto 0 0 0;
   height: 90px;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--paper));
+  background: linear-gradient(to bottom, transparent, var(--preview-bg, var(--paper)));
 }
 
 /* 글은 잘라내면 편집이 불편하므로 안에서 스크롤시킨다 */
