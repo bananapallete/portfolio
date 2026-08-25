@@ -10,21 +10,26 @@
    아니라 문 앞 커튼에 가깝다.
    ========================================================================== */
 
-/* 비밀번호의 SHA-256 해시(소금 포함). 비워두면 첫 화면에서 새로 정할 수 있다.
-   해시는 공개돼도 되지만, 짧거나 흔한 비밀번호는 역산되니 길게 잡을 것. */
-const ADMIN_PW_HASH = "";
+/* 비밀번호를 PBKDF2로 늘린 값. 비워두면 첫 화면에서 새로 정할 수 있다.
+   이 값은 공개돼도 되지만, 짧은 비밀번호는 결국 전수조사로 뚫린다.
+   그냥 해시면 표 한 번 조회로 끝나므로 반복 횟수를 크게 잡아 시간을 벌어둔다. */
+const ADMIN_PW_HASH = "418a7f413b8dc037f42d9a5492d13098e1c539120d06c91ce5067d9a5476adc1";
 
 const GATE_SALT = "unlimitcho-portfolio-admin";
+const GATE_ITERATIONS = 250000;
 const GATE_UNLOCK_KEY = "portfolioAdminUnlockedUntil";
 const GATE_REMEMBER_DAYS = 30;
+const GATE_MIN_LENGTH = 4;
 
-async function sha256Hex(text) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-function hashPassword(pw) {
-  return sha256Hex(GATE_SALT + "|" + pw);
+async function hashPassword(pw) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: enc.encode(GATE_SALT), iterations: GATE_ITERATIONS, hash: "SHA-256" },
+    key,
+    256
+  );
+  return [...new Uint8Array(bits)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function gateIsUnlocked() {
@@ -91,19 +96,31 @@ window.adminGateReady = new Promise((resolve) => {
     const value = pw.value;
     if (!value) return;
 
+    // PBKDF2 25만 회는 눈에 띄게 걸리므로 멈춘 것처럼 보이지 않게 한다
+    submit.disabled = true;
+    const label = submit.textContent;
+    submit.textContent = "확인 중...";
+    const done = () => {
+      submit.disabled = false;
+      submit.textContent = label;
+    };
+
     if (settingUp) {
-      if (value.length < 8) {
-        msg.textContent = "8자 이상으로 정해주세요.";
+      if (value.length < GATE_MIN_LENGTH) {
+        msg.textContent = `${GATE_MIN_LENGTH}자 이상으로 정해주세요.`;
+        done();
         return;
       }
       if (value !== pw2.value) {
         msg.textContent = "두 번 입력한 비밀번호가 서로 달라요.";
+        done();
         return;
       }
       hashOut.value = await hashPassword(value);
       hashOut.parentElement.hidden = false;
       msg.textContent = "";
       gateRemember();
+      submit.disabled = false;
       submit.textContent = "이 브라우저에서 계속하기";
       submit.addEventListener("click", open, { once: true });
       return;
@@ -111,6 +128,7 @@ window.adminGateReady = new Promise((resolve) => {
 
     if ((await hashPassword(value)) !== ADMIN_PW_HASH) {
       msg.textContent = "비밀번호가 맞지 않아요.";
+      done();
       pw.select();
       return;
     }
