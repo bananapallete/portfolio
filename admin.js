@@ -9,8 +9,12 @@ let data = null;
 
 /* 블록 목록의 접힘 상태. 블록 객체 자체를 열쇠로 삼아 순서를 바꿔도 따라간다.
    (편집 팝업은 프로젝트 복사본을 한 번만 만들므로 다시 그려도 객체가 유지된다) */
-const expandedBlocks = new WeakSet(); // 영상·이미지는 기본으로 줄이고, 펼친 것만 기억한다
-const closedSettings = new WeakSet(); // 설정줄은 기본으로 펴고, 접은 것만 기억한다
+/* 블록별 접힘 여부. 값이 없으면 기본값(임베드만 접힘)을 따른다. */
+const blockFolds = new WeakMap();
+const isBlockFolded = (block) =>
+  blockFolds.has(block) ? blockFolds.get(block) : block.type === "embed";
+
+const openSettings = new WeakSet(); // 조절값 줄은 기본으로 접고, 연 것만 기억한다
 
 // 텍스트 블록의 미리보기 요소. 크기·색상을 다시 그리지 않고 바로 반영하는 데 쓴다.
 const textPreviewNodes = new WeakMap();
@@ -753,6 +757,7 @@ function closeProjectEditor(force = false) {
     }
   }
   editingContext = null;
+  applyModalBg(null);
   document.getElementById("projectEditOverlay").classList.add("hidden");
   renderAll();
 }
@@ -788,6 +793,17 @@ async function saveModalAndPublish() {
 /* 실제 페이지에서 이 자리에 깔리는 색을 미리보기에도 그대로 입힌다.
    상단은 heroBg가 없으면 프로젝트 전체 배경색이 그대로 비쳐 보이고,
    밝은 색을 깔면 사이트가 글자색을 뒤집으므로 여기서도 똑같이 뒤집는다. */
+/* 편집 팝업 전체를 그 프로젝트의 배경색으로 물들인다.
+   상세 페이지를 열었을 때와 같은 색 위에서 고치게 된다. */
+function applyModalBg(color) {
+  const modal = document.querySelector(".admin-modal");
+  if (!modal) return;
+  modal.style.background = "";
+  modal.style.removeProperty("--preview-bg");
+  modal.classList.remove("preview-light");
+  applyPreviewBg(modal, color);
+}
+
 function applyPreviewBg(el, color) {
   if (!color) return false;
   el.style.background = color;
@@ -920,6 +936,7 @@ function renderEditModalBody() {
   if (editingContext.type === "profile") return renderProfileModalBody();
   if (editingContext.type === "category") return renderCategoryModalBody();
   const { cat, project, projIndex } = editingContext;
+  applyModalBg(project.bgColor);
   const card = document.getElementById("projectEditBody");
   card.innerHTML = "";
 
@@ -999,6 +1016,7 @@ function renderEditModalBody() {
 
 // 프로필 편집 팝업 본문
 function renderProfileModalBody() {
+  applyModalBg(null);
   const card = document.getElementById("projectEditBody");
   card.innerHTML = "";
 
@@ -1014,6 +1032,7 @@ function renderProfileModalBody() {
 
 // 카테고리 설정 팝업 본문 (이름·색상·삭제)
 function renderCategoryModalBody() {
+  applyModalBg(null);
   const { cat, copy } = editingContext;
   const card = document.getElementById("projectEditBody");
   card.innerHTML = "";
@@ -1095,6 +1114,9 @@ function renderBlocksEditor(project) {
   project.blocks = project.blocks || [];
   const wrap = document.createElement("div");
   wrap.className = "block-list";
+  // 블록 사이 간격도 실제 페이지와 같은 값을 쓴다 (미설정이면 사이트 기본 28px)
+  const blockGap = normalizeGap(project.blockGap);
+  wrap.style.gap = (blockGap != null ? blockGap : 28) + "px";
   const group = `blocks-${project.id}`;
 
   project.blocks.forEach((block, i) => {
@@ -1121,8 +1143,8 @@ function renderBlocksEditor(project) {
     bh.appendChild(label);
     bh.appendChild(spacer);
 
-    // 영상과 이미지는 세로로 길어 목록을 밀어내므로 기본으로 줄여두고 여기서 펼친다
-    const expanded = expandedBlocks.has(block);
+    // 영상은 세로로 길어 목록을 밀어내므로 기본으로 접어두고, 나머지는 실제 크기 그대로 둔다
+    const folded = isBlockFolded(block);
     const canFold =
       block.type === "embed" || (block.type === "images" && (block.images || []).length > 0);
     if (canFold) {
@@ -1131,24 +1153,23 @@ function renderBlocksEditor(project) {
       fold.className = "btn btn-ghost btn-xs";
       fold.textContent =
         block.type === "embed"
-          ? (expanded ? "▾ 영상 접기" : "▸ 영상 펼치기")
-          : (expanded ? "▾ 줄이기" : "▸ 전체 보기");
+          ? (folded ? "▸ 영상 펼치기" : "▾ 영상 접기")
+          : (folded ? "▸ 전체 보기" : "▾ 줄이기");
       fold.addEventListener("click", () => {
-        if (expanded) expandedBlocks.delete(block);
-        else expandedBlocks.add(block);
+        blockFolds.set(block, !folded);
         renderEditModalBody();
       });
       bh.appendChild(fold);
     }
 
-    const settingsOpen = !closedSettings.has(block);
+    const settingsOpen = openSettings.has(block);
     const gear = document.createElement("button");
     gear.type = "button";
     gear.className = "btn btn-ghost btn-xs";
     gear.textContent = settingsOpen ? "⚙ 설정 접기" : "⚙ 설정";
     gear.addEventListener("click", () => {
-      if (settingsOpen) closedSettings.add(block);
-      else closedSettings.delete(block);
+      if (settingsOpen) openSettings.delete(block);
+      else openSettings.add(block);
       renderEditModalBody();
     });
     bh.appendChild(gear);
@@ -1169,14 +1190,12 @@ function renderBlocksEditor(project) {
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
     const preview = document.createElement("div");
     preview.className = "block-preview";
-    if (block.type === "embed" && !expanded) {
+    if (block.type === "embed" && folded) {
       // 접었을 때는 iframe을 아예 만들지 않아 영상이 로드되지 않는다
       preview.appendChild(renderFoldedEmbed(block));
     } else {
-      // 글은 길어도 안에서 스크롤되고, 이미지는 접었을 때 높이만 잘라 보여준다
-      if (block.type === "text") preview.classList.add("block-preview-text");
-      else if (canFold && !expanded) preview.classList.add("block-preview-capped");
-      applyPreviewBg(preview, project.bgColor);
+      // 기본은 실제 페이지와 같은 크기. 이미지를 접으면 높이만 잘라 보여준다
+      if (canFold && folded) preview.classList.add("block-preview-capped");
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
     item.appendChild(preview);
