@@ -8,6 +8,36 @@
 </head>
 <body class="theme-dark admin-body">
 
+<!-- 비밀번호를 넣기 전까지 관리자 화면을 덮는 잠금 판 -->
+<div class="admin-gate" id="adminGate">
+  <form class="admin-gate-card" id="adminGateForm">
+    <h1>관리자 페이지</h1>
+    <p class="admin-gate-sub">비밀번호를 입력해주세요.</p>
+
+    <div class="admin-gate-setup" id="adminGateSetup" hidden>
+      <p><strong>아직 비밀번호가 정해져 있지 않아요.</strong> 여기서 새로 정할 수 있어요.</p>
+      <p>정하고 나면 아래에 나오는 해시값을 <code>admin-gate.js</code>의
+         <code>ADMIN_PW_HASH</code>에 넣고 배포해야 다른 사람에게도 적용됩니다.</p>
+    </div>
+
+    <input type="password" id="adminGatePw" autocomplete="current-password" placeholder="비밀번호" />
+    <input type="password" id="adminGatePw2" autocomplete="new-password" placeholder="비밀번호 확인" hidden />
+    <p class="admin-gate-msg" id="adminGateMsg"></p>
+
+    <div class="admin-gate-hash" hidden>
+      <label for="adminGateHash">ADMIN_PW_HASH 에 넣을 값</label>
+      <input type="text" id="adminGateHash" readonly />
+    </div>
+
+    <button class="btn btn-primary" id="adminGateSubmit" type="submit">들어가기</button>
+
+    <p class="admin-gate-note">
+      정적 사이트라 이 잠금은 우연히 들어온 사람을 막는 정도예요.
+      실제로 사이트를 바꾸려면 GitHub 토큰이 필요하고, 토큰은 이 브라우저에만 있습니다.
+    </p>
+  </form>
+</div>
+
 <!-- 관리자 전용 유틸 바 — 이 바를 빼면 아래는 실제 사이트와 같은 구조 -->
 <div class="admin-utilbar">
   <div class="container">
@@ -20,6 +50,7 @@
       <button class="btn btn-ghost btn-small" id="resetBtn" title="임시 저장을 지우고 원본 data.json을 다시 불러오기">원본 다시 불러오기</button>
       <button class="btn btn-ghost btn-small" id="previewBtn" title="지금 상태를 새 탭에서 미리보기">미리보기</button>
       <button class="btn btn-ghost btn-small" id="tokenBtn" title="배포에 쓸 GitHub 토큰 입력">GitHub 토큰 설정</button>
+      <button class="btn btn-ghost btn-small" id="lockBtn" title="이 브라우저의 잠금 해제를 취소하고 다시 잠그기">잠그기</button>
       <button class="btn btn-outline btn-small" id="exportBtn" title="data.json을 파일로 받아두는 백업">내보내기(백업)</button>
       <button class="btn btn-primary btn-small" id="publishBtn" title="지금 상태 전체를 GitHub에 커밋해 실제 사이트에 반영">🚀 사이트에 반영</button>
     </div>
@@ -80,6 +111,7 @@
 <!-- 지금 어느 부분을 수정 중인지 보여주는 안내 칩 (입력창에 포커스하면 나타남) -->
 <div class="editing-indicator" id="editingIndicator" aria-live="polite"></div>
 
+<script src="admin-gate.js"></script>
 <script src="blocks.js"></script>
 <script src="admin.js"></script>
 </body>

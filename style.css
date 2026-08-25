@@ -523,6 +523,102 @@ body.bg-takeover-light {
 
 .admin-utilbar .btn { white-space: nowrap; }
 
+/* ------------------------------ 관리자 잠금 화면 ------------------------------ */
+
+.admin-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: var(--paper);
+}
+
+.admin-gate[hidden] { display: none; }
+
+body.gate-locked { overflow: hidden; }
+
+.admin-gate-card {
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.admin-gate-card h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.admin-gate-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-gate-card input[type="password"],
+.admin-gate-card input[type="text"] {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper-soft);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.admin-gate-card input[hidden] { display: none; }
+
+.admin-gate-setup,
+.admin-gate-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.admin-gate-setup p { margin: 0 0 6px; }
+.admin-gate-setup code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--paper-soft);
+  font-size: 11px;
+}
+
+.admin-gate-msg {
+  margin: 0;
+  min-height: 16px;
+  font-size: 12px;
+  color: #ff7a8a;
+}
+
+.admin-gate-hash[hidden] { display: none; }
+
+.admin-gate-hash label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.admin-gate-hash input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.admin-gate-note {
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
 /* 오래된 임시저장으로 사이트를 덮어쓰기 전에 띄우는 경고 배너 */
 .admin-stale {
   background: #4a2b00;

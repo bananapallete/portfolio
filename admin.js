@@ -2116,9 +2116,14 @@ document.getElementById("tokenBtn").addEventListener("click", () => {
   }
 });
 
+document.getElementById("lockBtn").addEventListener("click", () => {
+  if (confirm("이 브라우저의 잠금을 다시 걸까요? 다음에 열 때 비밀번호를 물어봐요.")) lockAdmin();
+});
+
 /* ---------------------------------- Init ---------------------------------- */
 
-loadInitial().then(({ data: initial, source, server }) => {
+// 비밀번호를 통과하기 전에는 데이터를 읽지도, 화면을 그리지도 않는다
+window.adminGateReady.then(loadInitial).then(({ data: initial, source, server }) => {
   if (source === "none") {
     data = null;
     showLoadFailure();
