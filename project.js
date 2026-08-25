@@ -10,12 +10,15 @@ function setPageBg(color) {
   const body = document.body;
   if (!color) {
     body.style.backgroundColor = "";
+    body.style.removeProperty("--chrome");
     body.classList.remove("bg-takeover", "bg-takeover-light");
     return;
   }
   // 기본 배경에서 지정한 색으로 서서히 넘어가도록 다음 프레임에 적용한다
   requestAnimationFrame(() => {
     body.style.backgroundColor = color;
+    // 상단바·맨 위로 버튼도 같은 색을 쓰도록 알려준다
+    body.style.setProperty("--chrome", color);
     body.classList.add("bg-takeover");
     // 밝은 배경으로 덮으면 글자·선 색을 어두운 쪽으로 뒤집어 대비를 유지한다
     body.classList.toggle("bg-takeover-light", !isDarkColor(color));

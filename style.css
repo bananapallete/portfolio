@@ -1177,11 +1177,13 @@ body.gate-locked { overflow: hidden; }
 
 /* ---------------------------- 프로젝트 상세 페이지 ---------------------------- */
 
+/* --chrome 은 지금 보고 있는 프로젝트의 배경색. 지정되지 않았으면 사이트 기본색을
+   쓴다. 상단바와 맨 위로 버튼이 본문 배경과 같은 색을 따라가도록 하기 위한 것. */
 .proj-topbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  background: color-mix(in srgb, var(--chrome, var(--paper)) 85%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
   transition: background-color 0.65s ease, border-color 0.65s ease, color 0.65s ease,
@@ -1202,7 +1204,7 @@ body.gate-locked { overflow: hidden; }
   height: 48px;
   border-radius: 50%;
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  background: color-mix(in srgb, var(--chrome, var(--paper)) 88%, transparent);
   backdrop-filter: blur(10px);
   color: var(--ink);
   font-size: 18px;
