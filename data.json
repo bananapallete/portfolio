@@ -20,8 +20,8 @@
   },
   "categories": [
     {
-      "id": "branding",
-      "name": "Brand",
+      "id": "work",
+      "name": "Work",
       "accent": "#FF4D6D",
       "projects": [
         {
@@ -78,7 +78,10 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
+              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479",
+              "ratioW": 426,
+              "ratioH": 188,
+              "ratioSrc": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
             }
           ],
           "summary": "",
@@ -98,7 +101,10 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioW": 426,
+              "ratioH": 188,
+              "ratioSrc": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             }
           ],
           "summary": "",
@@ -110,14 +116,7 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
-        }
-      ]
-    },
-    {
-      "id": "illustration",
-      "name": "Illustration",
-      "accent": "#6C5CE7",
-      "projects": [
+        },
         {
           "id": "illustration-safari-riders",
           "title": "Safari Riders",
@@ -208,14 +207,7 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
-        }
-      ]
-    },
-    {
-      "id": "motion",
-      "name": "Motion Graphic",
-      "accent": "#00C2A8",
-      "projects": [
+        },
         {
           "id": "motion-prototype",
           "title": "Prototype",
