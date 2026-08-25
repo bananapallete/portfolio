@@ -20,8 +20,8 @@
   },
   "categories": [
     {
-      "id": "work",
-      "name": "Work",
+      "id": "branding",
+      "name": "Brand",
       "accent": "#FF4D6D",
       "projects": [
         {
@@ -38,10 +38,10 @@
             },
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "src": "https://player.vimeo.com/video/1218843246?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
               "ratioW": 426,
               "ratioH": 240,
-              "ratioSrc": "https://player.vimeo.com/video/1212252932?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              "ratioSrc": "https://player.vimeo.com/video/1218843246?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             },
             {
               "type": "embed",
@@ -49,6 +49,22 @@
               "ratioW": 426,
               "ratioH": 178,
               "ratioSrc": "https://player.vimeo.com/video/1218827964?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            },
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1218861191?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioW": 426,
+              "ratioH": 188,
+              "ratioSrc": "https://player.vimeo.com/video/1218861191?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/6003c2af94629f0144e4.png"
+              ],
+              "grid": "3",
+              "gap": 2
             }
           ],
           "summary": "MIDAS IT 국내외 임직원 대상 글로벌 사내 어워즈 키비주얼 및 현장 그래픽 디자인",
@@ -62,10 +78,7 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479",
-              "ratioW": 426,
-              "ratioH": 188,
-              "ratioSrc": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
+              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
             }
           ],
           "summary": "",
@@ -85,10 +98,7 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
-              "ratioW": 426,
-              "ratioH": 188,
-              "ratioSrc": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             }
           ],
           "summary": "",
@@ -100,7 +110,14 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
-        },
+        }
+      ]
+    },
+    {
+      "id": "illustration",
+      "name": "Illustration",
+      "accent": "#6C5CE7",
+      "projects": [
         {
           "id": "illustration-safari-riders",
           "title": "Safari Riders",
@@ -191,7 +208,14 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
-        },
+        }
+      ]
+    },
+    {
+      "id": "motion",
+      "name": "Motion Graphic",
+      "accent": "#00C2A8",
+      "projects": [
         {
           "id": "motion-prototype",
           "title": "Prototype",
