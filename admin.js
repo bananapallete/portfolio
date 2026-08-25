@@ -498,10 +498,16 @@ function renderTabs() {
   const tabs = document.getElementById("tabs");
   tabs.innerHTML = "";
 
-  tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
+  const cats = data.categories || [];
 
-  (data.categories || []).forEach((cat) => {
-    tabs.appendChild(makeTab(cat.name || "(이름 없음)", activeCatId === cat.id, () => scrollToCategory(cat.id)));
+  // 공개 사이트와 같은 규칙: 카테고리가 하나뿐이면 "All" 탭은 중복이라 감춘다
+  if (cats.length > 1) {
+    tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
+  }
+
+  cats.forEach((cat) => {
+    const active = cats.length === 1 ? true : activeCatId === cat.id;
+    tabs.appendChild(makeTab(cat.name || "(이름 없음)", active, () => scrollToCategory(cat.id)));
   });
 
   // 관리자 전용: 카테고리 추가 탭

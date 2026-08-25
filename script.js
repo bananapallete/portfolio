@@ -68,11 +68,17 @@ function renderTabs() {
   const tabs = document.getElementById("tabs");
   tabs.innerHTML = "";
 
-  tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
+  // 빈 카테고리는 섹션이 없으므로 탭도 생략
+  const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
 
-  (siteData.categories || []).forEach((cat) => {
-    if (!(cat.projects || []).length) return; // 빈 카테고리는 섹션이 없으므로 탭도 생략
-    tabs.appendChild(makeTab(cat.name, activeCatId === cat.id, () => scrollToCategory(cat.id)));
+  // 카테고리가 하나뿐이면 "All"과 가리키는 곳이 같아 탭을 나눌 이유가 없다
+  if (cats.length > 1) {
+    tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
+  }
+
+  cats.forEach((cat) => {
+    const active = cats.length === 1 ? true : activeCatId === cat.id;
+    tabs.appendChild(makeTab(cat.name, active, () => scrollToCategory(cat.id)));
   });
 }
 
@@ -122,26 +128,32 @@ function renderSections() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
 
+  const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
+
   // 지금까지 그린 카드 수 — 첫 두 장만 즉시 로드할지 판단하는 데 쓴다
   let total = 0;
-  (siteData.categories || []).forEach((cat) => {
+  cats.forEach((cat) => {
     const projects = cat.projects || [];
-    if (!projects.length) return;
 
     const section = document.createElement("section");
     section.className = "work-section";
     section.id = `cat-${cat.id}`;
     section.dataset.catId = cat.id;
 
-    const head = document.createElement("div");
-    head.className = "work-section-head";
-    const headInner = document.createElement("div");
-    headInner.className = "container";
-    const h2 = document.createElement("h2");
-    h2.textContent = cat.name || "";
-    headInner.appendChild(h2);
-    head.appendChild(headInner);
-    section.appendChild(head);
+    // 카테고리가 하나뿐이면 탭 이름과 똑같은 제목이라 섹션 머리는 생략한다
+    if (cats.length === 1) {
+      section.classList.add("work-section-bare"); // 머리가 빠진 만큼 위 여백을 대신 준다
+    } else {
+      const head = document.createElement("div");
+      head.className = "work-section-head";
+      const headInner = document.createElement("div");
+      headInner.className = "container";
+      const h2 = document.createElement("h2");
+      h2.textContent = cat.name || "";
+      headInner.appendChild(h2);
+      head.appendChild(headInner);
+      section.appendChild(head);
+    }
 
     const grid = document.createElement("div");
     grid.className = "work-grid";

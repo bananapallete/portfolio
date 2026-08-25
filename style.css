@@ -259,6 +259,11 @@ input, textarea, select { font-family: inherit; }
   padding: 44px 0 18px;
 }
 
+/* 섹션 머리를 생략한 경우(카테고리 하나) 그만큼의 위 여백을 섹션이 대신 갖는다 */
+.work-section-bare {
+  padding-top: 44px;
+}
+
 .work-section-head .container {
   display: flex;
   align-items: center;
@@ -1582,6 +1587,7 @@ body.bg-takeover-light {
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
   .work-section-head { padding: 28px 0 12px; }
+  .work-section-bare { padding-top: 28px; }
   .work-section-head h2 { font-size: 17px; }
   .footer-grid { flex-direction: column; align-items: flex-start; }
 

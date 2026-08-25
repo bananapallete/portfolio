@@ -20,8 +20,8 @@
   },
   "categories": [
     {
-      "id": "branding",
-      "name": "Brand",
+      "id": "work",
+      "name": "Work",
       "accent": "#FF4D6D",
       "projects": [
         {
@@ -58,14 +58,7 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
-        }
-      ]
-    },
-    {
-      "id": "illustration",
-      "name": "Illustration",
-      "accent": "#6C5CE7",
-      "projects": [
+        },
         {
           "id": "illustration-safari-riders",
           "title": "Safari Riders",
