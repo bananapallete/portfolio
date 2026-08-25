@@ -7,8 +7,13 @@ const RECENT_COLORS_KEY = "portfolioRecentColors";
 const DEFAULT_COLORS = ["#f5f4f0", "#ff4d6d", "#6c5ce7", "#00c2a8", "#ffc93c", "#14121a"];
 let data = null;
 
-// 미리보기·순서 조절 모드인 프로젝트 id 목록
-const previewProjects = new Set();
+/* 블록 목록의 접힘 상태. 블록 객체 자체를 열쇠로 삼아 순서를 바꿔도 따라간다.
+   (편집 팝업은 프로젝트 복사본을 한 번만 만들므로 다시 그려도 객체가 유지된다) */
+const expandedBlocks = new WeakSet(); // 영상·이미지는 기본으로 줄이고, 펼친 것만 기억한다
+const closedSettings = new WeakSet(); // 설정줄은 기본으로 펴고, 접은 것만 기억한다
+
+// 텍스트 블록의 미리보기 요소. 크기·색상을 다시 그리지 않고 바로 반영하는 데 쓴다.
+const textPreviewNodes = new WeakMap();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
 // 편집 팝업이 열려 있는 대상. type: "project" | "profile" | "category"
@@ -901,34 +906,6 @@ function renderEditModalBody() {
   ));
   card.appendChild(gapRow);
 
-  // ---- 모드 전환: 블록 편집 / 미리보기·순서 조절 ----
-  const isPreview = previewProjects.has(project.id);
-  const modeSeg = document.createElement("div");
-  modeSeg.className = "layout-seg";
-  modeSeg.style.marginTop = "14px";
-  [["edit", "✎ 블록 편집"], ["preview", "👁 미리보기 · 순서 조절"]].forEach(([value, text]) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = text;
-    if ((isPreview ? "preview" : "edit") === value) b.classList.add("active");
-    b.addEventListener("click", () => {
-      if (value === "preview") previewProjects.add(project.id);
-      else previewProjects.delete(project.id);
-      renderEditModalBody();
-    });
-    modeSeg.appendChild(b);
-  });
-  card.appendChild(modeSeg);
-
-  if (isPreview) {
-    const hint = document.createElement("div");
-    hint.className = "block-hint";
-    hint.textContent = "실제 사이트에 보이는 모습이에요. ⠿ 핸들을 잡고 드래그하면 블록과 이미지 순서를 바꿀 수 있어요.";
-    card.appendChild(hint);
-    card.appendChild(renderProjectPreview(project));
-    return;
-  }
-
   // ---- 커버 이미지 ----
   const coverLabel = document.createElement("label");
   coverLabel.textContent = "커버 이미지 (목록 카드에 표시)";
@@ -956,7 +933,7 @@ function renderEditModalBody() {
 
   // ---- 콘텐츠 블록 ----
   const blocksLabel = document.createElement("label");
-  blocksLabel.textContent = "상세 콘텐츠 (⠿ 핸들을 잡고 드래그하면 순서가 바뀌어요)";
+  blocksLabel.textContent = "상세 콘텐츠 (실제 보이는 모습 그대로 · ⠿ 핸들을 드래그하면 순서가 바뀌어요)";
   blocksLabel.className = "mini-label";
   blocksLabel.style.marginTop = "18px";
   card.appendChild(blocksLabel);
@@ -1031,6 +1008,33 @@ function renderCategoryModalBody() {
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */
 
+function blockTypeLabel(block) {
+  if (block.type === "text") return "텍스트";
+  if (block.type === "images") {
+    return { single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 자동 슬라이드" }[block.layout] || "이미지";
+  }
+  return "비디오 임베드";
+}
+
+// 접어둔 영상 자리에 놓이는 한 줄짜리 표시
+function renderFoldedEmbed(block) {
+  const strip = document.createElement("div");
+  strip.className = "embed-folded";
+  strip.textContent = block.src ? shortenEmbedSrc(block.src) : "(링크가 없는 임베드 블록)";
+  if (!block.src) strip.classList.add("embed-folded-empty");
+  return strip;
+}
+
+// 긴 임베드 주소를 알아볼 수 있는 만큼만 줄인다
+function shortenEmbedSrc(src) {
+  const m = /vimeo\.com\/(?:video\/)?(\d+)/.exec(src);
+  if (m) return `Vimeo · ${m[1]}`;
+  const y = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]+)/.exec(src);
+  if (y) return `YouTube · ${y[1]}`;
+  if (isVideoFile(src)) return "업로드한 영상 파일";
+  return src.length > 60 ? src.slice(0, 57) + "..." : src;
+}
+
 function renderBlocksEditor(project) {
   project.blocks = project.blocks || [];
   const wrap = document.createElement("div");
@@ -1052,15 +1056,50 @@ function renderBlocksEditor(project) {
 
     const label = document.createElement("span");
     label.className = "block-type-label";
-    label.textContent =
-      block.type === "text" ? "텍스트"
-      : block.type === "images" ? ({ single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 슬라이드" }[block.layout] || "이미지")
-      : "비디오 임베드";
+    label.textContent = blockTypeLabel(block);
+
+    const spacer = document.createElement("span");
+    spacer.className = "block-head-spacer";
+
+    bh.appendChild(handle);
+    bh.appendChild(label);
+    bh.appendChild(spacer);
+
+    // 영상과 이미지는 세로로 길어 목록을 밀어내므로 기본으로 줄여두고 여기서 펼친다
+    const expanded = expandedBlocks.has(block);
+    const canFold =
+      block.type === "embed" || (block.type === "images" && (block.images || []).length > 0);
+    if (canFold) {
+      const fold = document.createElement("button");
+      fold.type = "button";
+      fold.className = "btn btn-ghost btn-xs";
+      fold.textContent =
+        block.type === "embed"
+          ? (expanded ? "▾ 영상 접기" : "▸ 영상 펼치기")
+          : (expanded ? "▾ 줄이기" : "▸ 전체 보기");
+      fold.addEventListener("click", () => {
+        if (expanded) expandedBlocks.delete(block);
+        else expandedBlocks.add(block);
+        renderEditModalBody();
+      });
+      bh.appendChild(fold);
+    }
+
+    const settingsOpen = !closedSettings.has(block);
+    const gear = document.createElement("button");
+    gear.type = "button";
+    gear.className = "btn btn-ghost btn-xs";
+    gear.textContent = settingsOpen ? "⚙ 설정 접기" : "⚙ 설정";
+    gear.addEventListener("click", () => {
+      if (settingsOpen) closedSettings.add(block);
+      else closedSettings.delete(block);
+      renderEditModalBody();
+    });
+    bh.appendChild(gear);
 
     const del = document.createElement("button");
     del.className = "btn btn-danger btn-xs";
-    del.textContent = "블록 삭제";
-    del.style.marginLeft = "auto";
+    del.textContent = "삭제";
     del.addEventListener("click", () => {
       if (confirm("이 블록을 삭제할까요?")) {
         project.blocks.splice(i, 1);
@@ -1068,12 +1107,30 @@ function renderBlocksEditor(project) {
         renderEditModalBody();
       }
     });
-
-    bh.appendChild(handle);
-    bh.appendChild(label);
     bh.appendChild(del);
     item.appendChild(bh);
-    item.appendChild(renderBlockBody(project, block, i));
+
+    // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
+    const preview = document.createElement("div");
+    preview.className = "block-preview";
+    if (block.type === "embed" && !expanded) {
+      // 접었을 때는 iframe을 아예 만들지 않아 영상이 로드되지 않는다
+      preview.appendChild(renderFoldedEmbed(block));
+    } else {
+      // 글은 길어도 안에서 스크롤되고, 이미지는 접었을 때 높이만 잘라 보여준다
+      if (block.type === "text") preview.classList.add("block-preview-text");
+      else if (canFold && !expanded) preview.classList.add("block-preview-capped");
+      preview.appendChild(renderPreviewBlockContent(project, block, i));
+    }
+    item.appendChild(preview);
+
+    if (settingsOpen) {
+      const settings = document.createElement("div");
+      settings.className = "block-settings";
+      settings.appendChild(renderBlockBody(project, block, i));
+      item.appendChild(settings);
+    }
+
     attachDrag(item, handle, group, project.blocks, i);
     wrap.appendChild(item);
   });
@@ -1103,17 +1160,8 @@ function renderBlockBody(project, block, blockIndex) {
   const body = document.createElement("div");
 
   if (block.type === "text") {
-    const ta = document.createElement("textarea");
-    ta.rows = 4;
-    ta.value = block.content || "";
-    ta.className = "block-textarea";
-    ta.style.fontSize = (block.size || 15) + "px";
-    // 색을 지정하지 않은 블록은 사이트 기본색(밝은 글자)을 따르므로 그대로 상속
-    if (block.color) ta.style.color = block.color;
-    ta.style.textAlign = block.align || "left";
-    ta.placeholder = "내용을 입력하세요 (프리텐다드 폰트로 표시돼요)";
-    ta.addEventListener("input", () => { block.content = ta.value; saveDraft(); });
-    body.appendChild(ta);
+    // 글은 위쪽 미리보기에서 바로 고친다. 여기에는 조절값만 둔다.
+    const pv = textPreviewNodes.get(block) || document.createElement("p");
 
     const controls = document.createElement("div");
     controls.className = "block-controls-row";
@@ -1131,7 +1179,7 @@ function renderBlockBody(project, block, blockIndex) {
       const v = parseInt(sizeInput.value, 10);
       if (v >= 10 && v <= 80) {
         block.size = v;
-        ta.style.fontSize = v + "px";
+        pv.style.fontSize = v + "px";
         saveDraft();
       }
     });
@@ -1148,7 +1196,7 @@ function renderBlockBody(project, block, blockIndex) {
       block.color || "#f5f4f0",
       (v) => {
         block.color = v;
-        ta.style.color = v;
+        pv.style.color = v;
         saveDraft();
       },
       { swatches: true, rerender: renderEditModalBody }
@@ -1168,7 +1216,7 @@ function renderBlockBody(project, block, blockIndex) {
       if ((block.align || "left") === value) b.classList.add("active");
       b.addEventListener("click", () => {
         block.align = value;
-        ta.style.textAlign = value;
+        pv.style.textAlign = value;
         saveDraft();
         renderEditModalBody();
       });
@@ -1473,62 +1521,34 @@ function buildEmbedRatioField(block) {
   return row;
 }
 
-/* ------------------------- 미리보기 · 순서 조절 모드 ------------------------- */
-
-function renderProjectPreview(project) {
-  const pane = document.createElement("div");
-  pane.className = "preview-pane";
-  project.blocks = project.blocks || [];
-
-  // 설정한 블록 사이 간격을 미리보기에도 반영
-  const blockGap = normalizeGap(project.blockGap);
-  if (blockGap != null) pane.style.gap = blockGap + "px";
-
-  if (!project.blocks.length) {
-    const empty = document.createElement("div");
-    empty.className = "block-hint";
-    empty.textContent = "아직 콘텐츠 블록이 없어요. \"블록 편집\" 탭에서 추가해주세요.";
-    pane.appendChild(empty);
-    return pane;
-  }
-
-  const group = `pvblocks-${project.id}`;
-  project.blocks.forEach((block, i) => {
-    const wrap = document.createElement("div");
-    wrap.className = "pv-block";
-
-    const handle = document.createElement("button");
-    handle.type = "button";
-    handle.className = "drag-handle pv-handle";
-    handle.title = "드래그해서 블록 순서 변경";
-    handle.textContent = "⠿";
-
-    const chip = document.createElement("span");
-    chip.className = "pv-chip";
-    chip.textContent =
-      block.type === "text" ? "텍스트"
-      : block.type === "images" ? ({ single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 자동 슬라이드" }[block.layout] || "이미지")
-      : "비디오 임베드";
-
-    wrap.appendChild(handle);
-    wrap.appendChild(chip);
-    wrap.appendChild(renderPreviewBlockContent(project, block, i));
-    attachDrag(wrap, handle, group, project.blocks, i);
-    pane.appendChild(wrap);
-  });
-
-  return pane;
-}
+/* --------------------- 블록 미리보기 (편집 목록 안에 함께 표시) --------------------- */
 
 function renderPreviewBlockContent(project, block, blockIndex) {
   if (block.type === "text") {
     const p = document.createElement("p");
-    p.className = "blk-text";
-    p.textContent = block.content || "(빈 텍스트 블록)";
+    p.className = "blk-text blk-text-edit";
+    p.contentEditable = "true";
+    p.spellcheck = false;
+    p.dataset.placeholder = "여기에 바로 입력하세요";
+    p.textContent = block.content || "";
     p.style.fontSize = (block.size || 15) + "px";
     if (block.color) p.style.color = block.color;
-    if (block.align && block.align !== "left") p.style.textAlign = block.align;
-    if (!block.content) p.style.opacity = "0.4";
+    p.style.textAlign = block.align || "left";
+
+    // 입력할 때마다 다시 그리면 커서가 튀므로 값만 갱신한다
+    p.addEventListener("input", () => {
+      block.content = p.innerText;
+      saveDraft();
+    });
+    // 붙여넣기로 서식이 딸려 들어오지 않도록 글자만 넣는다
+    p.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+      document.execCommand("insertText", false, text);
+    });
+
+    // 크기·색상 조절이 이 요소에 바로 반영되도록 기억해둔다
+    textPreviewNodes.set(block, p);
     return p;
   }
 

@@ -1351,8 +1351,81 @@ body.gate-locked { overflow: hidden; }
 .block-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+/* 종류 이름과 오른쪽 버튼들 사이를 벌린다 */
+.block-head-spacer { flex: 1 1 auto; }
+
+/* 실제 사이트에 보이는 모습이 들어가는 자리 */
+.block-preview {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* 이미지가 길 때는 높이만 잘라 보여주고, "전체 보기"로 펼친다 */
+.block-preview-capped {
+  position: relative;
+  max-height: 420px;
+}
+
+.block-preview-capped::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 90px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--paper));
+}
+
+/* 글은 잘라내면 편집이 불편하므로 안에서 스크롤시킨다 */
+.block-preview-text {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+/* 조절값은 미리보기 아래에 한 칸 띄워 놓는다 */
+.block-settings {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+
+/* 접어둔 영상 자리 */
+.embed-folded {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--paper-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+}
+
+.embed-folded-empty { font-family: inherit; }
+
+/* 미리보기 안에서 바로 고치는 텍스트 */
+/* 여백을 건드리면 실제 사이트와 다르게 보이므로 색·테두리로만 표시한다 */
+.blk-text-edit {
+  outline: none;
+  border-radius: 6px;
+  cursor: text;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.blk-text-edit:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+
+.blk-text-edit:focus {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--sun);
+}
+
+.blk-text-edit:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.4;
 }
 
 .drag-handle {
@@ -1375,17 +1448,6 @@ body.gate-locked { overflow: hidden; }
   letter-spacing: 0.05em;
   color: color-mix(in srgb, var(--ink) 50%, transparent);
   transition: color 0.15s ease;
-}
-
-.block-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--line);
-  background: var(--paper-soft);
-  resize: vertical;
-  min-height: 80px;
-  line-height: 1.6;
 }
 
 /* 레이아웃 선택 · 간격 등 작은 컨트롤들을 한 줄에 모아 배치 */
@@ -1546,44 +1608,6 @@ body.gate-locked { overflow: hidden; }
 /* ------------------------- 미리보기 · 순서 조절 (관리자) ------------------------- */
 
 /* 실제 사이트와 같은 배경 위에서 미리보기 (관리자도 다크 테마라 --paper가 곧 사이트 배경) */
-.preview-pane {
-  background: var(--paper);
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 20px;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.pv-block {
-  position: relative;
-  border: 1.5px dashed transparent;
-  border-radius: 10px;
-  padding: 30px 10px 10px;
-  transition: border-color 0.15s ease;
-}
-
-.pv-block:hover { border-color: var(--line); }
-.pv-block.dragging { opacity: 0.4; }
-
-.pv-handle {
-  position: absolute;
-  top: 4px;
-  left: 6px;
-}
-
-.pv-chip {
-  position: absolute;
-  top: 9px;
-  left: 38px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
-}
-
 .pv-img-wrap { position: relative; }
 .pv-img-wrap.dragging { opacity: 0.4; }
 
@@ -1726,7 +1750,6 @@ body.gate-locked { overflow: hidden; }
   .project-card-head { flex-wrap: wrap; }
   .project-card-head input { min-width: 100%; }
   .block-item { padding: 10px; }
-  .preview-pane { padding: 12px; }
   .block-controls-row { row-gap: 10px; column-gap: 10px; }
 
   /* 좁은 화면에서는 썸네일을 줄여 업로드 타일이 같은 줄에 남도록 */
