@@ -128,7 +128,8 @@ function checkStaleDraft(server) {
 
   const count = (d) => (d.categories || []).reduce((n, c) => n + (c.projects || []).length, 0);
   document.getElementById("staleMsg").innerHTML =
-    `⚠️ 브라우저에 남아 있던 <strong>임시저장 내용</strong>이 지금 사이트에 올라간 내용과 달라요. ` +
+    `⚠️ 지금 화면은 브라우저에 남아 있던 <strong>임시저장 내용</strong>이고, ` +
+    `사이트에 올라간 내용과 달라요. ` +
     `(임시저장 프로젝트 ${count(data)}개 / 사이트 ${count(server)}개)<br/>` +
     `이대로 "사이트에 반영"을 누르면 사이트 쪽 내용이 임시저장 내용으로 덮어써집니다.`;
   banner.hidden = false;
