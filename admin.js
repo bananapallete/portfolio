@@ -16,6 +16,18 @@ const isBlockFolded = (block) =>
 
 const openSettings = new WeakSet(); // 조절값 줄은 기본으로 접고, 연 것만 기억한다
 
+// 방금 추가해서 아직 아무것도 안 들어간 블록 — 그려진 뒤 입력칸에 커서를 둔다
+let focusNewBlock = null;
+
+/* 아직 내용이 없어서, 넣을 방법이 조절값 줄에만 있는 블록.
+   이런 블록은 줄을 접지 않고 업로드 버튼·링크 입력칸을 바로 보여준다.
+   텍스트는 미리보기 자체가 입력칸이므로 여기 해당하지 않는다. */
+function needsSetup(block) {
+  if (block.type === "images") return !(block.images || []).length;
+  if (block.type === "embed") return !block.src;
+  return false;
+}
+
 // 텍스트 블록의 미리보기 요소. 크기·색상을 다시 그리지 않고 바로 반영하는 데 쓴다.
 const textPreviewNodes = new WeakMap();
 // 현재 드래그 중인 항목 정보 { group, list, from }
@@ -1171,17 +1183,21 @@ function renderBlocksEditor(project) {
       bh.appendChild(fold);
     }
 
-    const settingsOpen = openSettings.has(block);
-    const gear = document.createElement("button");
-    gear.type = "button";
-    gear.className = "btn btn-ghost btn-xs";
-    gear.textContent = settingsOpen ? "⚙ 설정 접기" : "⚙ 설정";
-    gear.addEventListener("click", () => {
-      if (settingsOpen) openSettings.delete(block);
-      else openSettings.add(block);
-      renderEditModalBody();
-    });
-    bh.appendChild(gear);
+    // 아직 비어 있는 블록은 넣을 방법이 설정 줄에 있으므로 접지 않는다
+    const mustShowSettings = needsSetup(block);
+    const settingsOpen = mustShowSettings || openSettings.has(block);
+    if (!mustShowSettings) {
+      const gear = document.createElement("button");
+      gear.type = "button";
+      gear.className = "btn btn-ghost btn-xs";
+      gear.textContent = settingsOpen ? "⚙ 설정 접기" : "⚙ 설정";
+      gear.addEventListener("click", () => {
+        if (settingsOpen) openSettings.delete(block);
+        else openSettings.add(block);
+        renderEditModalBody();
+      });
+      bh.appendChild(gear);
+    }
 
     const del = document.createElement("button");
     del.className = "btn btn-danger btn-xs";
@@ -1199,7 +1215,10 @@ function renderBlocksEditor(project) {
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
     const preview = document.createElement("div");
     preview.className = "block-preview";
-    if (block.type === "embed" && folded) {
+    if (mustShowSettings) {
+      // 보여줄 내용이 없으니 미리보기는 생략하고 아래 설정 줄로 바로 간다
+      preview.remove();
+    } else if (block.type === "embed" && folded) {
       // 접었을 때는 iframe을 아예 만들지 않아 영상이 로드되지 않는다
       preview.appendChild(renderFoldedEmbed(block));
     } else {
@@ -1207,7 +1226,7 @@ function renderBlocksEditor(project) {
       if (canFold && folded) preview.classList.add("block-preview-capped");
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
-    item.appendChild(preview);
+    if (!mustShowSettings) item.appendChild(preview);
 
     if (settingsOpen) {
       const settings = document.createElement("div");
@@ -1218,6 +1237,14 @@ function renderBlocksEditor(project) {
 
     attachDrag(item, handle, group, project.blocks, i);
     wrap.appendChild(item);
+
+    // 막 추가한 블록이면 바로 쓸 수 있게 커서를 넣어 준다
+    if (block === focusNewBlock) {
+      focusNewBlock = null;
+      const target = item.querySelector(".embed-input, .blk-text-edit");
+      if (target) requestAnimationFrame(() => target.focus());
+      requestAnimationFrame(() => item.scrollIntoView({ block: "center", behavior: "smooth" }));
+    }
   });
 
   const addRow = document.createElement("div");
@@ -1227,7 +1254,9 @@ function renderBlocksEditor(project) {
     b.className = "btn btn-outline btn-small";
     b.textContent = text;
     b.addEventListener("click", () => {
-      project.blocks.push(makeBlock());
+      const block = makeBlock();
+      project.blocks.push(block);
+      focusNewBlock = block;
       saveDraft();
       renderEditModalBody();
     });
@@ -1415,18 +1444,23 @@ function renderBlockBody(project, block, blockIndex) {
       block.src = normalizeEmbedSrc(input.value);
       saveDraft();
     });
-    // 붙여넣기를 마치면 정리된 주소를 입력창에도 보여준다
+
+    const ratioRow = buildEmbedRatioField(block);
+
+    // 붙여넣기를 마치면 정리된 주소를 입력창에도 보여준다.
+    // 여기서 화면을 통째로 다시 그리면 그 순간 누르고 있던 버튼이 사라져
+    // 클릭이 씹히므로, 비율 확인만 새 주소 기준으로 다시 돌린다.
+    // (어느 주소로 구한 비율인지는 block.ratioSrc가 기억한다)
     input.addEventListener("change", () => {
       const v = normalizeEmbedSrc(input.value);
       input.value = v;
       block.src = v;
       saveDraft();
-      // 다시 그리면서 비율을 새 주소 기준으로 자동 확인한다
-      // (어느 주소로 구한 비율인지는 block.ratioSrc가 기억한다)
-      renderEditModalBody();
+      autoFillEmbedRatio(block, ratioRow.querySelector(".block-hint"));
     });
+
     body.appendChild(input);
-    body.appendChild(buildEmbedRatioField(block));
+    body.appendChild(ratioRow);
     return body;
   }
 
