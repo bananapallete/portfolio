@@ -74,7 +74,7 @@
         {
           "id": "new-project-mt9nq9yg",
           "title": "Quest Hub",
-          "coverImage": "",
+          "coverImage": "assets/ddc7e5bf51a50b3bf136.png",
           "blocks": [
             {
               "type": "embed",
@@ -89,6 +89,15 @@
               "ratioSrc": "https://player.vimeo.com/video/1221395481?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
               "ratioW": 640,
               "ratioH": 180
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/edf9bcf9431596b54464.png",
+                "assets/269fb480c72a104c93e6.png"
+              ],
+              "grid": "2"
             }
           ],
           "summary": "Visual Identity, Motion Graphic",
