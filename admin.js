@@ -1998,42 +1998,81 @@ function setPublishStatus(text) {
   }
 }
 
-/* 이 탭이 살아 있는 동안만 쓰는 예비 보관함.
-   임시저장 초안이 커서 localStorage 용량(약 5MB)을 다 쓰면 토큰 쓰기까지
-   함께 실패한다. 그때 토큰이 통째로 날아가 매번 다시 묻게 되는 걸 막는다. */
+/* 토큰 보관함. localStorage가 막히면 sessionStorage, 그것도 막히면 이 탭의
+   메모리까지 차례로 내려간다. 어느 단계든 남아 있으면 다시 묻지 않는다. */
 let memoryToken = null;
 
-function readStoredToken() {
+// 왜 토큰이 사라졌는지 남겨 두고, 다음에 물어볼 때 이유를 먼저 알려준다
+const GH_TOKEN_GONE_KEY = "portfolioGithubTokenGone";
+
+// 브라우저 설정에 따라 접근 자체가 예외를 던지므로 감싸서 쓴다
+function safeStore(kind) {
   try {
-    return localStorage.getItem(GH_TOKEN_KEY) || memoryToken;
+    return window[kind] || null;
   } catch (e) {
-    return memoryToken;
+    return null;
   }
+}
+
+function eachStore(fn) {
+  ["localStorage", "sessionStorage"].forEach((kind) => {
+    const store = safeStore(kind);
+    if (!store) return;
+    try { fn(store); } catch (e) {}
+  });
+}
+
+function readStoredToken() {
+  let found = null;
+  eachStore((store) => { found = found || store.getItem(GH_TOKEN_KEY); });
+  return found || memoryToken;
 }
 
 function storeToken(token) {
   memoryToken = token;
-  try {
-    localStorage.setItem(GH_TOKEN_KEY, token);
-    return true;
-  } catch (e) {
-    // 용량 초과 등으로 못 남긴 경우 — 이 탭에서는 계속 쓸 수 있게 두고 알려만 준다
-    return false;
-  }
+  let saved = false;
+  eachStore((store) => {
+    store.setItem(GH_TOKEN_KEY, token);
+    store.removeItem(GH_TOKEN_GONE_KEY);
+    saved = true;
+  });
+  refreshTokenButton();
+  return saved;
 }
 
-function forgetToken() {
+function forgetToken(reason) {
   memoryToken = null;
-  try {
-    localStorage.removeItem(GH_TOKEN_KEY);
-  } catch (e) {}
+  eachStore((store) => {
+    store.removeItem(GH_TOKEN_KEY);
+    if (reason) store.setItem(GH_TOKEN_GONE_KEY, reason);
+  });
+  refreshTokenButton();
+}
+
+/* 토큰이 저장돼 있는지 버튼에 그대로 드러낸다.
+   발행 버튼을 누르고 나서야 없다는 걸 알게 되지 않도록. */
+function refreshTokenButton() {
+  const btn = document.getElementById("tokenBtn");
+  if (!btn) return;
+  const has = !!readStoredToken();
+  btn.textContent = has ? "GitHub 토큰 ✓" : "GitHub 토큰 없음";
+  btn.classList.toggle("btn-outline", !has);
+  btn.classList.toggle("btn-ghost", has);
+  btn.title = has
+    ? "토큰이 이 브라우저에 저장돼 있어요. 눌러서 다시 입력할 수 있어요."
+    : "발행하려면 토큰이 필요해요. 눌러서 입력해주세요.";
 }
 
 function getGithubToken(forceAsk = false) {
   const saved = readStoredToken();
   if (saved && !forceAsk) return saved;
+
+  let why = "";
+  eachStore((store) => { why = why || store.getItem(GH_TOKEN_GONE_KEY) || ""; });
+
   let token = prompt(
-    "GitHub 토큰(ghp_...)을 입력해주세요.\n\n" +
+    (why ? why + "\n\n" : "") +
+      "GitHub 토큰(ghp_...)을 입력해주세요.\n\n" +
       "발급 방법: github.com/settings/tokens → Generate new token (classic) → 'repo' 권한 체크\n\n" +
       "토큰은 이 브라우저에만 저장되며, 토큰이 없는 사람은 이 페이지를 열어도 사이트를 수정할 수 없어요.",
     ""
@@ -2042,8 +2081,8 @@ function getGithubToken(forceAsk = false) {
   token = token.trim();
   if (!storeToken(token)) {
     setPublishStatus(
-      "토큰을 브라우저에 저장하지 못했어요(용량 초과). 이 탭에서는 계속 쓸 수 있지만, " +
-        "탭을 닫으면 다시 입력해야 해요. \"사이트에 반영\"으로 이미지가 올라가면 용량이 줄어듭니다."
+      "토큰을 브라우저에 저장하지 못했어요. 이 탭에서는 계속 쓸 수 있지만, " +
+        "탭을 닫으면 다시 입력해야 해요."
     );
   }
   return token;
@@ -2059,8 +2098,8 @@ async function ghRequest(path, token, options = {}) {
     },
   });
   if (res.status === 401) {
-    // 토큰 자체가 잘못된 경우에만 지운다
-    forgetToken();
+    // 토큰 자체가 잘못된 경우에만 지운다 (왜 지웠는지 남겨 다음 안내에 쓴다)
+    forgetToken("⚠️ 이전 토큰을 GitHub이 거부해서(401) 지웠어요. 새로 발급받은 토큰을 넣어주세요.");
     throw new Error("토큰이 만료되었거나 잘못됐어요. \"사이트에 반영\"을 다시 눌러 새 토큰을 입력해주세요.");
   }
   if (res.status === 403) {
@@ -2224,6 +2263,8 @@ document.getElementById("lockBtn").addEventListener("click", () => {
 });
 
 /* ---------------------------------- Init ---------------------------------- */
+
+refreshTokenButton();
 
 // 비밀번호를 통과하기 전에는 데이터를 읽지도, 화면을 그리지도 않는다
 window.adminGateReady.then(loadInitial).then(({ data: initial, source, server }) => {
