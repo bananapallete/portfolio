@@ -682,23 +682,8 @@ function renderAdminCard(cat, project, projIndex) {
   }
   card.appendChild(media);
 
-  const body = document.createElement("div");
-  body.className = "card-body";
-  const title = document.createElement("div");
-  title.className = "card-title";
-  title.textContent = project.title || "(제목 없음)";
-  body.appendChild(title);
-  if (project.summary) {
-    const desc = document.createElement("div");
-    desc.className = "card-desc";
-    desc.textContent = project.summary;
-    body.appendChild(desc);
-  }
-  const hint = document.createElement("div");
-  hint.className = "card-edit-hint";
-  hint.textContent = "✎ 클릭해서 편집";
-  body.appendChild(hint);
-  card.appendChild(body);
+  // 관리자 목록에서는 커버를 가리지 않도록 호버 오버레이(제목·설명·편집 안내)를 두지 않는다.
+  // 커버가 없는 카드만 위쪽 card-empty-title로 제목을 보여준다.
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "project-thumb-delete";

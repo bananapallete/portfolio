@@ -739,13 +739,6 @@ body.gate-locked { overflow: hidden; }
   text-align: center;
 }
 
-.card-edit-hint {
-  margin-top: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
-}
-
 /* 카드 위 삭제/드래그 버튼 (호버 시 표시) */
 .admin-card .project-thumb-delete,
 .admin-card .project-thumb-handle {
