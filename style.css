@@ -319,40 +319,6 @@ input, textarea, select { font-family: inherit; }
 }
 
 /* 평소엔 이미지만 보이다가, 마우스를 올리면 어두운 스크림 위로 제목·설명이 중앙에 페이드인 */
-.card-body {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 32px;
-  background: rgba(0, 0, 0, 0.55);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.card:hover .card-body { opacity: 1; }
-
-.card-title {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #fff;
-  margin-bottom: 6px;
-}
-
-.card-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .empty-state {
   padding: 60px 20px;
   text-align: center;
