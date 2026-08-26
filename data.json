@@ -221,6 +221,20 @@
           "coverImage": "",
           "blocks": [],
           "summary": ""
+        },
+        {
+          "id": "new-project-mt9nq9yg",
+          "title": "Quest Hub",
+          "coverImage": "",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1221366898?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioSrc": "https://player.vimeo.com/video/1221366898?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            }
+          ],
+          "summary": "Visual Identity, Motion Graphic",
+          "bgColor": "#086CFA"
         }
       ]
     }
