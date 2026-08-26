@@ -92,7 +92,8 @@
             }
           ],
           "summary": "Visual Identity, Motion Graphic",
-          "bgColor": "#086CFA"
+          "bgColor": "#086CFA",
+          "blockGap": 0
         },
         {
           "id": "branding-inhr-plus",
