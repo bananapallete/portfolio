@@ -124,9 +124,15 @@
         {
           "id": "new-project-mtb4jh1h",
           "title": "Graphic Resource Center",
-          "coverImage": "assets/2ed622ad0e6a4050a6ad.png",
+          "coverImage": "assets/0436956636e20ab00ea6.webm",
           "blocks": [],
-          "summary": ""
+          "summary": "",
+          "tools": [
+            "illustrator",
+            "aftereffects",
+            "lottie",
+            "figma"
+          ]
         }
       ]
     },
