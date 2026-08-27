@@ -2128,8 +2128,19 @@ body.gate-locked { overflow: hidden; }
   }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
+  /* 좁은 화면에서는 아이콘을 제목 아래로 내리고 왼쪽에 맞춘다 */
+  .proj-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
   .tool-cell { width: 34px; height: 34px; }
-  .tool-row { gap: 8px; }
+  .tool-row {
+    gap: 8px;
+    justify-content: flex-start;
+    max-width: 100%;
+    margin-top: 0;
+  }
   .work-section-head { padding: 28px 0 12px; }
   .work-section-bare { padding-top: 28px; }
   .work-section-head h2 { font-size: 17px; }
