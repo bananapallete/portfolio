@@ -125,28 +125,6 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
   return row;
 }
 
-// 켜고 끄는 작은 스위치 (체크박스 + 라벨)
-function buildSwitchField(labelText, getVal, setVal, onApply) {
-  const label = document.createElement("label");
-  label.className = "switch-field";
-
-  const box = document.createElement("input");
-  box.type = "checkbox";
-  box.checked = !!getVal();
-  box.addEventListener("change", () => {
-    setVal(box.checked);
-    saveDraft();
-    if (onApply) onApply(box.checked);
-  });
-
-  const text = document.createElement("span");
-  text.textContent = labelText;
-
-  label.appendChild(box);
-  label.appendChild(text);
-  return label;
-}
-
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   const row = document.createElement("div");
   row.className = "gap-field";
@@ -601,7 +579,7 @@ function renderProfileFields(wrap, profile) {
 function renderLayoutFields(wrap, profile) {
   const head = document.createElement("label");
   head.className = "mini-label";
-  head.textContent = "레이아웃 (\"꽉 채우기\"를 켜면 최대 폭 제한 없이 양 끝까지 차요)";
+  head.textContent = "레이아웃 (최대 폭을 화면보다 크게 올리면 양 끝까지 차요)";
   head.style.marginTop = "0";
   wrap.appendChild(head);
 
@@ -627,10 +605,15 @@ function renderLayoutFields(wrap, profile) {
       { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
       live
     ),
-    buildSwitchField(
-      "꽉 채우기",
-      () => profile.fullBleedHome,
-      (v) => { if (v) profile.fullBleedHome = true; else delete profile.fullBleedHome; },
+    buildSliderField(
+      "최대 폭",
+      () => readMaxWidth(profile.maxWidthHome, profile.fullBleedHome),
+      (v) => {
+        delete profile.fullBleedHome;      // 예전 스위치 값은 버린다
+        if (v == null) delete profile.maxWidthHome;
+        else profile.maxWidthHome = v;
+      },
+      { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT },
       live
     )
   ));
@@ -643,10 +626,15 @@ function renderLayoutFields(wrap, profile) {
       (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
       { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
     ),
-    buildSwitchField(
-      "꽉 채우기",
-      () => profile.fullBleedContent,
-      (v) => { if (v) profile.fullBleedContent = true; else delete profile.fullBleedContent; }
+    buildSliderField(
+      "최대 폭",
+      () => readMaxWidth(profile.maxWidthContent, profile.fullBleedContent),
+      (v) => {
+        delete profile.fullBleedContent;
+        if (v == null) delete profile.maxWidthContent;
+        else profile.maxWidthContent = v;
+      },
+      { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT }
     )
   ));
   box.appendChild(buildSliderField(

@@ -44,6 +44,16 @@ function playWhileVisible(video) {
    헤더·목록 그리드·상세 블록이 모두 이 변수를 보므로 값만 바꾸면 전부 따라온다. */
 const SIDE_MARGIN_DEFAULT = 28;
 const CARD_GAP_DEFAULT = 0;
+// 가운데 정렬 최대 폭. 화면보다 크게 잡으면 자연스럽게 화면 폭까지만 쓴다
+const MAX_WIDTH_DEFAULT = 1350;
+const MAX_WIDTH_FULL = 2560;
+
+// 예전 데이터의 "꽉 채우기" 스위치를 최대 폭 값으로 옮겨 읽는다
+function readMaxWidth(value, legacyFull) {
+  const v = normalizeGap(value);
+  if (v != null) return v;
+  return legacyFull ? MAX_WIDTH_FULL : MAX_WIDTH_DEFAULT;
+}
 
 /* scope: "home"(목록) | "content"(상세). 화면마다 다른 여백 값을 쓴다.
    상세 화면은 상단바·제목·블록·푸터가 모두 --side 하나를 보므로
@@ -55,18 +65,23 @@ function applyLayoutVars(profile, scope = "home") {
   const gap = normalizeGap(p.cardGap);
   // "꽉 채우기"를 켠 화면만 가운데 정렬용 최대 폭을 푼다.
   // 여백 값과 분리해 둬야 0↔1 사이에서 폭이 계단처럼 튀지 않는다.
-  const full = scope === "content" ? p.fullBleedContent : p.fullBleedHome;
+  const max = scope === "content"
+    ? readMaxWidth(p.maxWidthContent, p.fullBleedContent)
+    : readMaxWidth(p.maxWidthHome, p.fullBleedHome);
 
-  // 상세 화면의 상단 메뉴(← Back to list)는 본문과 따로, 홈과 같은 여백을 쓴다.
+  // 상세 화면의 상단 메뉴(← Back to list)는 본문과 따로, 홈과 같은 값을 쓴다.
   // 어느 화면에서든 맨 위 줄의 기준선이 같아 보이도록 하기 위함이다.
   const menuRaw = normalizeGap(p.sideMargin);
   const menu = menuRaw != null ? menuRaw : SIDE_MARGIN_DEFAULT;
+  const menuMax = readMaxWidth(p.maxWidthHome, p.fullBleedHome);
 
   const root = document.documentElement.style;
   root.setProperty("--side", side + "px");
-  root.setProperty("--wrap", full ? "100%" : "1350px");
+  // min(…, 100%)이라 최대 폭을 화면보다 크게 잡으면 그대로 화면 끝까지 찬다.
+  // 켜고 끄는 스위치가 아니라 이어지는 값이라 폭이 계단처럼 튀지 않는다.
+  root.setProperty("--wrap", `min(${max}px, 100%)`);
   root.setProperty("--side-menu", menu + "px");
-  root.setProperty("--wrap-menu", p.fullBleedHome ? "100%" : "1350px");
+  root.setProperty("--wrap-menu", `min(${menuMax}px, 100%)`);
   root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
 }
 

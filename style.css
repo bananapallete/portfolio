@@ -1580,22 +1580,6 @@ body.gate-locked { overflow: hidden; }
   flex-wrap: nowrap;
 }
 
-.switch-field {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-  margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.switch-field input { accent-color: var(--sun); cursor: pointer; }
-.switch-field:hover { color: var(--ink); }
-
 /* 끌면서 바로 반영되는 슬라이더 (라벨 + 손잡이 + 숫자 + px + 기본값) */
 .slider-field {
   display: flex;
@@ -1612,10 +1596,13 @@ body.gate-locked { overflow: hidden; }
   white-space: nowrap;
 }
 
+/* 최대 폭은 네 자리라 기본 숫자칸으로는 잘린다 */
+.slider-field > .size-input { width: 70px; }
+
 .slider-field input[type="range"] {
-  flex: 1 1 160px;
-  min-width: 120px;
-  max-width: 260px;
+  flex: 1 1 130px;
+  min-width: 100px;
+  max-width: 200px;
   height: 4px;
   border-radius: 999px;
   /* var(--line)은 너무 옅어 손잡이만 떠 보인다 */
