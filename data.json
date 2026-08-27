@@ -111,7 +111,15 @@
           ],
           "summary": "Visual Identity, Motion Graphic",
           "bgColor": "#0957c3",
-          "blockGap": 2
+          "blockGap": 2,
+          "tools": [
+            "photoshop",
+            "illustrator",
+            "figma",
+            "c4d",
+            "kling",
+            "redshift"
+          ]
         },
         {
           "id": "new-project-mtb4jh1h",
