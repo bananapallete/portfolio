@@ -78,10 +78,10 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "https://player.vimeo.com/video/1221366898?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
+              "src": "https://player.vimeo.com/video/1221366898?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
               "ratioW": 426,
               "ratioH": 240,
-              "ratioSrc": "https://player.vimeo.com/video/1221366898?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479"
+              "ratioSrc": "https://player.vimeo.com/video/1221366898?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             },
             {
               "type": "embed",
