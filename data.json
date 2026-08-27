@@ -109,6 +109,20 @@
           "blockGap": 2
         },
         {
+          "id": "motion-menuboard",
+          "title": "Menuboard",
+          "coverImage": "",
+          "blocks": [],
+          "summary": ""
+        }
+      ]
+    },
+    {
+      "id": "illustration",
+      "name": "Illustration",
+      "accent": "#6c5ce7",
+      "projects": [
+        {
           "id": "illustration-jihaksa",
           "title": "지학사",
           "coverImage": "assets/d7578e404504795fab17.png",
@@ -156,21 +170,8 @@
           ],
           "summary": "지학사 책 표지 디자인",
           "blockGap": 2
-        },
-        {
-          "id": "motion-menuboard",
-          "title": "Menuboard",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
         }
       ]
-    },
-    {
-      "id": "new-category-mtaxsyo1",
-      "name": "Illustraion",
-      "accent": "#6c5ce7",
-      "projects": []
     }
   ]
 }
