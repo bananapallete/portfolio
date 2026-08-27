@@ -294,6 +294,20 @@ input, textarea, select { font-family: inherit; }
   overflow: hidden;
 }
 
+/* 마우스를 올리면 커버가 살짝 어두워진다 (글자는 얹지 않는다).
+   관리자 카드의 삭제·드래그 버튼은 z-index로 이 위에 뜬다. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover::after { opacity: 1; }
+
 .card-media {
   aspect-ratio: 16 / 9;
   width: 100%;
@@ -698,6 +712,8 @@ body.gate-locked { overflow: hidden; }
 
 /* 커버가 없는 카드에도 제목이 보이도록 (공개 사이트에는 없는 관리자 전용 표시) */
 .card-empty-title {
+  position: relative;
+  z-index: 1;
   font-size: 14px;
   font-weight: 700;
   color: var(--muted);
