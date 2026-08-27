@@ -45,12 +45,18 @@ function playWhileVisible(video) {
 const SIDE_MARGIN_DEFAULT = 28;
 const CARD_GAP_DEFAULT = 0;
 
-function applyLayoutVars(profile) {
+/* scope: "home"(목록) | "content"(상세). 화면마다 다른 여백 값을 쓴다.
+   상세 화면은 상단바·제목·블록·푸터가 모두 --side 하나를 보므로
+   값 하나로 그 화면 전체가 함께 움직인다. */
+function applyLayoutVars(profile, scope = "home") {
   const p = profile || {};
-  const side = normalizeGap(p.sideMargin);
+  const raw = normalizeGap(scope === "content" ? p.contentMargin : p.sideMargin);
+  const side = raw != null ? raw : SIDE_MARGIN_DEFAULT;
   const gap = normalizeGap(p.cardGap);
   const root = document.documentElement.style;
-  root.setProperty("--side", (side != null ? side : SIDE_MARGIN_DEFAULT) + "px");
+  root.setProperty("--side", side + "px");
+  // 0이면 가운데 정렬용 최대 폭까지 풀어 화면 양 끝을 꽉 채운다
+  root.setProperty("--wrap", side === 0 ? "100%" : "1350px");
   root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
 }
 

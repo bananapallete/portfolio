@@ -107,6 +107,7 @@
   --radius-sm: 10px;
   /* 레이아웃 값. 관리자에서 조절하면 JS가 이 값들을 바꾼다 */
   --side: 28px;
+  --wrap: 1350px;
   --card-gap: 0px;
 
   /* 카드/패널처럼 배경 위에 살짝 떠 있는 면 */
@@ -156,7 +157,7 @@ input, textarea, select { font-family: inherit; }
 ::selection { background: var(--sun); color: var(--ink); }
 
 .container {
-  max-width: 1350px;
+  max-width: var(--wrap);
   margin: 0 auto;
   padding: 0 var(--side);
 }
@@ -208,6 +209,9 @@ input, textarea, select { font-family: inherit; }
   border: none;
   background: transparent;
   padding: 6px 0;
+  /* 카테고리 이름은 Poppins로 고정 (한글은 Pretendard로 넘어간다) */
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  letter-spacing: -0.02em;
   font-weight: 400;
   font-size: 14px;
   color: var(--muted);
@@ -275,9 +279,10 @@ input, textarea, select { font-family: inherit; }
 
 /* 바디에 표시되는 카테고리 이름은 레귤러 + 전부 대문자 */
 .work-section-head h2 {
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
   font-size: 20px;
   font-weight: 400;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   margin: 0;
 }
@@ -290,7 +295,7 @@ input, textarea, select { font-family: inherit; }
 .work-grid,
 .proj-blocks {
   width: 100%;
-  max-width: 1350px;
+  max-width: var(--wrap);
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--side);
@@ -504,6 +509,7 @@ body.bg-takeover-light,
 .admin-utilbar .container,
 .admin-panel .container,
 .admin-stale .container {
+  max-width: 1350px;
   padding-left: 28px;
   padding-right: 28px;
 }

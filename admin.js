@@ -579,7 +579,7 @@ function renderProfileFields(wrap, profile) {
 function renderLayoutFields(wrap, profile) {
   const head = document.createElement("label");
   head.className = "mini-label";
-  head.textContent = "레이아웃 (끌면 화면에 바로 반영돼요)";
+  head.textContent = "레이아웃 (여백 0이면 화면 양 끝까지 꽉 채워요)";
   head.style.marginTop = "0";
   wrap.appendChild(head);
 
@@ -589,11 +589,18 @@ function renderLayoutFields(wrap, profile) {
   const live = () => applyLayoutVars(profile);
 
   box.appendChild(buildSliderField(
-    "좌우 여백",
+    "홈 좌우 여백",
     () => profile.sideMargin,
     (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
     { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
     live
+  ));
+  box.appendChild(buildSliderField(
+    "콘텐츠 좌우 여백",
+    () => profile.contentMargin,
+    (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
+    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
+    // 상세 화면 값이라 관리자 목록에는 바로 보이지 않는다 (미리보기로 확인)
   ));
   box.appendChild(buildSliderField(
     "카드 사이 간격",
