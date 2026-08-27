@@ -125,6 +125,28 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
   return row;
 }
 
+// 켜고 끄는 작은 스위치 (체크박스 + 라벨)
+function buildSwitchField(labelText, getVal, setVal, onApply) {
+  const label = document.createElement("label");
+  label.className = "switch-field";
+
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = !!getVal();
+  box.addEventListener("change", () => {
+    setVal(box.checked);
+    saveDraft();
+    if (onApply) onApply(box.checked);
+  });
+
+  const text = document.createElement("span");
+  text.textContent = labelText;
+
+  label.appendChild(box);
+  label.appendChild(text);
+  return label;
+}
+
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   const row = document.createElement("div");
   row.className = "gap-field";
@@ -579,7 +601,7 @@ function renderProfileFields(wrap, profile) {
 function renderLayoutFields(wrap, profile) {
   const head = document.createElement("label");
   head.className = "mini-label";
-  head.textContent = "레이아웃 (여백 0이면 화면 양 끝까지 꽉 채워요)";
+  head.textContent = "레이아웃 (\"꽉 채우기\"를 켜면 최대 폭 제한 없이 양 끝까지 차요)";
   head.style.marginTop = "0";
   wrap.appendChild(head);
 
@@ -588,19 +610,44 @@ function renderLayoutFields(wrap, profile) {
 
   const live = () => applyLayoutVars(profile);
 
-  box.appendChild(buildSliderField(
-    "홈 좌우 여백",
-    () => profile.sideMargin,
-    (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
-    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
-    live
+  // 여백 슬라이더와 "꽉 채우기" 스위치를 한 덩어리로 묶는다
+  const marginItem = (slider, sw) => {
+    const item = document.createElement("div");
+    item.className = "layout-item";
+    item.appendChild(slider);
+    item.appendChild(sw);
+    return item;
+  };
+
+  box.appendChild(marginItem(
+    buildSliderField(
+      "홈 좌우 여백",
+      () => profile.sideMargin,
+      (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
+      { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
+      live
+    ),
+    buildSwitchField(
+      "꽉 채우기",
+      () => profile.fullBleedHome,
+      (v) => { if (v) profile.fullBleedHome = true; else delete profile.fullBleedHome; },
+      live
+    )
   ));
-  box.appendChild(buildSliderField(
-    "콘텐츠 좌우 여백",
-    () => profile.contentMargin,
-    (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
-    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
-    // 상세 화면 값이라 관리자 목록에는 바로 보이지 않는다 (미리보기로 확인)
+
+  // 상세 화면 값이라 관리자 목록에는 바로 보이지 않는다 (미리보기로 확인)
+  box.appendChild(marginItem(
+    buildSliderField(
+      "콘텐츠 좌우 여백",
+      () => profile.contentMargin,
+      (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
+      { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
+    ),
+    buildSwitchField(
+      "꽉 채우기",
+      () => profile.fullBleedContent,
+      (v) => { if (v) profile.fullBleedContent = true; else delete profile.fullBleedContent; }
+    )
   ));
   box.appendChild(buildSliderField(
     "카드 사이 간격",

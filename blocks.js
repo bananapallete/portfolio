@@ -53,10 +53,12 @@ function applyLayoutVars(profile, scope = "home") {
   const raw = normalizeGap(scope === "content" ? p.contentMargin : p.sideMargin);
   const side = raw != null ? raw : SIDE_MARGIN_DEFAULT;
   const gap = normalizeGap(p.cardGap);
+  // "꽉 채우기"를 켠 화면만 가운데 정렬용 최대 폭을 푼다.
+  // 여백 값과 분리해 둬야 0↔1 사이에서 폭이 계단처럼 튀지 않는다.
+  const full = scope === "content" ? p.fullBleedContent : p.fullBleedHome;
   const root = document.documentElement.style;
   root.setProperty("--side", side + "px");
-  // 0이면 가운데 정렬용 최대 폭까지 풀어 화면 양 끝을 꽉 채운다
-  root.setProperty("--wrap", side === 0 ? "100%" : "1350px");
+  root.setProperty("--wrap", full ? "100%" : "1350px");
   root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
 }
 
