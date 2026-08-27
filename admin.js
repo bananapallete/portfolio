@@ -603,6 +603,7 @@ function renderTabs() {
 function renderSections() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
+  stopCoverVideos();
 
   (data.categories || []).forEach((cat) => {
     const section = document.createElement("section");
@@ -669,11 +670,7 @@ function renderAdminCard(cat, project, projIndex) {
   const media = document.createElement("div");
   media.className = "card-media";
   if (project.coverImage) {
-    const img = document.createElement("img");
-    img.src = project.coverImage;
-    img.alt = project.title || "";
-    setImgLoading(img, false);
-    media.appendChild(img);
+    media.appendChild(buildCoverMedia(project.coverImage, project.title, false));
   } else {
     const ph = document.createElement("div");
     ph.className = "card-empty-title";
@@ -986,7 +983,7 @@ function renderEditModalBody() {
 
   // ---- 커버 이미지 ----
   const coverLabel = document.createElement("label");
-  coverLabel.textContent = "커버 이미지 (목록 카드에 표시)";
+  coverLabel.textContent = "커버 이미지 · 영상 (목록 카드에 표시)";
   coverLabel.className = "mini-label";
   coverLabel.style.marginTop = "14px";
   card.appendChild(coverLabel);
@@ -994,13 +991,14 @@ function renderEditModalBody() {
   const coverRow = document.createElement("div");
   coverRow.className = "thumb-row";
   if (project.coverImage) {
-    coverRow.appendChild(makeThumb(project.coverImage, "image", () => {
+    coverRow.appendChild(makeThumb(project.coverImage, isVideoFile(project.coverImage) ? "video" : "image", () => {
       project.coverImage = "";
       saveDraft();
       renderEditModalBody();
     }));
   }
-  coverRow.appendChild(makeUploadTile(project.coverImage ? "교체" : "커버 업로드", {}, (files) => {
+  // 커버는 이미지뿐 아니라 영상 파일도 쓸 수 있다 (목록에서 소리 없이 반복 재생)
+  coverRow.appendChild(makeUploadTile(project.coverImage ? "교체" : "커버 업로드", { accept: "image/*,video/*" }, (files) => {
     if (!files.length) return;
     readFileAsDataURL(files[0]).then((dataUrl) => {
       project.coverImage = dataUrl;

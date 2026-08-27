@@ -10,6 +10,57 @@ function stopSliders() {
   sliderTimers = [];
 }
 
+/* -------------------------- 목록 카드의 커버 (이미지/영상) --------------------------
+   커버로 영상 파일을 쓰면 소리 없이 반복 재생한다. 카드가 여러 장이라
+   전부 동시에 돌면 무거우므로, 화면에 들어와 있는 것만 재생한다. */
+
+let coverVideoWatcher = null;
+
+function stopCoverVideos() {
+  if (coverVideoWatcher) coverVideoWatcher.disconnect();
+  coverVideoWatcher = null;
+}
+
+function playWhileVisible(video) {
+  if (!("IntersectionObserver" in window)) {
+    video.autoplay = true;
+    return;
+  }
+  if (!coverVideoWatcher) {
+    coverVideoWatcher = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.play().catch(() => {});
+          else e.target.pause();
+        });
+      },
+      { rootMargin: "120px" }
+    );
+  }
+  coverVideoWatcher.observe(video);
+}
+
+// eager: 첫 화면에 걸리는 카드만 미리 받아 둔다
+function buildCoverMedia(src, alt, eager) {
+  if (!isVideoFile(src)) {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = alt || "";
+    setImgLoading(img, eager);
+    return img;
+  }
+  const video = document.createElement("video");
+  video.src = src;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.controls = false;
+  video.preload = eager ? "auto" : "metadata";
+  video.setAttribute("aria-label", alt || "");
+  playWhileVisible(video);
+  return video;
+}
+
 // #RGB / #RRGGBB 색이 어두운지 판별 (밝기 < 0.55면 어두움 → 흰 글자 사용)
 function isDarkColor(hex) {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((hex || "").trim());

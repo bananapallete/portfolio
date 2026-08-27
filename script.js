@@ -80,11 +80,7 @@ function buildCard(project, eager) {
   const media = document.createElement("div");
   media.className = "card-media";
   if (project.coverImage) {
-    const img = document.createElement("img");
-    img.src = project.coverImage;
-    img.alt = project.title || "";
-    setImgLoading(img, eager);
-    media.appendChild(img);
+    media.appendChild(buildCoverMedia(project.coverImage, project.title, eager));
   }
   card.appendChild(media);
 
@@ -103,6 +99,7 @@ function goToProject(project) {
 function renderSections() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
+  stopCoverVideos();
 
   const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
 
