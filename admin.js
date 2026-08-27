@@ -213,7 +213,6 @@ function ensureShape() {
   data.profile = data.profile || {};
   data.profile.contact = data.profile.contact || {};
   data.profile.contact.emails = data.profile.contact.emails || [];
-  if (data.profile.heroDim == null) data.profile.heroDim = 0.5;
   data.categories = data.categories || [];
   // 구버전: 프로젝트별 titleWeight가 있으면 전역 설정으로 승격 후 제거
   if (!data.profile.projectTitleWeight) {
@@ -225,7 +224,6 @@ function ensureShape() {
   (data.categories || []).forEach((c) => (c.projects || []).forEach((p) => { delete p.titleWeight; }));
   data.categories.forEach((cat) => {
     cat.projects = cat.projects || [];
-    cat.accent = cat.accent || "#6c5ce7";
     cat.projects.forEach((p) => {
       p.summary = p.summary || "";
       // 구버전(description/images/videos) 데이터를 블록 구조로 변환
@@ -440,22 +438,6 @@ function renderProfileFields(wrap, profile) {
   row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; saveDraft(); }));
   wrap.appendChild(row1);
 
-  const row2 = document.createElement("div");
-  row2.className = "field-row";
-  const taglineField = document.createElement("div");
-  taglineField.className = "field";
-  taglineField.style.gridColumn = "1 / -1";
-  const label = document.createElement("label");
-  label.textContent = "소개 문구(태그라인)";
-  const ta = document.createElement("textarea");
-  ta.value = profile.tagline || "";
-  ta.rows = 2;
-  ta.addEventListener("input", () => { profile.tagline = ta.value; saveDraft(); });
-  taglineField.appendChild(label);
-  taglineField.appendChild(ta);
-  row2.appendChild(taglineField);
-  wrap.appendChild(row2);
-
   const row3 = document.createElement("div");
   row3.className = "field-row";
   row3.appendChild(makeTextField("전화번호", profile.contact.phone, (v) => { profile.contact.phone = v; saveDraft(); }));
@@ -607,7 +589,6 @@ function renderTabs() {
     const cat = {
       id: slugify("new-category"),
       name: "새 카테고리",
-      accent: "#6c5ce7",
       projects: [],
     };
     data.categories.push(cat);
@@ -797,7 +778,7 @@ function openCategoryEditor(cat) {
   editingContext = {
     type: "category",
     cat,
-    copy: { name: cat.name || "", accent: cat.accent || "#6c5ce7" },
+    copy: { name: cat.name || "" },
     dirty: false,
   };
   openEditModal();
@@ -840,7 +821,6 @@ async function saveModalAndPublish() {
     data.profile = ctx.profile;
   } else if (ctx.type === "category") {
     ctx.cat.name = ctx.copy.name;
-    ctx.cat.accent = ctx.copy.accent;
   }
   saveDraft();
   const ok = await publishToGithub();
@@ -1126,20 +1106,6 @@ function renderCategoryModalBody() {
   }));
   card.appendChild(row);
 
-  const accentLabel = document.createElement("label");
-  accentLabel.textContent = "포인트 색상";
-  accentLabel.className = "mini-label";
-  card.appendChild(accentLabel);
-
-  const accentRow = document.createElement("div");
-  accentRow.className = "block-controls-row";
-  const accentField = buildColorField(
-    copy.accent,
-    (v) => { copy.accent = v; saveDraft(); },
-    { swatches: true, rerender: renderEditModalBody }
-  );
-  accentRow.appendChild(accentField.field);
-  card.appendChild(accentRow);
 }
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */
@@ -2305,9 +2271,6 @@ async function uploadAssetIfNeeded(dataUrl, token) {
 // data 안에서 아직 업로드되지 않은(data:로 시작하는) 이미지/영상 목록을 모은다.
 function collectPendingMedia() {
   const refs = [];
-  if (data.profile && data.profile.heroVideo && data.profile.heroVideo.startsWith("data:")) {
-    refs.push({ get: () => data.profile.heroVideo, set: (v) => { data.profile.heroVideo = v; } });
-  }
   (data.categories || []).forEach((cat) => {
     (cat.projects || []).forEach((p) => {
       if (p.coverImage && p.coverImage.startsWith("data:")) {

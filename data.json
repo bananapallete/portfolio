@@ -3,7 +3,6 @@
     "name": "hanjung cho",
     "nickname": "unlimit_cho",
     "role": "",
-    "tagline": "",
     "contact": {
       "phone": "+82 10 5678 0569",
       "emails": [
@@ -11,10 +10,6 @@
         "bananapallete@gmail.com"
       ]
     },
-    "heroDim": 0.65,
-    "heroVideo": "assets/9c82b908a4a57428c15d.mp4",
-    "heroTitle": "",
-    "showHeroTitle": false,
     "projectTitleWeight": "400",
     "workBg": "#14121a",
     "cardGap": 5
@@ -23,7 +18,6 @@
     {
       "id": "work",
       "name": "Work",
-      "accent": "#FF4D6D",
       "projects": [
         {
           "id": "branding-midas-week-2026",
@@ -114,7 +108,6 @@
     {
       "id": "illustration",
       "name": "Illustration",
-      "accent": "#6c5ce7",
       "projects": [
         {
           "id": "illustration-jihaksa",
