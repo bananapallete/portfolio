@@ -1614,6 +1614,45 @@ body.gate-locked { overflow: hidden; }
 
 .drag-handle-mini:active { cursor: grabbing; }
 
+/* 이미지가 들어갈 빈 칸. 고른 배열(2열·3열·4열…) 그대로 자리를 차지해
+   어떤 모양이 될지 눈으로 보면서 그 자리에 바로 올릴 수 있다. */
+.img-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 120px;
+  aspect-ratio: 4 / 3;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 28%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+  transition: border-color 0.25s ease-in-out, background 0.25s ease-in-out, color 0.25s ease-in-out;
+}
+
+.img-slot:hover {
+  border-color: var(--sun);
+  background: color-mix(in srgb, var(--sun) 12%, transparent);
+  color: var(--ink);
+}
+
+.img-slot-plus { font-size: 20px; line-height: 1; }
+.img-slot-text { font-size: 12px; font-weight: 700; }
+
+/* 모자이크는 컬럼 흐름이라 칸이 잘리지 않도록 통째로 유지 */
+.blk-images-masonry .img-slot { break-inside: avoid; margin-bottom: 10px; }
+
+/* 슬라이드 줄에서는 사진과 같은 높이로 맞춘다 */
+.pv-slider-strip .img-slot {
+  flex: none;
+  width: 180px;
+  height: 130px;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
 /* 사진 위에 겹쳐 두는 "교체" 버튼 — 마우스를 올렸을 때만 나타난다 */
 .img-replace {
   position: absolute;

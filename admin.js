@@ -1196,10 +1196,12 @@ function renderBlocksEditor(project) {
     item.appendChild(bh);
 
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
+    // 링크가 없는 임베드는 보여줄 게 없어 미리보기를 생략한다.
+    // 이미지 블록은 비어 있어도 빈 칸을 보여줘야 하므로 항상 그린다.
+    const hidePreview = mustShowSettings && block.type === "embed";
     const preview = document.createElement("div");
     preview.className = "block-preview";
-    if (mustShowSettings) {
-      // 보여줄 내용이 없으니 미리보기는 생략하고 아래 설정 줄로 바로 간다
+    if (hidePreview) {
       preview.remove();
     } else if (block.type === "embed" && folded) {
       // 접었을 때는 iframe을 아예 만들지 않아 영상이 로드되지 않는다
@@ -1209,7 +1211,7 @@ function renderBlocksEditor(project) {
       if (canFold && folded) preview.classList.add("block-preview-capped");
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
-    if (!mustShowSettings) item.appendChild(preview);
+    if (!hidePreview) item.appendChild(preview);
 
     if (settingsOpen) {
       const settings = document.createElement("div");
@@ -1630,12 +1632,6 @@ function renderPreviewBlockContent(project, block, blockIndex) {
     const images = block.images || [];
     const imgGroup = `pvimgs-${project.id}-${blockIndex}`;
     let div;
-    if (!images.length) {
-      div = document.createElement("div");
-      div.className = "block-hint";
-      div.textContent = "(이미지가 없는 블록)";
-      return div;
-    }
     // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다
     const ownGap = normalizeGap(block.gap);
     const gap = ownGap != null ? ownGap : normalizeGap(project.blockGap);
@@ -1685,6 +1681,15 @@ function renderPreviewBlockContent(project, block, blockIndex) {
 
       attachDrag(w, h, imgGroup, block.images, j);
       div.appendChild(w);
+    });
+
+    // 빈 칸을 실제 칸 모양 그대로 놓아, 고른 배열이 눈에 보이고 그 자리에 바로 올릴 수 있게 한다
+    emptySlotCount(block).forEach(() => {
+      div.appendChild(makeImageSlot((added) => {
+        block.images = (block.images || []).concat(added);
+        saveDraft();
+        renderEditModalBody();
+      }));
     });
 
     if (block.layout === "slider") {
@@ -1765,6 +1770,49 @@ function makeThumb(src, kind, onRemove) {
   removeBtn.addEventListener("click", onRemove);
   thumb.appendChild(removeBtn);
   return thumb;
+}
+
+/* 미리보기에 함께 놓을 빈 칸 개수.
+   그리드는 남은 칸을 채워 배열이 한눈에 보이게 하고(비어 있으면 한 줄 전체),
+   줄이 딱 맞으면 다음 칸 하나만 둔다. 단일·슬라이드·모자이크는 하나면 충분하다. */
+function emptySlotCount(block) {
+  const n = (block.images || []).length;
+  let slots = 1;
+  if (block.layout === "grid" && block.grid !== "masonry") {
+    const cols = parseInt(block.grid, 10) || 3;
+    const rest = n % cols;
+    slots = rest === 0 ? (n === 0 ? cols : 1) : cols - rest;
+  }
+  return new Array(slots).fill(0);
+}
+
+// 이미지가 들어갈 빈 칸. 눌러서 그 자리에 바로 올린다.
+function makeImageSlot(onImages) {
+  const slot = document.createElement("button");
+  slot.type = "button";
+  slot.className = "img-slot file-btn";
+  slot.title = "이 칸에 이미지 올리기";
+
+  const plus = document.createElement("span");
+  plus.className = "img-slot-plus";
+  plus.textContent = "＋";
+  const text = document.createElement("span");
+  text.className = "img-slot-text";
+  text.textContent = "이미지 추가";
+  slot.appendChild(plus);
+  slot.appendChild(text);
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = true;
+  input.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    Promise.all(files.map(readFileAsDataURL)).then(onImages);
+  });
+  slot.appendChild(input);
+  return slot;
 }
 
 // 사진 위에 겹쳐 두는 "교체" 버튼. 평소에는 숨어 있다가 마우스를 올리면 나타난다.
