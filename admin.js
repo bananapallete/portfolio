@@ -494,6 +494,8 @@ function buildColorField(initial, onChange, options = {}) {
 function renderProfileFields(wrap, profile) {
   profile.contact = profile.contact || {};
 
+  renderLayoutFields(wrap, profile);
+
   const row1 = document.createElement("div");
   row1.className = "field-row";
 
@@ -566,40 +568,38 @@ function renderProfileFields(wrap, profile) {
   workBgRow.appendChild(workBgClear);
   wrap.appendChild(workBgRow);
 
-  // ---- 사이트 좌우 여백 ----
-  const sideLabel = document.createElement("label");
-  sideLabel.textContent = "사이트 좌우 여백 (헤더·목록·상세에 함께 적용)";
-  sideLabel.className = "mini-label";
-  sideLabel.style.marginTop = "18px";
-  wrap.appendChild(sideLabel);
+}
 
-  const sideRow = document.createElement("div");
-  sideRow.className = "block-controls-row";
-  sideRow.appendChild(buildSliderField(
-    "여백",
+/* 레이아웃 값 두 가지를 한 자리에 모아 맨 위에 둔다.
+   손잡이를 끄는 동안 화면이 바로 따라오도록 다시 그리지 않고 변수만 갱신한다. */
+function renderLayoutFields(wrap, profile) {
+  const head = document.createElement("label");
+  head.className = "mini-label";
+  head.textContent = "레이아웃 (끌면 화면에 바로 반영돼요)";
+  head.style.marginTop = "0";
+  wrap.appendChild(head);
+
+  const box = document.createElement("div");
+  box.className = "layout-fields";
+
+  const live = () => applyLayoutVars(profile);
+
+  box.appendChild(buildSliderField(
+    "좌우 여백",
     () => profile.sideMargin,
     (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
     { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
-    () => applySideMargin(profile)   // 끄는 동안 관리자 화면에 바로 보인다
+    live
   ));
-  wrap.appendChild(sideRow);
-
-  // ---- 목록 카드 사이 간격 ----
-  const cardGapLabel = document.createElement("label");
-  cardGapLabel.textContent = "목록 카드 사이 간격 (홈 화면 그리드, 최소 0px)";
-  cardGapLabel.className = "mini-label";
-  cardGapLabel.style.marginTop = "18px";
-  wrap.appendChild(cardGapLabel);
-
-  const cardGapRow = document.createElement("div");
-  cardGapRow.className = "block-controls-row";
-  cardGapRow.appendChild(buildGapField(
-    "간격",
+  box.appendChild(buildSliderField(
+    "카드 사이 간격",
     () => profile.cardGap,
-    (g) => { if (g == null) delete profile.cardGap; else profile.cardGap = g; },
-    "0"
+    (v) => { if (v == null) delete profile.cardGap; else profile.cardGap = v; },
+    { min: 0, max: 80, def: CARD_GAP_DEFAULT },
+    live
   ));
-  wrap.appendChild(cardGapRow);
+
+  wrap.appendChild(box);
 }
 
 function makeTextField(labelText, value, onChange) {
@@ -714,7 +714,6 @@ function renderSections() {
 
     const grid = document.createElement("div");
     grid.className = "work-grid";
-    applyCardGap(grid, data.profile);
     (cat.projects || []).forEach((project, projIndex) => {
       grid.appendChild(renderAdminCard(cat, project, projIndex));
     });
@@ -1964,7 +1963,7 @@ function readFileAsDataURL(file) {
 }
 
 function renderAll() {
-  applySideMargin(data && data.profile);
+  applyLayoutVars(data && data.profile);
   if (!data) return;
   ensureShape();
   renderSiteHeader();

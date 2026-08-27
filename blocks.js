@@ -40,22 +40,18 @@ function playWhileVisible(video) {
   coverVideoWatcher.observe(video);
 }
 
-/* 사이트 좌우 여백 (프로필 설정, 미설정이면 CSS 기본 28px).
-   헤더·목록 그리드·상세 블록이 모두 이 변수를 쓰므로 한 번에 바뀐다. */
+/* 레이아웃 값(좌우 여백·카드 사이 간격)은 CSS 변수로 한 번에 적용한다.
+   헤더·목록 그리드·상세 블록이 모두 이 변수를 보므로 값만 바꾸면 전부 따라온다. */
 const SIDE_MARGIN_DEFAULT = 28;
+const CARD_GAP_DEFAULT = 0;
 
-function applySideMargin(profile) {
-  const v = normalizeGap((profile || {}).sideMargin);
-  document.documentElement.style.setProperty(
-    "--side",
-    (v != null ? v : SIDE_MARGIN_DEFAULT) + "px"
-  );
-}
-
-// 목록 그리드의 카드 사이 간격 (프로필 설정, 최소 0px — 미설정이면 0)
-function applyCardGap(grid, profile) {
-  const gap = normalizeGap((profile || {}).cardGap);
-  grid.style.gap = (gap != null ? gap : 0) + "px";
+function applyLayoutVars(profile) {
+  const p = profile || {};
+  const side = normalizeGap(p.sideMargin);
+  const gap = normalizeGap(p.cardGap);
+  const root = document.documentElement.style;
+  root.setProperty("--side", (side != null ? side : SIDE_MARGIN_DEFAULT) + "px");
+  root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
 }
 
 // eager: 첫 화면에 걸리는 카드만 미리 받아 둔다

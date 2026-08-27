@@ -42,7 +42,7 @@ function applyWorkBg(p) {
 
 function renderHeader() {
   const p = siteData.profile || {};
-  applySideMargin(p);
+  applyLayoutVars(p);
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
   document.getElementById("brandRole").textContent = p.role || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
@@ -131,7 +131,6 @@ function renderSections() {
 
     const grid = document.createElement("div");
     grid.className = "work-grid";
-    applyCardGap(grid, siteData.profile);
     projects.forEach((project) => {
       // 2열 그리드라 처음 두 장만 첫 화면에 걸린다
       grid.appendChild(buildCard(project, total < 2));

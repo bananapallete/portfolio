@@ -105,8 +105,9 @@
   --radius-lg: 28px;
   --radius-md: 18px;
   --radius-sm: 10px;
-  /* 사이트 좌우 여백. 관리자에서 조절하면 JS가 이 값을 바꾼다 */
+  /* 레이아웃 값. 관리자에서 조절하면 JS가 이 값들을 바꾼다 */
   --side: 28px;
+  --card-gap: 0px;
 
   /* 카드/패널처럼 배경 위에 살짝 떠 있는 면 */
   --panel: #ffffff;
@@ -299,7 +300,7 @@ input, textarea, select { font-family: inherit; }
 .work-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0;
+  gap: var(--card-gap);
 }
 
 .card {
@@ -1513,6 +1514,18 @@ body.gate-locked { overflow: hidden; }
   margin-top: 10px;
 }
 
+/* 레이아웃 조절값 묶음 — 프로필 편집 맨 위 */
+.layout-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+}
+
 /* 끌면서 바로 반영되는 슬라이더 (라벨 + 손잡이 + 숫자 + px + 기본값) */
 .slider-field {
   display: flex;
@@ -1535,7 +1548,8 @@ body.gate-locked { overflow: hidden; }
   max-width: 260px;
   height: 4px;
   border-radius: 999px;
-  background: var(--line);
+  /* var(--line)은 너무 옅어 손잡이만 떠 보인다 */
+  background: color-mix(in srgb, var(--ink) 20%, transparent);
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
