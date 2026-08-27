@@ -58,6 +58,13 @@
               "ratioSrc": "https://player.vimeo.com/video/1218861191?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
             },
             {
+              "type": "embed",
+              "src": "https://player.vimeo.com/video/1218812087?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
+              "ratioW": 426,
+              "ratioH": 178,
+              "ratioSrc": "https://player.vimeo.com/video/1218812087?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+            },
+            {
               "type": "images",
               "layout": "single",
               "images": [
@@ -69,7 +76,7 @@
           ],
           "summary": "MIDAS IT 국내외 임직원 대상 사내 어워즈 키비주얼 및 현장 그래픽 디자인",
           "blockGap": 0,
-          "bgColor": "#0b2391"
+          "bgColor": "#071345"
         },
         {
           "id": "new-project-mt9nq9yg",
