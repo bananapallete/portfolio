@@ -107,13 +107,6 @@
           "summary": "Visual Identity, Motion Graphic",
           "bgColor": "#0957c3",
           "blockGap": 2
-        },
-        {
-          "id": "motion-menuboard",
-          "title": "Menuboard",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
         }
       ]
     },
@@ -170,6 +163,13 @@
           ],
           "summary": "지학사 책 표지 디자인",
           "blockGap": 2
+        },
+        {
+          "id": "new-project-mtb0xnip",
+          "title": "Safari Riders",
+          "coverImage": "assets/67aba58943c66cb26386.png",
+          "blocks": [],
+          "summary": ""
         }
       ]
     }
