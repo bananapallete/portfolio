@@ -173,7 +173,15 @@
     {
       "id": "new-category-mtb40jrr",
       "name": "Crumbles",
-      "projects": []
+      "projects": [
+        {
+          "id": "new-project-mtb445wu",
+          "title": "Test Thumbs",
+          "coverImage": "assets/d5729495f5d38311befc.png",
+          "blocks": [],
+          "summary": ""
+        }
+      ]
     }
   ]
 }
