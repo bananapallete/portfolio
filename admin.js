@@ -1018,14 +1018,44 @@ function renderHeroPreview(cat, project) {
     document.execCommand("insertText", false, text);
   });
 
-  const tag = document.createElement("span");
-  tag.className = "modal-tag";
-  tag.textContent = cat.name || "";
-
+  // 디자인 지시대로 카테고리 뱃지 자리에는 사용 툴 아이콘 줄을 우측 정렬로 둔다
   inner.appendChild(h1);
-  inner.appendChild(tag);
+  inner.appendChild(buildToolPicker(project));
   wrap.appendChild(inner);
   return wrap;
+}
+
+/* 제목 오른쪽에 붙는 툴 고르기 줄. 누르면 켜지고 꺼지며,
+   켜둔 툴이 목록 카드에 마우스를 올렸을 때 태그로 뜬다. */
+function buildToolPicker(project) {
+  const row = document.createElement("div");
+  row.className = "tool-picker";
+
+  TOOLS.forEach((tool) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tool-pick";
+    btn.title = tool.label;
+    btn.setAttribute("aria-label", tool.label);
+    const on = (project.tools || []).includes(tool.id);
+    btn.classList.toggle("tool-pick-on", on);
+    btn.setAttribute("aria-pressed", String(on));
+    btn.appendChild(buildToolIcon(tool));
+    btn.addEventListener("click", () => {
+      const picked = new Set(project.tools || []);
+      if (picked.has(tool.id)) picked.delete(tool.id);
+      else picked.add(tool.id);
+      // 저장 순서는 디자인에 정의된 순서를 따른다
+      const next = TOOLS.filter((t) => picked.has(t.id)).map((t) => t.id);
+      if (next.length) project.tools = next;
+      else delete project.tools;
+      saveDraft();
+      renderEditModalBody();
+    });
+    row.appendChild(btn);
+  });
+
+  return row;
 }
 
 /* 배경색·카드 설명·콘텐츠 간격처럼 한 번 정하면 잘 안 바꾸는 값들.

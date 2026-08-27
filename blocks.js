@@ -500,6 +500,84 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
   return null;
 }
 
+/* ------------------------------ 사용 툴 (공용) ------------------------------
+   프로젝트마다 쓴 툴을 골라두면 목록 카드에 마우스를 올렸을 때 태그로 뜬다.
+   아이콘 판의 배경색과 그림 위치·크기는 디자인(Figma) 값을 28.125px 기준
+   비율(%)로 환산한 것이라 어떤 크기로 그려도 모양이 그대로 유지된다.
+   x/y가 "c"면 그 축은 가운데. crop은 그림을 판 안에서 잘라 쓰는 경우. */
+
+const TOOLS = [
+  { id: "photoshop",    label: "Photoshop",   bg: "#001e36", w: 91.17, h: 91.17, x: 4.46,  y: 4.47 },
+  { id: "illustrator",  label: "Illustrator", bg: "#330000", w: 73.98, h: 66.73, x: "c",   y: "c",
+    crop: { w: 121.64, h: 134.85, x: -10.82, y: -17.42 } },
+  { id: "aftereffects", label: "After Effect", bg: "#00005b", w: 94.11, h: 91.75, x: 2.84, y: 4.18 },
+  { id: "procreate",    label: "Procreate",   bg: "#242424", w: 71.96, h: 71.59, x: 13.91, y: 14.25,
+    crop: { w: 116.43, h: 117.02, x: -8.21, y: -8.51 } },
+  { id: "lottie",       label: "Lottie",      bg: "#00dfb4", w: 72.58, h: 81.24, x: "c",   y: 9.38,
+    crop: { w: 976.3, h: 654.65, x: -145.87, y: -277.33 } },
+  { id: "figma",        label: "Figma",       bg: "#2b2d34", w: 63.56, h: 80.46, x: 18.13, y: "c",
+    crop: { w: 184.52, h: 145.78, x: -42.26, y: -20 } },
+  { id: "c4d",          label: "C4D",         bg: "#2b2ba3", w: 100,   h: 112.05, x: "c",  y: "c" },
+  { id: "kling",        label: "Kling AI",    bg: "#eef5f7", w: 72.07, h: 72.07, x: 14.04, y: 14.02 },
+  { id: "redshift",     label: "Redshift",    bg: "#700428", w: 90.43, h: 102.27, x: "c",  y: "c" },
+  { id: "gemini",       label: "Gemini",      bg: "#eef5f7", w: 74.43, h: 74.43, x: "c",   y: "c" },
+  { id: "gpt",          label: "GPT",         bg: "#eef5f7", w: 100,   h: 100,   x: "c",   y: "c" },
+  { id: "claude",       label: "Claude",      bg: "#da7656", w: 76.12, h: 75.76, x: "c",   y: "c",
+    crop: { w: 131.37, h: 132, x: -15.68, y: -16 } },
+];
+
+const TOOL_BY_ID = TOOLS.reduce((m, t) => { m[t.id] = t; return m; }, {});
+
+// 프로젝트에 저장된 id 목록을 디자인에 정의된 순서대로 정리한다
+function toolsOf(project) {
+  const picked = new Set(project.tools || []);
+  return TOOLS.filter((t) => picked.has(t.id));
+}
+
+// 아이콘 한 개. 크기는 CSS가 정하고, 안쪽 그림은 비율로 자리를 잡는다.
+function buildToolIcon(tool) {
+  const icon = document.createElement("span");
+  icon.className = "tool-icon";
+  icon.style.background = tool.bg;
+
+  const leaf = document.createElement("span");
+  leaf.className = "tool-icon-leaf";
+  leaf.style.width = tool.w + "%";
+  leaf.style.height = tool.h + "%";
+  leaf.style.left = (tool.x === "c" ? (100 - tool.w) / 2 : tool.x) + "%";
+  leaf.style.top = (tool.y === "c" ? (100 - tool.h) / 2 : tool.y) + "%";
+
+  const img = document.createElement("img");
+  img.src = `assets/tools/${tool.id}.png`;
+  img.alt = "";
+  img.draggable = false;
+  if (tool.crop) {
+    // 판 안에서 잘라 쓰는 그림 — 잘린 위치까지 그대로 맞춘다
+    img.style.width = tool.crop.w + "%";
+    img.style.height = tool.crop.h + "%";
+    img.style.left = tool.crop.x + "%";
+    img.style.top = tool.crop.y + "%";
+  }
+  leaf.appendChild(img);
+  icon.appendChild(leaf);
+  return icon;
+}
+
+// 카드에 마우스를 올렸을 때 뜨는 툴 태그 줄
+function buildToolTags(project) {
+  const list = toolsOf(project);
+  if (!list.length) return null;
+  const row = document.createElement("div");
+  row.className = "card-tags";
+  list.forEach((t) => {
+    const tag = document.createElement("span");
+    tag.className = "card-tag";
+    tag.textContent = t.label;
+    row.appendChild(tag);
+  });
+  return row;
+}
+
 /* ---------------------------- 푸터 연락처 (공용) ----------------------------
    목록 화면과 상세 화면이 같은 마크업을 쓰므로 한 곳에서 만든다. */
 

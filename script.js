@@ -95,6 +95,8 @@ function buildCard(project, eager) {
     desc.textContent = project.summary;
     body.appendChild(desc);
   }
+  const tags = buildToolTags(project);
+  if (tags) body.appendChild(tags);
   card.appendChild(body);
 
   card.addEventListener("click", () => goToProject(project));
