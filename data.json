@@ -12,7 +12,8 @@
     },
     "projectTitleWeight": "400",
     "workBg": "#14121a",
-    "cardGap": 5
+    "cardGap": 5,
+    "sideMargin": 10
   },
   "categories": [
     {
