@@ -494,19 +494,22 @@ function buildColorField(initial, onChange, options = {}) {
 function renderProfileFields(wrap, profile) {
   profile.contact = profile.contact || {};
 
+  // 판이 열려 있는 동안 아래 화면이 바로 따라오도록 (저장 전 미리보기)
+  const live = () => { saveDraft(); renderSiteHeader(profile); };
+
   renderLayoutFields(wrap, profile);
 
   const row1 = document.createElement("div");
   row1.className = "field-row";
 
-  row1.appendChild(makeTextField("이름", profile.name, (v) => { profile.name = v; saveDraft(); }));
-  row1.appendChild(makeTextField("닉네임", profile.nickname, (v) => { profile.nickname = v; saveDraft(); }));
-  row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; saveDraft(); }));
+  row1.appendChild(makeTextField("이름", profile.name, (v) => { profile.name = v; live(); }));
+  row1.appendChild(makeTextField("닉네임", profile.nickname, (v) => { profile.nickname = v; live(); }));
+  row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; live(); }));
   wrap.appendChild(row1);
 
   const row3 = document.createElement("div");
   row3.className = "field-row";
-  row3.appendChild(makeTextField("전화번호", profile.contact.phone, (v) => { profile.contact.phone = v; saveDraft(); }));
+  row3.appendChild(makeTextField("전화번호", profile.contact.phone, (v) => { profile.contact.phone = v; live(); }));
 
   const emailField = document.createElement("div");
   emailField.className = "field";
@@ -520,7 +523,7 @@ function renderProfileFields(wrap, profile) {
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
-    saveDraft();
+    live();
   });
   emailField.appendChild(emailLabel);
   emailField.appendChild(emailTa);
@@ -552,7 +555,7 @@ function renderProfileFields(wrap, profile) {
   workBgRow.className = "block-controls-row";
   const workBgField = buildColorField(
     profile.workBg || "#0d0d0d",
-    (v) => { profile.workBg = v; saveDraft(); },
+    (v) => { profile.workBg = v; live(); },
     { swatches: true, rerender: renderEditModalBody }
   );
   workBgRow.appendChild(workBgField.field);
@@ -562,6 +565,7 @@ function renderProfileFields(wrap, profile) {
   workBgClear.textContent = "기본값";
   workBgClear.addEventListener("click", () => {
     delete profile.workBg;
+    renderSiteHeader(profile);
     saveDraft();
     renderEditModalBody();
   });
@@ -618,8 +622,9 @@ function makeTextField(labelText, value, onChange) {
 
 /* ---------------------- 실제 사이트와 동일한 화면 (헤더·탭·그리드·푸터) ---------------------- */
 
-function renderSiteHeader() {
-  const p = data.profile || {};
+// profile을 넘기면 그 값으로 그린다 (설정 판에서 저장 전 미리보기에 쓴다)
+function renderSiteHeader(profile) {
+  const p = profile || data.profile || {};
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
   document.getElementById("brandRole").textContent = p.role || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
@@ -627,21 +632,7 @@ function renderSiteHeader() {
   const work = document.querySelector(".work");
   if (work) work.style.background = p.workBg || "";
 
-  const contactEl = document.getElementById("footerContact");
-  contactEl.innerHTML = "";
-  const contact = p.contact || {};
-  if (contact.phone) {
-    const a = document.createElement("a");
-    a.href = `tel:${contact.phone.replace(/\s+/g, "")}`;
-    a.textContent = contact.phone;
-    contactEl.appendChild(a);
-  }
-  (contact.emails || []).forEach((email) => {
-    const a = document.createElement("a");
-    a.href = `mailto:${email}`;
-    a.textContent = email;
-    contactEl.appendChild(a);
-  });
+  renderFooterContact(p);
 }
 
 /* -------- 카테고리 탭 (스크롤 이동·스크롤 스파이·makeTab은 blocks.js 공용) -------- */
@@ -845,6 +836,10 @@ function openProjectEditor(cat, project, projIndex) {
   openEditModal();
 }
 
+function isPanelEditor() {
+  return !!editingContext && editingContext.type === "profile";
+}
+
 function openProfileEditor() {
   if (!data) return;
   editingContext = {
@@ -853,6 +848,12 @@ function openProfileEditor() {
     dirty: false,
   };
   openEditModal();
+}
+
+// 버튼을 다시 누르면 닫힌다
+function toggleProfileEditor() {
+  if (isPanelEditor()) closeProjectEditor();
+  else openProfileEditor();
 }
 
 function openCategoryEditor(cat) {
@@ -868,7 +869,12 @@ function openCategoryEditor(cat) {
 function openEditModal() {
   updateModalSaveState();
   renderEditModalBody();
-  document.getElementById("projectEditOverlay").classList.remove("hidden");
+  if (isPanelEditor()) {
+    document.getElementById("profilePanel").hidden = false;
+    document.getElementById("profileEditBtn").classList.add("btn-primary");
+  } else {
+    document.getElementById("projectEditOverlay").classList.remove("hidden");
+  }
 }
 
 // force=true면 확인 없이 닫는다 (저장 완료 후, 삭제 후)
@@ -881,13 +887,16 @@ function closeProjectEditor(force = false) {
   editingContext = null;
   applyModalBg(null);
   document.getElementById("projectEditOverlay").classList.add("hidden");
+  document.getElementById("profilePanel").hidden = true;
+  document.getElementById("profileEditBtn").classList.remove("btn-primary");
   renderAll();
 }
 
 function updateModalSaveState() {
-  const el = document.getElementById("modalSaveState");
-  if (!el) return;
   const dirty = !!(editingContext && editingContext.dirty);
+  const id = isPanelEditor() ? "profilePanelState" : "modalSaveState";
+  const el = document.getElementById(id);
+  if (!el) return;
   el.textContent = dirty ? "● 저장되지 않은 변경사항이 있어요" : "";
   el.classList.toggle("visible", dirty);
 }
@@ -1138,17 +1147,8 @@ function renderEditModalBody() {
 
 // 프로필 편집 팝업 본문
 function renderProfileModalBody() {
-  applyModalBg(null);
-  const card = document.getElementById("projectEditBody");
+  const card = document.getElementById("profilePanelBody");
   card.innerHTML = "";
-
-  const head = document.createElement("div");
-  head.className = "project-card-head";
-  const title = document.createElement("strong");
-  title.textContent = "프로필 & 연락처";
-  head.appendChild(title);
-  card.appendChild(head);
-
   renderProfileFields(card, editingContext.profile);
 }
 
@@ -2142,8 +2142,11 @@ document.getElementById("profileEditBtn").addEventListener("click", () => {
     alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 편집해주세요.");
     return;
   }
-  openProfileEditor();
+  toggleProfileEditor();
 });
+
+document.getElementById("profileSaveBtn").addEventListener("click", saveModalAndPublish);
+document.getElementById("profileCloseBtn").addEventListener("click", () => closeProjectEditor());
 
 document.getElementById("projectEditClose").addEventListener("click", () => closeProjectEditor());
 document.getElementById("projectEditSave").addEventListener("click", saveModalAndPublish);

@@ -43,6 +43,7 @@
   <div class="container">
     <span class="autosave-status" id="autosaveStatus">불러오는 중...</span>
     <div class="admin-actions">
+      <button class="btn btn-outline btn-small" id="profileEditBtn" title="이름·연락처·레이아웃 설정">✎ 프로필 편집</button>
       <button class="btn btn-outline file-btn btn-small" title="data.json 파일을 직접 불러오기">
         불러오기(json)
         <input type="file" id="importFile" accept="application/json" />
@@ -68,6 +69,20 @@
   </div>
 </div>
 
+<!-- 프로필·레이아웃 설정. 팝업이 아니라 접었다 펴는 판이라
+     아래 화면이 그대로 보이면서 값이 바뀌는 걸 볼 수 있다 -->
+<div class="admin-panel" id="profilePanel" hidden>
+  <div class="container">
+    <div class="admin-panel-head">
+      <strong>프로필 &amp; 연락처</strong>
+      <span class="admin-modal-savestate" id="profilePanelState"></span>
+      <button class="btn btn-primary btn-small" id="profileSaveBtn">🚀 저장 · 사이트에 반영</button>
+      <button class="btn btn-ghost btn-small" id="profileCloseBtn">닫기</button>
+    </div>
+    <div id="profilePanelBody"></div>
+  </div>
+</div>
+
 <!-- 실제 사이트(index.html)와 동일한 헤더: 브랜드 + 카테고리 탭 -->
 <header class="site-header">
   <div class="container">
@@ -86,14 +101,13 @@
   </div>
 </section>
 
-<!-- 실제 사이트와 동일한 푸터 + 프로필 편집 버튼 -->
+<!-- 실제 사이트와 동일한 푸터 -->
 <footer class="site-footer">
   <div class="container footer-grid">
     <div>
       <div class="footer-title" id="footerName">Unlimit_Cho</div>
       <div class="footer-contact" id="footerContact"></div>
     </div>
-    <button class="btn btn-outline btn-small" id="profileEditBtn">✎ 프로필 편집</button>
   </div>
 </footer>
 

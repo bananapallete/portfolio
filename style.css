@@ -616,6 +616,26 @@ body.gate-locked { overflow: hidden; }
   border-top: 1px solid var(--line);
 }
 
+/* 접었다 펴는 설정 판 — 팝업과 달리 아래 화면이 그대로 보인다 */
+.admin-panel {
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.admin-panel[hidden] { display: none; }
+
+.admin-panel .container { padding-top: 18px; padding-bottom: 22px; }
+
+.admin-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-panel-head strong { font-size: 14px; }
+.admin-panel-head .admin-modal-savestate { margin-right: auto; }
+
 /* 오래된 임시저장으로 사이트를 덮어쓰기 전에 띄우는 경고 배너 */
 .admin-stale {
   background: #4a2b00;
