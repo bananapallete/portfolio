@@ -1418,6 +1418,9 @@ body.gate-locked { overflow: hidden; }
   background: linear-gradient(to bottom, transparent, var(--preview-bg, var(--paper)));
 }
 
+/* 조절값 줄(배열·간격)보다 한 단계 아래인 항목이므로 한 칸 내려 놓는다 */
+.block-settings .thumb-row { margin-top: 16px; }
+
 /* 조절값은 미리보기 아래에 한 칸 띄워 놓는다 */
 .block-settings {
   margin-top: 12px;
@@ -1653,11 +1656,25 @@ body.gate-locked { overflow: hidden; }
   aspect-ratio: auto;
 }
 
-/* 사진 위에 겹쳐 두는 "교체" 버튼 — 마우스를 올렸을 때만 나타난다 */
-.img-replace {
+/* 사진 위에 겹쳐 두는 조작 버튼들(교체·빼기) — 마우스를 올렸을 때만 나타난다 */
+.pv-img-actions {
   position: absolute;
   top: 3px;
   right: 3px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.pv-img-wrap:hover .pv-img-actions,
+.pv-img-wrap:focus-within .pv-img-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.img-action {
   padding: 4px 10px;
   border-radius: 6px;
   border: none;
@@ -1666,16 +1683,14 @@ body.gate-locked { overflow: hidden; }
   font-size: 11px;
   font-weight: 700;
   line-height: 1.4;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease-in-out;
+  transition: background 0.2s ease;
 }
 
-.pv-img-wrap:hover .img-replace,
-.pv-img-wrap:focus-within .img-replace {
-  opacity: 1;
-  pointer-events: auto;
-}
+.img-action:hover { background: rgba(20, 18, 26, 0.92); }
+
+/* 빼기는 되돌리기 어려우니 색으로 구분해 둔다 */
+.img-remove { padding: 4px 8px; }
+.img-remove:hover { background: #c0392b; }
 
 .add-block-row {
   display: flex;

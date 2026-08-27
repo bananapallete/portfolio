@@ -1672,12 +1672,27 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       h.textContent = "⠿";
       w.appendChild(h);
 
-      // 사진 위에 올리면 그 자리에서 바로 다른 파일로 갈아끼울 수 있다
-      w.appendChild(makeImageReplaceBtn((dataUrl) => {
+      // 사진 위에 올리면 그 자리에서 바로 갈아끼우거나 뺄 수 있다
+      const actions = document.createElement("div");
+      actions.className = "pv-img-actions";
+      actions.appendChild(makeImageReplaceBtn((dataUrl) => {
         block.images[j] = dataUrl;
         saveDraft();
         renderEditModalBody();
       }));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "img-action img-remove";
+      remove.title = "이 이미지만 빼기";
+      remove.textContent = "✕";
+      remove.addEventListener("click", (e) => {
+        e.stopPropagation();
+        block.images.splice(j, 1);
+        saveDraft();
+        renderEditModalBody();
+      });
+      actions.appendChild(remove);
+      w.appendChild(actions);
 
       attachDrag(w, h, imgGroup, block.images, j);
       div.appendChild(w);
@@ -1819,7 +1834,7 @@ function makeImageSlot(onImages) {
 function makeImageReplaceBtn(onImage) {
   const btn = document.createElement("button");
   btn.type = "button";
-  btn.className = "img-replace file-btn";
+  btn.className = "img-action img-replace file-btn";
   btn.title = "다른 이미지로 교체";
   btn.appendChild(document.createTextNode("교체"));
 
