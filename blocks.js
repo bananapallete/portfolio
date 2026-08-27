@@ -40,6 +40,12 @@ function playWhileVisible(video) {
   coverVideoWatcher.observe(video);
 }
 
+// 목록 그리드의 카드 사이 간격 (프로필 설정, 최소 0px — 미설정이면 0)
+function applyCardGap(grid, profile) {
+  const gap = normalizeGap((profile || {}).cardGap);
+  grid.style.gap = (gap != null ? gap : 0) + "px";
+}
+
 // eager: 첫 화면에 걸리는 카드만 미리 받아 둔다
 function buildCoverMedia(src, alt, eager) {
   if (!isVideoFile(src)) {

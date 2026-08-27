@@ -130,6 +130,7 @@ function renderSections() {
 
     const grid = document.createElement("div");
     grid.className = "work-grid";
+    applyCardGap(grid, siteData.profile);
     projects.forEach((project) => {
       // 2열 그리드라 처음 두 장만 첫 화면에 걸린다
       grid.appendChild(buildCard(project, total < 2));

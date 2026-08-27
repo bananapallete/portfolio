@@ -519,6 +519,23 @@ function renderProfileFields(wrap, profile) {
   });
   workBgRow.appendChild(workBgClear);
   wrap.appendChild(workBgRow);
+
+  // ---- 목록 카드 사이 간격 ----
+  const cardGapLabel = document.createElement("label");
+  cardGapLabel.textContent = "목록 카드 사이 간격 (홈 화면 그리드, 최소 0px)";
+  cardGapLabel.className = "mini-label";
+  cardGapLabel.style.marginTop = "18px";
+  wrap.appendChild(cardGapLabel);
+
+  const cardGapRow = document.createElement("div");
+  cardGapRow.className = "block-controls-row";
+  cardGapRow.appendChild(buildGapField(
+    "간격",
+    () => profile.cardGap,
+    (g) => { if (g == null) delete profile.cardGap; else profile.cardGap = g; },
+    "0"
+  ));
+  wrap.appendChild(cardGapRow);
 }
 
 function makeTextField(labelText, value, onChange) {
@@ -634,6 +651,7 @@ function renderSections() {
 
     const grid = document.createElement("div");
     grid.className = "work-grid";
+    applyCardGap(grid, data.profile);
     (cat.projects || []).forEach((project, projIndex) => {
       grid.appendChild(renderAdminCard(cat, project, projIndex));
     });
