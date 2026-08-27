@@ -32,6 +32,9 @@ function needsSetup(block) {
 const textPreviewNodes = new WeakMap();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
+
+// 프로젝트 카드는 카테고리와 무관하게 한 그룹으로 묶어 서로 오갈 수 있게 한다
+const PROJECT_DRAG_GROUP = "projects";
 // 편집 팝업이 열려 있는 대상. type: "project" | "profile" | "category"
 // 편집은 복사본에서 이루어지고 "저장 · 사이트에 반영"을 눌러야 실제 데이터에 반영된다
 let editingContext = null;
@@ -309,8 +312,8 @@ function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditM
     e.dataTransfer.dropEffect = "move";
     const { axis, before, to } = dropTargetAt(itemEl, index, e);
     clearDropMarkers();
-    // 놓아도 순서가 그대로인 자리(집어 든 카드의 양옆)에는 표시하지 않는다
-    if (to === dragCtx.from || to === dragCtx.from + 1) return;
+    // 같은 목록 안에서, 놓아도 순서가 그대로인 자리(집어 든 카드의 양옆)에는 표시하지 않는다
+    if (dragCtx.list === list && (to === dragCtx.from || to === dragCtx.from + 1)) return;
     itemEl.classList.add(axis === "x" ? "drop-x" : "drop-y", before ? "drop-before" : "drop-after");
   });
   itemEl.addEventListener("dragleave", (e) => {
@@ -322,14 +325,16 @@ function attachDrag(itemEl, handleEl, group, list, index, onChange = renderEditM
     if (!dragCtx || dragCtx.group !== group) return;
     e.preventDefault();
     e.stopPropagation();
+    const srcList = dragCtx.list;
     const from = dragCtx.from;
     const { to } = dropTargetAt(itemEl, index, e);
     dragCtx = null;
     clearDropMarkers();
-    // 원래 자리를 빼내면 뒤쪽 인덱스가 하나씩 당겨진다
-    const target = to > from ? to - 1 : to;
-    if (target === from) return;
-    const [moved] = list.splice(from, 1);
+    // 같은 목록 안에서 옮길 때만, 원래 자리를 빼내며 뒤쪽 인덱스가 하나씩 당겨진다
+    const sameList = srcList === list;
+    const target = sameList && to > from ? to - 1 : to;
+    if (sameList && target === from) return;
+    const [moved] = srcList.splice(from, 1);
     list.splice(target, 0, moved);
     saveDraft();
     onChange();
@@ -650,6 +655,7 @@ function renderSections() {
       renderSections();
       openProjectEditor(cat, project, cat.projects.length - 1);
     });
+    attachCardDropZone(addCard, cat.projects);
     grid.appendChild(addCard);
 
     section.appendChild(grid);
@@ -659,6 +665,38 @@ function renderSections() {
   if (!(data.categories || []).length) {
     wrap.innerHTML = `<div class="empty-state">아직 카테고리가 없어요. 탭의 ＋ 버튼으로 추가해보세요.</div>`;
   }
+}
+
+/* 카드가 하나도 없는 카테고리에도 떨어뜨릴 수 있도록, "＋ 프로젝트 추가" 카드를
+   받는 자리로 함께 쓴다. 놓으면 그 카테고리의 맨 뒤로 들어간다. */
+function attachCardDropZone(el, list) {
+  el.addEventListener("dragover", (e) => {
+    if (!dragCtx || dragCtx.group !== PROJECT_DRAG_GROUP) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    clearDropMarkers();
+    // 이미 그 카테고리의 마지막이면 옮겨도 그대로이므로 표시하지 않는다
+    if (dragCtx.list === list && dragCtx.from === list.length - 1) return;
+    el.classList.add("drop-x", "drop-before");
+  });
+  el.addEventListener("dragleave", (e) => {
+    if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+    el.classList.remove(...DROP_CLASSES);
+  });
+  el.addEventListener("drop", (e) => {
+    if (!dragCtx || dragCtx.group !== PROJECT_DRAG_GROUP) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const { list: srcList, from } = dragCtx;
+    dragCtx = null;
+    clearDropMarkers();
+    if (srcList === list && from === list.length - 1) return;
+    const [moved] = srcList.splice(from, 1);
+    list.push(moved);
+    saveDraft();
+    renderSections();
+  });
 }
 
 // 공개 사이트와 같은 카드 + 관리자용 삭제/드래그 핸들. 클릭하면 편집 팝업.
@@ -699,14 +737,15 @@ function renderAdminCard(cat, project, projIndex) {
   const handle = document.createElement("button");
   handle.type = "button";
   handle.className = "project-thumb-handle";
-  handle.title = "드래그해서 순서 변경";
+  handle.title = "드래그해서 순서 변경 · 다른 카테고리로 이동";
   handle.textContent = "⠿";
   handle.addEventListener("click", (e) => {
     e.stopPropagation();
     card.draggable = false; // 드래그 없이 핸들만 클릭했다면 draggable 상태를 되돌린다
   });
   card.appendChild(handle);
-  attachDrag(card, handle, `projects-${cat.id}`, cat.projects, projIndex, renderSections);
+  // 카테고리를 가리지 않는 한 그룹이라 다른 카테고리 카드 사이로도 끌어다 놓을 수 있다
+  attachDrag(card, handle, PROJECT_DRAG_GROUP, cat.projects, projIndex, renderSections);
 
   return card;
 }
