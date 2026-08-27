@@ -20,7 +20,7 @@
   "categories": [
     {
       "id": "work",
-      "name": "Work",
+      "name": "Works",
       "projects": [
         {
           "id": "branding-midas-week-2026",
@@ -169,6 +169,11 @@
           "summary": ""
         }
       ]
+    },
+    {
+      "id": "new-category-mtb40jrr",
+      "name": "Crumbles",
+      "projects": []
     }
   ]
 }
