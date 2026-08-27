@@ -105,6 +105,8 @@
   --radius-lg: 28px;
   --radius-md: 18px;
   --radius-sm: 10px;
+  /* 사이트 좌우 여백. 관리자에서 조절하면 JS가 이 값을 바꾼다 */
+  --side: 28px;
 
   /* 카드/패널처럼 배경 위에 살짝 떠 있는 면 */
   --panel: #ffffff;
@@ -155,7 +157,7 @@ input, textarea, select { font-family: inherit; }
 .container {
   max-width: 1350px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 var(--side);
 }
 
 /* ---------------------------------- Header ---------------------------------- */
@@ -290,8 +292,8 @@ input, textarea, select { font-family: inherit; }
   max-width: 1350px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 28px;
-  padding-right: 28px;
+  padding-left: var(--side);
+  padding-right: var(--side);
 }
 
 .work-grid {
@@ -1041,7 +1043,7 @@ body.gate-locked { overflow: hidden; }
   width: 100%;
   max-width: 1350px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 var(--side);
   white-space: pre-wrap;
   line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 80%, transparent);
@@ -1511,6 +1513,56 @@ body.gate-locked { overflow: hidden; }
   margin-top: 10px;
 }
 
+/* 끌면서 바로 반영되는 슬라이더 (라벨 + 손잡이 + 숫자 + px + 기본값) */
+.slider-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* 라벨·숫자칸·버튼은 줄바꿈 없이 제 폭을 지키고, 손잡이만 남는 폭을 쓴다 */
+.slider-field > .control-label,
+.slider-field > .size-input,
+.slider-field > .btn {
+  flex: none;
+  white-space: nowrap;
+}
+
+.slider-field input[type="range"] {
+  flex: 1 1 160px;
+  min-width: 120px;
+  max-width: 260px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider-field input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sun);
+  cursor: grab;
+}
+
+.slider-field input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sun);
+  cursor: grab;
+}
+
+.slider-field input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
+
 /* 간격 조절(라벨 + 숫자 + px + 기본값)은 한 덩어리로 묶여 줄바꿈된다 */
 .gap-field {
   display: inline-flex;
@@ -1873,8 +1925,11 @@ body.gate-locked { overflow: hidden; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 6px 0; font-size: 12px; }
 
-  .container { padding: 0 18px; }
-  .work-grid, .proj-blocks { padding-left: 18px; padding-right: 18px; }
+  .container { padding: 0 min(var(--side), 18px); }
+  .work-grid, .proj-blocks {
+    padding-left: min(var(--side), 18px);
+    padding-right: min(var(--side), 18px);
+  }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
   .work-section-head { padding: 28px 0 12px; }

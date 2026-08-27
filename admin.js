@@ -61,6 +61,70 @@ function buildSeg(options, current, onPick) {
   return seg;
 }
 
+/* 끌면서 값이 바로 반영되는 슬라이더. 숫자칸으로도 넣을 수 있다.
+   끄는 동안 화면을 다시 그리면 손잡이를 놓치므로 onApply로만 반영한다. */
+function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def = 0 } = {}, onApply) {
+  const row = document.createElement("div");
+  row.className = "slider-field";
+
+  const label = document.createElement("span");
+  label.className = "control-label";
+  label.textContent = labelText;
+
+  const range = document.createElement("input");
+  range.type = "range";
+  range.min = min;
+  range.max = max;
+  range.step = 1;
+
+  const num = document.createElement("input");
+  num.type = "number";
+  num.min = min;
+  num.max = max;
+  num.className = "size-input";
+
+  const px = document.createElement("span");
+  px.className = "control-label";
+  px.textContent = "px";
+
+  const cur = normalizeGap(getVal());
+  const start = cur == null ? def : cur;
+  range.value = start;
+  num.value = start;
+
+  const apply = (v, from) => {
+    const g = Math.min(max, Math.max(min, v));
+    if (from !== "range") range.value = g;
+    if (from !== "num") num.value = g;
+    setVal(g);
+    saveDraft();
+    if (onApply) onApply(g);
+  };
+  range.addEventListener("input", () => apply(parseInt(range.value, 10), "range"));
+  num.addEventListener("input", () => {
+    const v = parseInt(num.value, 10);
+    if (!Number.isNaN(v)) apply(v, "num");
+  });
+
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "btn btn-outline btn-xs";
+  clearBtn.textContent = "기본값";
+  clearBtn.addEventListener("click", () => {
+    range.value = def;
+    num.value = def;
+    setVal(null);
+    saveDraft();
+    if (onApply) onApply(null);
+  });
+
+  row.appendChild(label);
+  row.appendChild(range);
+  row.appendChild(num);
+  row.appendChild(px);
+  row.appendChild(clearBtn);
+  return row;
+}
+
 function buildGapField(labelText, getVal, setVal, placeholder, onApply) {
   const row = document.createElement("div");
   row.className = "gap-field";
@@ -501,6 +565,24 @@ function renderProfileFields(wrap, profile) {
   });
   workBgRow.appendChild(workBgClear);
   wrap.appendChild(workBgRow);
+
+  // ---- 사이트 좌우 여백 ----
+  const sideLabel = document.createElement("label");
+  sideLabel.textContent = "사이트 좌우 여백 (헤더·목록·상세에 함께 적용)";
+  sideLabel.className = "mini-label";
+  sideLabel.style.marginTop = "18px";
+  wrap.appendChild(sideLabel);
+
+  const sideRow = document.createElement("div");
+  sideRow.className = "block-controls-row";
+  sideRow.appendChild(buildSliderField(
+    "여백",
+    () => profile.sideMargin,
+    (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
+    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
+    () => applySideMargin(profile)   // 끄는 동안 관리자 화면에 바로 보인다
+  ));
+  wrap.appendChild(sideRow);
 
   // ---- 목록 카드 사이 간격 ----
   const cardGapLabel = document.createElement("label");
@@ -1882,6 +1964,7 @@ function readFileAsDataURL(file) {
 }
 
 function renderAll() {
+  applySideMargin(data && data.profile);
   if (!data) return;
   ensureShape();
   renderSiteHeader();

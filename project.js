@@ -85,6 +85,7 @@ async function initProject() {
 
   // 프로필/푸터
   const profile = siteData.profile || {};
+  applySideMargin(profile);
   document.getElementById("projBrand").textContent = profile.nickname || profile.name || "Portfolio";
   document.getElementById("footerName").textContent = profile.name || profile.nickname || "";
   renderFooterContact(profile);

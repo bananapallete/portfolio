@@ -42,6 +42,7 @@ function applyWorkBg(p) {
 
 function renderHeader() {
   const p = siteData.profile || {};
+  applySideMargin(p);
   document.getElementById("brandName").textContent = p.nickname || p.name || "Portfolio";
   document.getElementById("brandRole").textContent = p.role || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
