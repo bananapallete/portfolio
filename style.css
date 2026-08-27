@@ -108,6 +108,9 @@
   /* 레이아웃 값. 관리자에서 조절하면 JS가 이 값들을 바꾼다 */
   --side: 28px;
   --wrap: 1350px;
+  /* 상세 화면의 상단 메뉴 전용 (홈 값을 따라간다) */
+  --side-menu: 28px;
+  --wrap-menu: 1350px;
   --card-gap: 0px;
 
   /* 카드/패널처럼 배경 위에 살짝 떠 있는 면 */
@@ -1261,6 +1264,13 @@ body.gate-locked { overflow: hidden; }
   .proj-topbar, .to-top { transition: none; }
 }
 
+/* 상단 메뉴만 본문과 다른 여백을 쓴다 (홈 화면 값) */
+.proj-topbar .container {
+  max-width: var(--wrap-menu);
+  padding-left: var(--side-menu);
+  padding-right: var(--side-menu);
+}
+
 .proj-topbar-inner {
   display: flex;
   align-items: center;
@@ -2000,6 +2010,10 @@ body.gate-locked { overflow: hidden; }
   .tab { padding: 6px 0; font-size: 12px; }
 
   .container { padding: 0 min(var(--side), 18px); }
+  .proj-topbar .container {
+    padding-left: min(var(--side-menu), 18px);
+    padding-right: min(var(--side-menu), 18px);
+  }
   .work-grid, .proj-blocks {
     padding-left: min(var(--side), 18px);
     padding-right: min(var(--side), 18px);

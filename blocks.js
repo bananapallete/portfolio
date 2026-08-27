@@ -56,9 +56,17 @@ function applyLayoutVars(profile, scope = "home") {
   // "꽉 채우기"를 켠 화면만 가운데 정렬용 최대 폭을 푼다.
   // 여백 값과 분리해 둬야 0↔1 사이에서 폭이 계단처럼 튀지 않는다.
   const full = scope === "content" ? p.fullBleedContent : p.fullBleedHome;
+
+  // 상세 화면의 상단 메뉴(← Back to list)는 본문과 따로, 홈과 같은 여백을 쓴다.
+  // 어느 화면에서든 맨 위 줄의 기준선이 같아 보이도록 하기 위함이다.
+  const menuRaw = normalizeGap(p.sideMargin);
+  const menu = menuRaw != null ? menuRaw : SIDE_MARGIN_DEFAULT;
+
   const root = document.documentElement.style;
   root.setProperty("--side", side + "px");
   root.setProperty("--wrap", full ? "100%" : "1350px");
+  root.setProperty("--side-menu", menu + "px");
+  root.setProperty("--wrap-menu", p.fullBleedHome ? "100%" : "1350px");
   root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
 }
 

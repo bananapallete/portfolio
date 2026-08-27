@@ -621,7 +621,7 @@ function renderLayoutFields(wrap, profile) {
 
   box.appendChild(marginItem(
     buildSliderField(
-      "홈 좌우 여백",
+      "홈 · 상단 메뉴 여백",
       () => profile.sideMargin,
       (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
       { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
@@ -638,7 +638,7 @@ function renderLayoutFields(wrap, profile) {
   // 상세 화면 값이라 관리자 목록에는 바로 보이지 않는다 (미리보기로 확인)
   box.appendChild(marginItem(
     buildSliderField(
-      "콘텐츠 좌우 여백",
+      "콘텐츠 본문 여백",
       () => profile.contentMargin,
       (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
       { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
