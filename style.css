@@ -498,6 +498,16 @@ body.bg-takeover-light,
   border-bottom: 1px solid var(--line);
 }
 
+/* 관리자 전용 줄(유틸 바·설정 판·경고 배너)은 사이트의 --side를 따르지 않는다.
+   좌우 여백 슬라이더가 이 안에 있어서, 값을 바꿀 때마다 슬라이더 자체가
+   옆으로 밀려 끄는 손잡이가 커서에서 벗어나기 때문이다. */
+.admin-utilbar .container,
+.admin-panel .container,
+.admin-stale .container {
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
 .admin-utilbar .container {
   display: flex;
   align-items: center;
