@@ -74,9 +74,6 @@ function renderTabs() {
 function buildCard(project, eager) {
   const card = document.createElement("div");
   card.className = "card reveal";
-  // 화면에 글자가 없으므로 스크린리더와 툴팁이 읽을 이름은 남겨 둔다
-  card.title = project.title || "";
-  card.setAttribute("aria-label", project.title || "");
 
   const media = document.createElement("div");
   media.className = "card-media";
@@ -85,7 +82,21 @@ function buildCard(project, eager) {
   }
   card.appendChild(media);
 
-  // 커버를 가리지 않도록 호버 오버레이(제목·설명)는 두지 않는다
+  // 마우스를 올리면 어두워지면서 제목과 설명이 함께 뜬다
+  const body = document.createElement("div");
+  body.className = "card-body";
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = project.title || "";
+  body.appendChild(title);
+  if (project.summary) {
+    const desc = document.createElement("div");
+    desc.className = "card-desc";
+    desc.textContent = project.summary;
+    body.appendChild(desc);
+  }
+  card.appendChild(body);
+
   card.addEventListener("click", () => goToProject(project));
   return card;
 }
