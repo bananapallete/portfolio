@@ -14,7 +14,8 @@
     "workBg": "#14121a",
     "cardGap": 5,
     "sideMargin": 10,
-    "contentMargin": 0
+    "contentMargin": 0,
+    "fullBleedContent": true
   },
   "categories": [
     {
