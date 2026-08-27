@@ -126,13 +126,14 @@
           "title": "Graphic Resource Center",
           "coverImage": "assets/0436956636e20ab00ea6.webm",
           "blocks": [],
-          "summary": "",
+          "summary": "사내 아이콘 어셋 플랫폼, 그래픽 리소스센터 ‘비전’",
           "tools": [
             "illustrator",
             "aftereffects",
             "lottie",
             "figma"
-          ]
+          ],
+          "bgColor": "#f9fafb"
         }
       ]
     },
