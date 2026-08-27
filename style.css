@@ -282,6 +282,18 @@ input, textarea, select { font-family: inherit; }
 /* 관리자 전용: 섹션 머리의 카테고리 설정 버튼 */
 .ws-edit { margin-left: 10px; }
 
+/* 화면 끝에 붙지 않도록 좌우 여백을 준다. 헤더·섹션 제목·푸터가 쓰는
+   .container 와 같은 폭·여백이라 카드가 브랜드명·제목과 같은 선에서 시작한다. */
+.work-grid,
+.proj-blocks {
+  width: 100%;
+  max-width: 1350px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
 .work-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1267,7 +1279,13 @@ body.gate-locked { overflow: hidden; }
   display: flex;
   flex-direction: column;
   gap: 28px;
-  padding: 0;
+}
+
+/* 여백은 .proj-blocks 가 이미 갖고 있으므로 안에서 또 주면 두 번 들어간다 */
+.proj-blocks .blk-text {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .proj-blocks .empty-state { padding: 80px 20px; }
@@ -1856,6 +1874,7 @@ body.gate-locked { overflow: hidden; }
   .tab { padding: 6px 0; font-size: 12px; }
 
   .container { padding: 0 18px; }
+  .work-grid, .proj-blocks { padding-left: 18px; padding-right: 18px; }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
   .work-section-head { padding: 28px 0 12px; }
