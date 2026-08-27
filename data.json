@@ -112,66 +112,6 @@
           "blockGap": 2
         },
         {
-          "id": "branding-inhr-plus",
-          "title": "INHR+",
-          "coverImage": "",
-          "blocks": [
-            {
-              "type": "embed",
-              "src": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479",
-              "ratioW": 426,
-              "ratioH": 188,
-              "ratioSrc": "https://player.vimeo.com/video/1218694838?badge=0&autopause=0&player_id=0&app_id=58479"
-            }
-          ],
-          "summary": "",
-          "bgColor": "#0017c2"
-        },
-        {
-          "id": "branding-midas-week-2025",
-          "title": "MIDAS WEEK 2025",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "branding-h-dot",
-          "title": "H.DOT",
-          "coverImage": "",
-          "blocks": [
-            {
-              "type": "embed",
-              "src": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1",
-              "ratioW": 426,
-              "ratioH": 188,
-              "ratioSrc": "https://player.vimeo.com/video/1218701116?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
-            }
-          ],
-          "summary": "",
-          "bgColor": "#EBF0F7"
-        },
-        {
-          "id": "branding-jobda-dev",
-          "title": "잡다데브",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "illustration-safari-riders",
-          "title": "Safari Riders",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "illustration-inhr-plus",
-          "title": "INHR+",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
           "id": "illustration-jihaksa",
           "title": "지학사",
           "coverImage": "assets/edd9cb513aaaccafa3bc.png",
@@ -221,41 +161,6 @@
           "blockGap": 2
         },
         {
-          "id": "illustration-kakao",
-          "title": "Kakao",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "illustration-workout",
-          "title": "Workout",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "illustration-hybs-fanart",
-          "title": "Hybs Fanart",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "illustration-tws-fanart",
-          "title": "TWS Fanart",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
-          "id": "motion-prototype",
-          "title": "Prototype",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
-        },
-        {
           "id": "motion-menuboard",
           "title": "Menuboard",
           "coverImage": "",
@@ -263,6 +168,12 @@
           "summary": ""
         }
       ]
+    },
+    {
+      "id": "new-category-mtaxsyo1",
+      "name": "Illustraion",
+      "accent": "#6c5ce7",
+      "projects": []
     }
   ]
 }
