@@ -426,6 +426,25 @@ input, textarea, select { font-family: inherit; }
   pointer-events: none;
 }
 
+/* 상세 화면: 제목 오른쪽에 늘어놓는 툴 아이콘 (고르는 게 아니라 보여주기만) */
+.tool-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 11px;
+  flex: none;
+  max-width: 60%;
+  margin-top: 6px;
+}
+
+.tool-cell {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+
 /* 관리자: 제목 오른쪽의 툴 고르기 줄 (디자인 지시 = 우측 정렬) */
 .tool-picker {
   display: flex;
@@ -493,20 +512,6 @@ input, textarea, select { font-family: inherit; }
 }
 
 /* ---------------------------------- 상세 페이지 태그 ---------------------------------- */
-
-.modal-tag {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: 999px;
-  border: 1.5px solid var(--line);
-  color: var(--muted);
-  margin-bottom: 14px;
-  background: transparent;
-}
 
 /* ---------------------------------- Footer ---------------------------------- */
 
@@ -1422,13 +1427,8 @@ body.gate-locked { overflow: hidden; }
 .proj-hero-wrap { padding: 48px 0 8px; }
 
 .proj-hero-wrap.proj-hero-dark .proj-title { color: #fff; }
-.proj-hero-wrap.proj-hero-dark .modal-tag {
-  color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-/* 카테고리 뱃지가 타이틀 우측 상단에 오도록 가로 배치.
-   DOM 순서는 타이틀 → 뱃지이고, space-between으로 좌/우에 자동 배치된다 */
+/* 툴 아이콘이 타이틀 우측 상단에 오도록 가로 배치.
+   DOM 순서는 타이틀 → 아이콘이고, space-between으로 좌/우에 자동 배치된다 */
 .proj-hero {
   padding-top: 0;
   display: flex;
@@ -1444,12 +1444,6 @@ body.gate-locked { overflow: hidden; }
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.proj-hero .modal-tag {
-  flex: none;
-  margin-bottom: 0;
-  margin-top: 6px;
 }
 
 .proj-blocks {
@@ -2109,7 +2103,6 @@ body.gate-locked { overflow: hidden; }
   .brand-name { font-size: 14px; }
 
   /* 좁은 화면에서는 카테고리 뱃지를 아예 표시하지 않는다 */
-  .proj-hero .modal-tag { display: none; }
 
   .to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; font-size: 16px; }
   .tabs {
@@ -2135,6 +2128,8 @@ body.gate-locked { overflow: hidden; }
   }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
+  .tool-cell { width: 34px; height: 34px; }
+  .tool-row { gap: 8px; }
   .work-section-head { padding: 28px 0 12px; }
   .work-section-bare { padding-top: 28px; }
   .work-section-head h2 { font-size: 17px; }

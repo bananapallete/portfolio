@@ -73,13 +73,9 @@ async function initProject() {
 
   const id = new URLSearchParams(location.search).get("id");
   let project = null;
-  let category = null;
   (siteData.categories || []).forEach((cat) => {
     (cat.projects || []).forEach((p) => {
-      if (p.id === id) {
-        project = p;
-        category = cat;
-      }
+      if (p.id === id) project = p;
     });
   });
 
@@ -102,8 +98,17 @@ async function initProject() {
   }
 
   document.title = `${project.title} — ${profile.nickname || profile.name || "Portfolio"}`;
-  const tag = document.getElementById("projTag");
-  tag.textContent = category.name;
+
+  // 제목 오른쪽에 이 프로젝트에서 쓴 툴 아이콘을 놓는다 (카테고리 뱃지 자리)
+  const toolRow = document.getElementById("projTools");
+  toolsOf(project).forEach((tool) => {
+    const cell = document.createElement("span");
+    cell.className = "tool-cell";
+    cell.title = tool.label;
+    cell.appendChild(buildToolIcon(tool));
+    toolRow.appendChild(cell);
+  });
+
   const titleEl = document.getElementById("projTitle");
   titleEl.textContent = project.title;
   // 폰트 두께는 프로필의 전역 설정을 모든 프로젝트에 일괄 적용
