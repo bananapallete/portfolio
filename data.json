@@ -1,7 +1,7 @@
 {
   "profile": {
-    "name": "Hanjung Cho",
-    "nickname": "Unlimit_Cho",
+    "name": "hanjung cho",
+    "nickname": "unlimit_cho",
     "role": "",
     "tagline": "",
     "contact": {
@@ -16,7 +16,8 @@
     "heroTitle": "",
     "showHeroTitle": false,
     "projectTitleWeight": "400",
-    "workBg": "#14121a"
+    "workBg": "#14121a",
+    "cardGap": 5
   },
   "categories": [
     {
