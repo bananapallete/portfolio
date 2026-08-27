@@ -13,9 +13,10 @@
     "projectTitleWeight": "400",
     "workBg": "#14121a",
     "cardGap": 5,
-    "sideMargin": 10,
+    "sideMargin": 0,
     "contentMargin": 0,
-    "fullBleedContent": true
+    "fullBleedContent": true,
+    "maxWidthHome": 1450
   },
   "categories": [
     {
