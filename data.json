@@ -71,7 +71,8 @@
                 "assets/e1651b3cd363fd342be7.png",
                 "assets/a168b01e0357d83d0f52.png"
               ],
-              "grid": "3"
+              "grid": "3",
+              "gap": 5
             }
           ],
           "summary": "MIDAS IT 국내외 임직원 대상 사내 어워즈 키비주얼 및 현장 그래픽 디자인",
