@@ -430,18 +430,19 @@ window.addEventListener("scroll", () => {
    들어와도 화면에서 코드로 실행되지 않는다. runs가 없으면 예전처럼
    content(민글자)를 그대로 쓴다. */
 
-function textRunsOf(block) {
-  const runs = Array.isArray(block.runs)
-    ? block.runs.filter((r) => r && typeof r.t === "string" && r.t !== "")
+// source: { runs, content } 모양이면 무엇이든 받는다 (텍스트 블록 · 개요 설명)
+function textRunsOf(source) {
+  const runs = Array.isArray(source.runs)
+    ? source.runs.filter((r) => r && typeof r.t === "string" && r.t !== "")
     : null;
   if (runs && runs.length) return runs;
-  return [{ t: block.content || "", b: false }];
+  return [{ t: source.content || "", b: false }];
 }
 
 // 조각들을 글자 노드로 채운다 (굵은 조각만 <b>로 감싼다)
-function fillTextRuns(el, block) {
+function fillTextRuns(el, source) {
   el.textContent = "";
-  textRunsOf(block).forEach((r) => {
+  textRunsOf(source).forEach((r) => {
     const text = document.createTextNode(r.t);
     if (!r.b) { el.appendChild(text); return; }
     const b = document.createElement("b");
@@ -648,6 +649,19 @@ function makeOverviewEditor(el, placeholder, multiline, onInput) {
   });
 }
 
+// 개요 설명도 텍스트 블록과 같은 조각 모델을 쓴다 (키 이름만 다르다)
+function overviewSource(project) {
+  return { runs: project.overviewRuns, content: project.overview };
+}
+
+/* 개요 설명의 크기·자간. 손대지 않으면 값을 비워 둬서 디자인 기본값
+   (19px · 자간 5%)이 CSS에서 그대로 적용되게 한다. */
+function applyOverviewStyle(el, project) {
+  el.style.fontSize = project.overviewSize ? project.overviewSize + "px" : "";
+  const t = normalizeTracking(project.overviewTracking);
+  el.style.letterSpacing = t != null ? t / 100 + "em" : "";
+}
+
 function buildProjectOverview(project, edit) {
   const desc = (project.overview || "").trim();
   const year = (project.year || "").trim();
@@ -665,8 +679,10 @@ function buildProjectOverview(project, edit) {
   if (edit || desc) {
     const p = document.createElement("p");
     p.className = "proj-overview-desc";
-    p.textContent = project.overview || "";
-    if (edit) makeOverviewEditor(p, "프로젝트 설명", true, (v) => edit("overview", v));
+    fillTextRuns(p, overviewSource(project));
+    applyOverviewStyle(p, project);
+    // 굵게 편집은 관리자에서 붙인다 (여기서는 자리만 내어준다)
+    if (edit) edit.desc(p);
     inner.appendChild(p);
   }
 
@@ -691,13 +707,13 @@ function buildProjectOverview(project, edit) {
   if (edit || year) {
     col("작업년도", (dd) => {
       dd.textContent = project.year || "";
-      if (edit) makeOverviewEditor(dd, "2026.06", false, (v) => edit("year", v));
+      if (edit) makeOverviewEditor(dd, "2026.06", false, (v) => edit.set("year", v));
     });
   }
   if (edit || contribution) {
     col("기여도", (dd) => {
       dd.textContent = project.contribution || "";
-      if (edit) makeOverviewEditor(dd, "100%", false, (v) => edit("contribution", v));
+      if (edit) makeOverviewEditor(dd, "100%", false, (v) => edit.set("contribution", v));
     });
   }
   // 사용 툴은 아이콘에서 켠 것을 그대로 읽어오므로 여기서는 고칠 수 없다

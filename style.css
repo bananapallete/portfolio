@@ -1486,6 +1486,9 @@ body.bg-takeover-light .proj-overview,
   white-space: pre-wrap;
 }
 
+/* 드래그해서 굵게 지정한 조각 (본문 글씨가 500이라 700이면 또렷하게 갈린다) */
+.proj-overview-desc b { font-weight: 700; }
+
 /* 설명 끝에서 라벨 줄까지 96px */
 .proj-meta {
   display: flex;
@@ -1634,6 +1637,9 @@ body.bg-takeover-light .proj-overview,
   font-size: clamp(26px, 3.2vw, 40px);
   color: var(--ink);
 }
+
+/* 개요 설명 글자 조절 줄 — 미리보기 바로 아래에 붙는다 */
+.overview-controls { margin-top: 8px; }
 
 /* 개요도 같은 팝업 안에서 실제 모습 그대로 그리고, 눌러서 바로 고친다 */
 .overview-preview {

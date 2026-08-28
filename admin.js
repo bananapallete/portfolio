@@ -1199,12 +1199,56 @@ function renderEditModalBody() {
   const overviewWrap = document.createElement("div");
   overviewWrap.className = "overview-preview";
   applyPreviewBg(overviewWrap, project.heroBg || project.bgColor);
-  overviewWrap.appendChild(buildProjectOverview(project, (field, value) => {
-    if (value) project[field] = value;
-    else delete project[field];
-    saveDraft();
+
+  // 설명 칸은 텍스트 블록과 똑같이 굵게·크기·자간을 다룰 수 있게 한다
+  const descSlot = richSlot(project, "overview", "overviewRuns");
+  let descEl = null;
+  overviewWrap.appendChild(buildProjectOverview(project, {
+    set: (field, value) => {
+      if (value) project[field] = value;
+      else delete project[field];
+      saveDraft();
+    },
+    desc: (el) => {
+      descEl = el;
+      el.classList.add("blk-text-edit");
+      el.contentEditable = "true";
+      el.spellcheck = false;
+      el.dataset.placeholder = "프로젝트 설명";
+      el.addEventListener("input", () => {
+        storeRichText(el, descSlot);
+        saveDraft();
+      });
+      // 서식이 딸려 들어오지 않도록 붙여넣기는 글자만 받는다
+      el.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+        document.execCommand("insertText", false, text);
+      });
+    },
   }));
   card.appendChild(overviewWrap);
+
+  // 설명 글자 조절 줄 (디자인 기본값은 19px · 자간 5%)
+  const ovControls = document.createElement("div");
+  ovControls.className = "block-controls-row overview-controls";
+  ovControls.appendChild(buildWeightButtons(() => descEl, descSlot));
+  const restyle = () => { if (descEl) applyOverviewStyle(descEl, project); };
+  ovControls.appendChild(buildSliderField(
+    "설명 크기",
+    () => project.overviewSize,
+    (v) => { if (v == null) delete project.overviewSize; else project.overviewSize = v; },
+    { min: 10, max: 60, def: 19, unit: "px" },
+    restyle
+  ));
+  ovControls.appendChild(buildSliderField(
+    "설명 자간",
+    () => project.overviewTracking,
+    (v) => { if (v == null) delete project.overviewTracking; else project.overviewTracking = v; },
+    { min: -10, max: 30, def: 5, step: 0.5, unit: "%" },
+    restyle
+  ));
+  card.appendChild(ovControls);
 
   // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
   if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
@@ -1471,25 +1515,7 @@ function renderBlockBody(project, block, blockIndex) {
     controls.className = "block-controls-row";
 
     // 드래그로 고른 글자만 굵게/보통으로 바꾼다
-    const weightLabel = document.createElement("span");
-    weightLabel.className = "control-label";
-    weightLabel.textContent = "선택 글자";
-
-    const weightBtn = (text, bold, className) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "btn btn-outline btn-xs " + className;
-      b.textContent = text;
-      b.title = "고칠 글자를 드래그해서 고른 뒤 누르세요";
-      // 버튼을 누를 때 선택이 풀리지 않도록 기본 동작을 막는다
-      b.addEventListener("mousedown", (e) => e.preventDefault());
-      b.addEventListener("click", () => {
-        if (!applyWeightToSelection(pv, block, bold)) {
-          alert("바꿀 글자를 먼저 드래그해서 선택해 주세요.");
-        }
-      });
-      return b;
-    };
+    const weightButtons = buildWeightButtons(() => pv, richSlot(block, "content", "runs"));
 
     const sizeSlider = buildSliderField(
       "크기",
@@ -1532,9 +1558,7 @@ function renderBlockBody(project, block, blockIndex) {
       (v) => { block.align = v; }
     );
 
-    controls.appendChild(weightLabel);
-    controls.appendChild(weightBtn("굵게", true, "weight-bold"));
-    controls.appendChild(weightBtn("보통", false, "weight-normal"));
+    controls.appendChild(weightButtons);
     controls.appendChild(sizeSlider);
     controls.appendChild(trackSlider);
     controls.appendChild(colorLabel);
@@ -1894,16 +1918,26 @@ function restoreSelection(root, from, to) {
   sel.addRange(range);
 }
 
-// 편집 중인 화면 상태를 그대로 블록에 담는다 (굵기가 없으면 runs는 지운다)
-function storeRichText(el, block) {
-  const { runs } = scanRichText(el);
-  block.content = runsPlainText(runs);
-  if (runs.some((r) => r.b)) block.runs = runs;
-  else delete block.runs;
+/* 굵게 편집이 붙는 자리. 텍스트 블록과 개요 설명은 담는 키 이름만 다르므로
+   읽고 쓰는 방법만 넘겨받아 같은 코드로 다룬다. */
+function richSlot(obj, contentKey, runsKey) {
+  return {
+    read: () => ({ runs: obj[runsKey], content: obj[contentKey] }),
+    write: (runs) => {
+      obj[contentKey] = runsPlainText(runs);
+      if (runs.some((r) => r.b)) obj[runsKey] = runs;
+      else delete obj[runsKey];
+    },
+  };
+}
+
+// 편집 중인 화면 상태를 그대로 담는다 (굵기가 없으면 조각 기록은 지운다)
+function storeRichText(el, slot) {
+  slot.write(scanRichText(el).runs);
 }
 
 // "굵게" · "보통" 버튼이 하는 일
-function applyWeightToSelection(el, block, bold) {
+function applyWeightToSelection(el, slot, bold) {
   const sel = window.getSelection();
   if (!sel || !sel.rangeCount) return false;
   const range = sel.getRangeAt(0);
@@ -1914,15 +1948,37 @@ function applyWeightToSelection(el, block, bold) {
   const to = charIndexOf(scan, range.endContainer, range.endOffset);
   if (from == null || to == null || to <= from) return false;
 
-  const runs = setBoldRange(scan.runs, from, to, bold);
-  block.content = runsPlainText(runs);
-  if (runs.some((r) => r.b)) block.runs = runs;
-  else delete block.runs;
-
-  fillTextRuns(el, block);
+  slot.write(setBoldRange(scan.runs, from, to, bold));
+  fillTextRuns(el, slot.read());
   restoreSelection(el, from, to);
   saveDraft();
   return true;
+}
+
+/* "선택 글자 [굵게] [보통]" 버튼 한 쌍. 드래그로 고른 범위에만 적용된다. */
+function buildWeightButtons(getEl, slot) {
+  const frag = document.createDocumentFragment();
+  const label = document.createElement("span");
+  label.className = "control-label";
+  label.textContent = "선택 글자";
+  frag.appendChild(label);
+
+  [["굵게", true, "weight-bold"], ["보통", false, "weight-normal"]].forEach(([text, bold, cls]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn btn-outline btn-xs " + cls;
+    b.textContent = text;
+    b.title = "고칠 글자를 드래그해서 고른 뒤 누르세요";
+    // 버튼을 누를 때 선택이 풀리지 않도록 기본 동작을 막는다
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", () => {
+      if (!applyWeightToSelection(getEl(), slot, bold)) {
+        alert("바꿀 글자를 먼저 드래그해서 선택해 주세요.");
+      }
+    });
+    frag.appendChild(b);
+  });
+  return frag;
 }
 
 /* --------------------- 블록 미리보기 (편집 목록 안에 함께 표시) --------------------- */
@@ -1935,12 +1991,13 @@ function renderPreviewBlockContent(project, block, blockIndex) {
     p.spellcheck = false;
     p.dataset.placeholder = "여기에 바로 입력하세요";
     // 굵게가 섞인 글도 공개 화면과 같은 모양으로 그린다
-    fillTextRuns(p, block);
+    fillTextRuns(p, { runs: block.runs, content: block.content });
     applyTextStyle(p, block);
 
     // 입력할 때마다 다시 그리면 커서가 튀므로 화면을 읽어 값만 갱신한다
+    const slot = richSlot(block, "content", "runs");
     p.addEventListener("input", () => {
-      storeRichText(p, block);
+      storeRichText(p, slot);
       saveDraft();
     });
     // 붙여넣기로 서식이 딸려 들어오지 않도록 글자만 넣는다
