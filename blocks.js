@@ -654,12 +654,17 @@ function overviewSource(project) {
   return { runs: project.overviewRuns, content: project.overview };
 }
 
-/* 개요 설명의 크기·자간. 손대지 않으면 값을 비워 둬서 디자인 기본값
-   (19px · 자간 5%)이 CSS에서 그대로 적용되게 한다. */
-function applyOverviewStyle(el, project) {
-  el.style.fontSize = project.overviewSize ? project.overviewSize + "px" : "";
+/* 개요의 크기·자간. 손대지 않으면 값을 비워 둬서 디자인 기본값
+   (19px · 자간 5%)이 CSS에서 그대로 적용되게 한다.
+
+   크기는 묶음 전체에 걸어 작업년도 · 기여도 · 사용 툴까지 함께 따라오게 하고,
+   자간은 설명에만 준다 (디자인에서 값 줄은 자간이 0이다). */
+function applyOverviewStyle(sec, project) {
+  sec.style.fontSize = project.overviewSize ? project.overviewSize + "px" : "";
+  const desc = sec.querySelector(".proj-overview-desc");
+  if (!desc) return;
   const t = normalizeTracking(project.overviewTracking);
-  el.style.letterSpacing = t != null ? t / 100 + "em" : "";
+  desc.style.letterSpacing = t != null ? t / 100 + "em" : "";
 }
 
 function buildProjectOverview(project, edit) {
@@ -680,7 +685,6 @@ function buildProjectOverview(project, edit) {
     const p = document.createElement("p");
     p.className = "proj-overview-desc";
     fillTextRuns(p, overviewSource(project));
-    applyOverviewStyle(p, project);
     // 굵게 편집은 관리자에서 붙인다 (여기서는 자리만 내어준다)
     if (edit) edit.desc(p);
     inner.appendChild(p);
@@ -734,6 +738,7 @@ function buildProjectOverview(project, edit) {
   }
 
   if (meta.children.length) inner.appendChild(meta);
+  applyOverviewStyle(sec, project);
   return sec;
 }
 
