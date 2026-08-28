@@ -1562,49 +1562,6 @@ function renderBlockBody(project, block, blockIndex) {
     }
     body.appendChild(segRow);
 
-    // 썸네일 (드래그로 순서 변경)
-    const imgGroup = `imgs-${project.id}-${blockIndex}`;
-    const row = document.createElement("div");
-    row.className = "thumb-row";
-    (block.images || []).forEach((src, j) => {
-      const thumb = document.createElement("div");
-      thumb.className = "thumb";
-      const img = document.createElement("img");
-      img.src = src;
-      img.draggable = false;
-      setImgLoading(img, false);
-      thumb.appendChild(img);
-
-      const miniHandle = document.createElement("button");
-      miniHandle.type = "button";
-      miniHandle.className = "drag-handle-mini";
-      miniHandle.title = "드래그해서 순서 변경";
-      miniHandle.textContent = "⠿";
-      thumb.appendChild(miniHandle);
-
-      const removeBtn = document.createElement("button");
-      removeBtn.textContent = "✕";
-      removeBtn.addEventListener("click", () => {
-        block.images.splice(j, 1);
-        saveDraft();
-        renderEditModalBody();
-      });
-      thumb.appendChild(removeBtn);
-
-      attachDrag(thumb, miniHandle, imgGroup, block.images, j);
-      row.appendChild(thumb);
-    });
-
-    // 업로드 타일을 썸네일 옆에 붙여 한 줄로 정리
-    row.appendChild(makeUploadTile("이미지 추가", { multiple: true }, async (files) => {
-      for (const file of files) {
-        const dataUrl = await readFileAsDataURL(file);
-        block.images.push(dataUrl);
-      }
-      saveDraft();
-      renderEditModalBody();
-    }));
-    body.appendChild(row);
 
     if (block.layout === "slider") {
       const hint = document.createElement("div");
