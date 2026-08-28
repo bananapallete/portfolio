@@ -137,6 +137,24 @@
             "figma"
           ],
           "bgColor": "#f9fafb"
+        },
+        {
+          "id": "new-project-mtcndyjj",
+          "title": "MIDAS WEEK",
+          "coverImage": "assets/fb6b5ca257b720ef6ddf.webm",
+          "blocks": [],
+          "summary": "",
+          "tools": [
+            "photoshop",
+            "illustrator",
+            "aftereffects",
+            "figma",
+            "c4d",
+            "redshift"
+          ],
+          "contribution": "75",
+          "year": "2025.06",
+          "bgColor": "#f3f5f7"
         }
       ]
     },
