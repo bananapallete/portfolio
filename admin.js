@@ -1192,6 +1192,9 @@ function renderEditModalBody() {
   head.appendChild(deleteBtn);
   card.appendChild(head);
 
+  // 페이지 설정은 "⚙ 설정"을 누른 그 줄 바로 아래에 펼쳐진다
+  if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
+
   card.appendChild(renderHeroPreview(cat, project));
 
   // 개요(설명 · 작업년도 · 기여도 · 사용 툴)는 공개 화면과 같은 마크업을 쓰고,
@@ -1253,9 +1256,6 @@ function renderEditModalBody() {
   ));
   card.appendChild(ovControls);
   card.appendChild(overviewWrap);
-
-  // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
-  if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
 
   // ---- 커버 이미지 ----
   const coverLabel = document.createElement("label");
