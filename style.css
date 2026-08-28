@@ -476,11 +476,12 @@ input, textarea, select { font-family: inherit; }
   align-items: flex-end;
 }
 
+/* 이름과 연락처는 같은 크기·같은 두께로 두고, 색 하나로만 위계를 준다.
+   두께와 크기를 함께 키우면 푸터가 본문보다 무거워 보인다. */
 .footer-title {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 8px;
 }
 
 .footer-contact {
@@ -488,16 +489,16 @@ input, textarea, select { font-family: inherit; }
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   color: color-mix(in srgb, var(--ink) 70%, transparent);
 }
 
 .footer-contact a:hover { color: var(--branding); }
 
 .footer-admin-link {
-  font-size: 12px;
+  font-size: 14px;
   color: color-mix(in srgb, var(--ink) 35%, transparent);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .footer-admin-link:hover { color: color-mix(in srgb, var(--ink) 60%, transparent); }
