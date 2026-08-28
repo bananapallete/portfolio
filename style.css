@@ -1828,17 +1828,50 @@ body.bg-takeover-light .proj-overview,
 }
 
 /* 접어둔 영상 자리 */
+/* 접어둔 영상 줄 — 눌러서 펼친다. 한 줄이 꽉 차 보이지 않도록 안쪽을 넉넉히 준다 */
 .embed-folded {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: calc(100% - 56px);
   margin: 0 28px;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 20px 24px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: var(--paper-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   color: color-mix(in srgb, var(--ink) 65%, transparent);
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.embed-folded-empty { font-family: inherit; }
+.embed-folded:hover {
+  border-color: color-mix(in srgb, var(--sun) 55%, transparent);
+  color: var(--ink);
+}
+
+/* 안내를 오른쪽 끝에 두면 떠 있는 도구 줄에 가리므로 주소 바로 옆에 붙인다.
+   주소가 길면 줄지 않고 말줄임으로 접힌다. */
+.embed-folded-src {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.embed-folded-hint {
+  flex: none;
+  font-family: var(--font);
+  font-size: 11px;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.embed-folded:hover .embed-folded-hint { color: var(--sun); }
+
+/* 링크가 없는 블록은 주소가 아니라 안내문이라 고정폭 글꼴을 쓰지 않는다 */
+.embed-folded-empty { font-family: var(--font); }
 
 /* 미리보기 안에서 바로 고치는 텍스트 */
 /* 여백을 건드리면 실제 사이트와 다르게 보이므로 색·테두리로만 표시한다 */

@@ -16,6 +16,19 @@ const isBlockFolded = (block) =>
 
 const openSettings = new WeakSet(); // 조절값 줄은 기본으로 접고, 연 것만 기억한다
 
+/* 마우스를 누르고 있는 동안인지. 누르는 도중에 화면이 길어지면 버튼이 밀려
+   손을 떼는 지점이 빗나가 클릭이 씹힌다. 그래서 화면을 늘리는 일은
+   손을 뗄 때까지 미룬다. */
+let pointerHeld = false;
+document.addEventListener("pointerdown", () => { pointerHeld = true; }, true);
+document.addEventListener("pointerup", () => { pointerHeld = false; }, true);
+
+// 지금 누르는 중이면 손을 뗀 뒤에, 아니면 바로 실행한다
+function afterClick(fn) {
+  if (!pointerHeld) { fn(); return; }
+  document.addEventListener("pointerup", () => requestAnimationFrame(fn), { once: true, capture: true });
+}
+
 // 방금 추가해서 아직 아무것도 안 들어간 블록 — 그려진 뒤 입력칸에 커서를 둔다
 let focusNewBlock = null;
 
@@ -1360,12 +1373,26 @@ function blockTypeLabel(block) {
   return "비디오 임베드";
 }
 
-// 접어둔 영상 자리에 놓이는 한 줄짜리 표시
+/* 접어둔 영상 자리에 놓이는 한 줄짜리 표시.
+   따로 버튼을 두지 않고 이 줄을 누르면 바로 펼쳐진다. */
 function renderFoldedEmbed(block) {
-  const strip = document.createElement("div");
+  const strip = document.createElement("button");
+  strip.type = "button";
   strip.className = "embed-folded";
-  strip.textContent = block.src ? shortenEmbedSrc(block.src) : "(링크가 없는 임베드 블록)";
-  if (!block.src) strip.classList.add("embed-folded-empty");
+  strip.title = "눌러서 영상 펼치기";
+  const label = document.createElement("span");
+  label.className = "embed-folded-src";
+  label.textContent = block.src ? shortenEmbedSrc(block.src) : "(링크가 없는 임베드 블록)";
+  if (!block.src) label.classList.add("embed-folded-empty");
+  const hint = document.createElement("span");
+  hint.className = "embed-folded-hint";
+  hint.textContent = "눌러서 펼치기";
+  strip.appendChild(label);
+  strip.appendChild(hint);
+  strip.addEventListener("click", () => {
+    blockFolds.set(block, false);
+    renderEditModalBody();
+  });
   return strip;
 }
 
@@ -1416,13 +1443,14 @@ function renderBlocksEditor(project) {
     const folded = isBlockFolded(block);
     const canFold =
       block.type === "embed" || (block.type === "images" && (block.images || []).length > 0);
-    if (canFold) {
+    // 접힌 영상은 줄 자체를 누르면 펼쳐지므로 머리줄에 펼치기 버튼을 두지 않는다
+    if (canFold && !(block.type === "embed" && folded)) {
       const fold = document.createElement("button");
       fold.type = "button";
       fold.className = "btn btn-ghost btn-xs";
       fold.textContent =
         block.type === "embed"
-          ? (folded ? "▸ 영상 펼치기" : "▾ 영상 접기")
+          ? "▾ 영상 접기"
           : (folded ? "▸ 전체 보기" : "▾ 줄이기");
       fold.addEventListener("click", () => {
         blockFolds.set(block, !folded);
@@ -1431,10 +1459,14 @@ function renderBlocksEditor(project) {
       bh.appendChild(fold);
     }
 
-    // 아직 비어 있는 블록은 넣을 방법이 설정 줄에 있으므로 접지 않는다
-    const mustShowSettings = needsSetup(block);
+    /* 아직 비어 있는 블록은 넣을 방법이 설정 줄에 있으므로 접지 않는다.
+       영상은 펼쳤을 때 링크 칸이 늘 영상 위에 함께 보이므로,
+       따로 여닫는 설정 버튼을 두지 않는다. */
+    const mustShowSettings = needsSetup(block) || (block.type === "embed" && !folded);
     const settingsOpen = mustShowSettings || openSettings.has(block);
-    if (!mustShowSettings) {
+    // 영상은 접으면 줄을 눌러 펼치고, 펼치면 링크 칸이 늘 함께 뜨므로
+    // 어느 쪽이든 여닫는 설정 버튼이 필요 없다
+    if (!mustShowSettings && block.type !== "embed") {
       const gear = document.createElement("button");
       gear.type = "button";
       gear.className = "btn btn-ghost btn-xs";
@@ -1466,7 +1498,9 @@ function renderBlocksEditor(project) {
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
     // 링크가 없는 임베드는 보여줄 게 없어 미리보기를 생략한다.
     // 이미지 블록은 비어 있어도 빈 칸을 보여줘야 하므로 항상 그린다.
-    const hidePreview = mustShowSettings && block.type === "embed";
+    // 링크가 아예 없을 때만 감춘다 — 펼친 임베드는 설정을 늘 함께 보여주므로
+    // mustShowSettings로 판단하면 영상이 영영 뜨지 않는다
+    const hidePreview = block.type === "embed" && needsSetup(block);
     const preview = document.createElement("div");
     preview.className = "block-preview";
     if (hidePreview) {
@@ -1666,6 +1700,22 @@ function renderBlockBody(project, block, blockIndex) {
       block.src = v;
       saveDraft();
       autoFillEmbedRatio(block, ratioRow.querySelector(".block-hint"));
+
+      /* 링크를 처음 넣으면 그 자리에 바로 영상이 보여야 한다.
+         화면을 통째로 다시 그리면 그 순간 누르고 있던 버튼이 사라져 클릭이
+         씹히므로, 이 블록에만 미리보기를 만들어 붙인다.
+         붙이면 블록이 길어져 아래 버튼이 밀리므로, 다른 버튼을 누르다가
+         생긴 change라면 그 클릭이 끝난 뒤에 붙인다. */
+      const item = input.closest(".block-item");
+      if (!v || !item || item.querySelector(".block-preview")) return;
+      blockFolds.set(block, false); // 방금 넣은 영상은 펼친 채로 둔다
+      afterClick(() => {
+        if (!item.isConnected || item.querySelector(".block-preview")) return;
+        const preview = document.createElement("div");
+        preview.className = "block-preview";
+        preview.appendChild(renderPreviewBlockContent(project, block, blockIndex));
+        item.appendChild(preview);
+      });
     });
 
     body.appendChild(input);
