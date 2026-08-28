@@ -426,25 +426,6 @@ input, textarea, select { font-family: inherit; }
   pointer-events: none;
 }
 
-/* 상세 화면: 제목 오른쪽에 늘어놓는 툴 아이콘 (고르는 게 아니라 보여주기만) */
-.tool-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 11px;
-  flex: none;
-  max-width: 60%;
-  margin-top: 6px;
-}
-
-.tool-cell {
-  display: block;
-  width: 44px;
-  height: 44px;
-  flex: none;
-}
-
 /* 관리자: 제목 오른쪽의 툴 고르기 줄 (디자인 지시 = 우측 정렬) */
 .tool-picker {
   display: flex;
@@ -1612,10 +1593,26 @@ body.bg-takeover-light .proj-overview,
   color: var(--meta-value);
 }
 
+/* 가로 간격 18px은 디자인 실측값. 세로만 아이콘 높이에 맞춰 넉넉히 준다 */
 .proj-meta-tools {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 18px;
+  gap: 10px 18px;
+}
+
+/* 아이콘 + 이름 한 짝 */
+.proj-meta-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 아이콘 크기는 글자를 따라간다 — "개요 크기"를 올리면 함께 커진다 */
+.proj-meta-tool-icon {
+  display: block;
+  width: 1.6em;
+  height: 1.6em;
+  flex: none;
 }
 
 .proj-meta-empty {
@@ -2397,18 +2394,11 @@ body.bg-takeover-light .proj-overview,
   .proj-meta { margin-top: 46px; gap: 20px 26px; }
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
-  /* 좁은 화면에서는 아이콘을 제목 아래로 내리고 왼쪽에 맞춘다 */
+  /* 좁은 화면에서는 툴 고르기 줄(관리자)을 제목 아래로 내리고 왼쪽에 맞춘다 */
   .proj-hero {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-  }
-  .tool-cell { width: 34px; height: 34px; }
-  .tool-row {
-    gap: 8px;
-    justify-content: flex-start;
-    max-width: 100%;
-    margin-top: 0;
   }
   .work-section-head { padding: 28px 0 12px; }
   .work-section-bare { padding-top: 28px; }

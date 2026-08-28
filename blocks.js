@@ -725,9 +725,17 @@ function buildProjectOverview(project, edit) {
     col("사용 툴", (dd) => {
       dd.classList.add("proj-meta-tools");
       tools.forEach((t) => {
+        // 아이콘과 이름을 한 덩어리로 묶어, 줄이 바뀌어도 짝이 갈라지지 않게 한다
+        const item = document.createElement("span");
+        item.className = "proj-meta-tool";
+        const icon = document.createElement("span");
+        icon.className = "proj-meta-tool-icon";
+        icon.appendChild(buildToolIcon(t));
         const name = document.createElement("span");
         name.textContent = t.label;
-        dd.appendChild(name);
+        item.appendChild(icon);
+        item.appendChild(name);
+        dd.appendChild(item);
       });
     });
   } else if (edit) {
