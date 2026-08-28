@@ -667,6 +667,26 @@ function applyOverviewStyle(sec, project) {
   desc.style.letterSpacing = t != null ? t / 100 + "em" : "";
 }
 
+/* 아이콘 + 이름 한 짝. 공개 화면은 보여주기만 하고(span),
+   관리자는 눌러서 켜고 끄므로 버튼으로 만든다. 마크업이 같아야
+   관리자 미리보기가 실제 화면과 어긋나지 않는다. */
+function buildToolNameItem(tool, asButton) {
+  const item = document.createElement(asButton ? "button" : "span");
+  item.className = "proj-meta-tool";
+  if (asButton) {
+    item.type = "button";
+    item.title = tool.label;
+  }
+  const icon = document.createElement("span");
+  icon.className = "proj-meta-tool-icon";
+  icon.appendChild(buildToolIcon(tool));
+  const name = document.createElement("span");
+  name.textContent = tool.label;
+  item.appendChild(icon);
+  item.appendChild(name);
+  return item;
+}
+
 function buildProjectOverview(project, edit) {
   const desc = (project.overview || "").trim();
   const year = (project.year || "").trim();
@@ -720,28 +740,17 @@ function buildProjectOverview(project, edit) {
       if (edit) makeOverviewEditor(dd, "100%", false, (v) => edit.set("contribution", v));
     });
   }
-  // 사용 툴은 아이콘에서 켠 것을 그대로 읽어오므로 여기서는 고칠 수 없다
-  if (tools.length) {
+  // 관리자는 이 자리에서 툴을 직접 고른다. 공개 화면은 켜둔 것만 보여준다.
+  if (edit) {
     col("사용 툴", (dd) => {
       dd.classList.add("proj-meta-tools");
-      tools.forEach((t) => {
-        // 아이콘과 이름을 한 덩어리로 묶어, 줄이 바뀌어도 짝이 갈라지지 않게 한다
-        const item = document.createElement("span");
-        item.className = "proj-meta-tool";
-        const icon = document.createElement("span");
-        icon.className = "proj-meta-tool-icon";
-        icon.appendChild(buildToolIcon(t));
-        const name = document.createElement("span");
-        name.textContent = t.label;
-        item.appendChild(icon);
-        item.appendChild(name);
-        dd.appendChild(item);
-      });
+      edit.tools(dd);
     });
-  } else if (edit) {
+  } else if (tools.length) {
     col("사용 툴", (dd) => {
-      dd.classList.add("proj-meta-tools", "proj-meta-empty");
-      dd.textContent = "위 아이콘에서 고르면 여기에 들어와요";
+      dd.classList.add("proj-meta-tools");
+      // 아이콘과 이름은 한 덩어리라 줄이 바뀌어도 짝이 갈라지지 않는다
+      tools.forEach((t) => dd.appendChild(buildToolNameItem(t, false)));
     });
   }
 

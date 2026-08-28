@@ -426,39 +426,6 @@ input, textarea, select { font-family: inherit; }
   pointer-events: none;
 }
 
-/* 관리자: 제목 오른쪽의 툴 고르기 줄 (디자인 지시 = 우측 정렬) */
-.tool-picker {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 11px;
-  flex: none;
-  max-width: 60%;
-}
-
-.tool-pick {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  opacity: 0.28;
-  filter: grayscale(1);
-  transition: opacity 0.2s ease-in-out, filter 0.2s ease-in-out, transform 0.15s ease-in-out;
-}
-
-.tool-pick:hover { opacity: 0.7; filter: grayscale(0.3); }
-
-.tool-pick-on,
-.tool-pick-on:hover {
-  opacity: 1;
-  filter: none;
-}
-
-.tool-pick:active { transform: scale(0.94); }
-
 .card-media {
   aspect-ratio: 16 / 9;
   width: 100%;
@@ -1607,6 +1574,25 @@ body.bg-takeover-light .proj-overview,
   gap: 8px;
 }
 
+/* 관리자에서는 이 한 짝이 눌러서 켜고 끄는 버튼이 된다.
+   글자·여백은 공개 화면과 같게 두고 누를 수 있다는 것만 덧입힌다. */
+button.proj-meta-tool {
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  transition: opacity 0.2s ease-in-out, filter 0.2s ease-in-out, background 0.15s ease;
+}
+
+button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); }
+
+/* 꺼둔 툴 — 자리는 지키되 흐리게 두어 켠 것이 한눈에 들어온다 */
+.proj-meta-tool.tool-off { opacity: 0.32; filter: grayscale(1); }
+.proj-meta-tool.tool-off:hover { opacity: 0.6; filter: grayscale(0.4); }
+
 /* 아이콘 크기는 글자를 따라간다 — "개요 크기"를 올리면 함께 커진다 */
 .proj-meta-tool-icon {
   display: block;
@@ -2394,12 +2380,6 @@ body.bg-takeover-light .proj-overview,
   .proj-meta { margin-top: 46px; gap: 20px 26px; }
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
-  /* 좁은 화면에서는 툴 고르기 줄(관리자)을 제목 아래로 내리고 왼쪽에 맞춘다 */
-  .proj-hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
   .work-section-head { padding: 28px 0 12px; }
   .work-section-bare { padding-top: 28px; }
   .work-section-head h2 { font-size: 17px; }
