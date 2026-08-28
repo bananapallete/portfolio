@@ -720,7 +720,7 @@ function renderTabs() {
 }
 
 // 카테고리별로 단(섹션)을 나눠서 렌더링. 공개 사이트와 같은 구조에
-// 관리자 전용으로 섹션 머리의 "✎ 설정" 버튼과 "+ 프로젝트 추가" 카드가 붙는다.
+// 관리자 전용으로 섹션 머리의 "⚙ 설정" 버튼과 "+ 프로젝트 추가" 카드가 붙는다.
 function renderSections() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
@@ -740,7 +740,7 @@ function renderSections() {
     h2.textContent = cat.name || "(이름 없음)";
     const editBtn = document.createElement("button");
     editBtn.className = "btn btn-outline btn-small ws-edit";
-    editBtn.textContent = "✎ 설정";
+    editBtn.textContent = "⚙ 설정";
     editBtn.title = "카테고리 이름·색상·삭제";
     editBtn.addEventListener("click", () => openCategoryEditor(cat));
     headInner.appendChild(h2);
@@ -2532,13 +2532,54 @@ function refreshTokenButton() {
   const btn = document.getElementById("tokenBtn");
   if (!btn) return;
   const has = !!readStoredToken();
-  btn.textContent = has ? "GitHub 토큰 ✓" : "GitHub 토큰 없음";
-  btn.classList.toggle("btn-outline", !has);
-  btn.classList.toggle("btn-ghost", has);
+  btn.textContent = has ? "GitHub 토큰 · 저장됨" : "GitHub 토큰 · 없음";
   btn.title = has
     ? "토큰이 이 브라우저에 저장돼 있어요. 눌러서 다시 입력할 수 있어요."
     : "발행하려면 토큰이 필요해요. 눌러서 입력해주세요.";
+  // 메뉴를 열지 않아도 알 수 있도록 "더보기" 버튼에 표시를 남긴다
+  const more = document.getElementById("moreBtn");
+  if (more) {
+    more.classList.toggle("has-alert", !has);
+    more.title = has ? "파일·토큰·잠금" : "GitHub 토큰이 없어요 · 파일·토큰·잠금";
+  }
 }
+
+/* -------------------------- "더보기" 메뉴 여닫기 --------------------------
+   가끔 쓰는 항목(토큰·파일·잠금)을 한 곳에 모아 두었다.
+   바깥을 누르거나 Esc를 누르면 닫히고, 항목을 고르면 바로 닫힌다. */
+function initMoreMenu() {
+  const btn = document.getElementById("moreBtn");
+  const menu = document.getElementById("moreMenu");
+  if (!btn || !menu) return;
+
+  const setOpen = (open) => {
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    btn.classList.toggle("menu-open", open);
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setOpen(menu.hidden);
+  });
+
+  // 항목을 고르면 닫는다. 파일 고르기는 창이 뜨는 사이 닫혀도 동작에 지장이 없다.
+  menu.addEventListener("click", (e) => {
+    if (e.target.closest(".menu-item")) setOpen(false);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!menu.hidden && !menu.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu.hidden) {
+      setOpen(false);
+      btn.focus();
+    }
+  });
+}
+
+initMoreMenu();
 
 function getGithubToken(forceAsk = false) {
   const saved = readStoredToken();

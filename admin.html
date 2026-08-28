@@ -43,17 +43,25 @@
   <div class="container">
     <span class="autosave-status" id="autosaveStatus">불러오는 중...</span>
     <div class="admin-actions">
-      <button class="btn btn-outline btn-small" id="profileEditBtn" title="이름·연락처·레이아웃 설정">✎ 프로필 편집</button>
-      <button class="btn btn-outline file-btn btn-small" title="data.json 파일을 직접 불러오기">
-        불러오기(json)
-        <input type="file" id="importFile" accept="application/json" />
-      </button>
-      <button class="btn btn-ghost btn-small" id="resetBtn" title="임시 저장을 지우고 원본 data.json을 다시 불러오기">원본 다시 불러오기</button>
+      <button class="btn btn-ghost btn-small" id="profileEditBtn" title="이름·연락처·레이아웃 설정">프로필 편집</button>
       <button class="btn btn-ghost btn-small" id="previewBtn" title="지금 상태를 새 탭에서 미리보기">미리보기</button>
-      <button class="btn btn-ghost btn-small" id="tokenBtn" title="배포에 쓸 GitHub 토큰 입력">GitHub 토큰 설정</button>
-      <button class="btn btn-ghost btn-small" id="lockBtn" title="이 브라우저의 잠금 해제를 취소하고 다시 잠그기">잠그기</button>
-      <button class="btn btn-outline btn-small" id="exportBtn" title="data.json을 파일로 받아두는 백업">내보내기(백업)</button>
-      <button class="btn btn-primary btn-small" id="publishBtn" title="지금 상태 전체를 GitHub에 커밋해 실제 사이트에 반영">🚀 사이트에 반영</button>
+      <!-- 가끔 쓰는 것들은 한 곳에 모아 둔다. 토큰이 없으면 버튼에 점이 붙는다 -->
+      <div class="menu-wrap">
+        <button class="btn btn-ghost btn-small" id="moreBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="moreMenu" title="파일·토큰·잠금">더보기</button>
+        <div class="menu" id="moreMenu" role="menu" hidden>
+          <button class="menu-item" id="tokenBtn" role="menuitem" title="배포에 쓸 GitHub 토큰 입력">GitHub 토큰</button>
+          <div class="menu-sep"></div>
+          <button class="menu-item file-btn" role="menuitem" title="data.json 파일을 직접 불러오기">
+            파일에서 불러오기
+            <input type="file" id="importFile" accept="application/json" />
+          </button>
+          <button class="menu-item" id="exportBtn" role="menuitem" title="data.json을 파일로 받아두는 백업">파일로 내보내기 (백업)</button>
+          <button class="menu-item" id="resetBtn" role="menuitem" title="임시 저장을 지우고 원본 data.json을 다시 불러오기">원본 다시 불러오기</button>
+          <div class="menu-sep"></div>
+          <button class="menu-item" id="lockBtn" role="menuitem" title="이 브라우저의 잠금 해제를 취소하고 다시 잠그기">잠그기</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-small" id="publishBtn" title="지금 상태 전체를 GitHub에 커밋해 실제 사이트에 반영">사이트에 반영</button>
     </div>
   </div>
 </div>
@@ -76,7 +84,7 @@
     <div class="admin-panel-head">
       <strong>프로필 &amp; 연락처</strong>
       <span class="admin-modal-savestate" id="profilePanelState"></span>
-      <button class="btn btn-primary btn-small" id="profileSaveBtn">🚀 저장 · 사이트에 반영</button>
+      <button class="btn btn-primary btn-small" id="profileSaveBtn">저장 · 사이트에 반영</button>
       <button class="btn btn-ghost btn-small" id="profileCloseBtn">닫기</button>
     </div>
     <div id="profilePanelBody"></div>
@@ -115,7 +123,7 @@
   <div class="admin-modal">
     <div class="admin-modal-topbar">
       <span class="admin-modal-savestate" id="modalSaveState"></span>
-      <button class="btn btn-primary btn-small" id="projectEditSave">🚀 저장 · 사이트에 반영</button>
+      <button class="btn btn-primary btn-small" id="projectEditSave">저장 · 사이트에 반영</button>
       <button class="admin-modal-close" id="projectEditClose" title="저장하지 않고 닫기">✕</button>
     </div>
     <div id="projectEditBody"></div>
