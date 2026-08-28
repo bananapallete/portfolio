@@ -1255,7 +1255,7 @@ function renderEditModalBody() {
       });
     },
   }));
-  // 개요 글자 조절 줄 (디자인 기본값은 19px · 자간 5%)
+  // 개요 글자 조절 줄 (기본값 14px · 자간 -2%)
   // 크기는 작업년도 · 기여도 · 사용 툴까지 함께 따라오고, 자간은 설명에만 걸린다
   const ovControls = document.createElement("div");
   ovControls.className = "block-controls-row overview-controls";
@@ -1269,14 +1269,14 @@ function renderEditModalBody() {
     "개요 크기",
     () => project.overviewSize,
     (v) => { if (v == null) delete project.overviewSize; else project.overviewSize = v; },
-    { min: 10, max: 60, def: 19, unit: "px" },
+    { min: 10, max: 60, def: 14, unit: "px" },
     restyle
   ));
   ovControls.appendChild(buildSliderField(
     "설명 자간",
     () => project.overviewTracking,
     (v) => { if (v == null) delete project.overviewTracking; else project.overviewTracking = v; },
-    { min: -10, max: 30, def: 5, step: 0.5, unit: "%" },
+    { min: -10, max: 30, def: -2, step: 0.5, unit: "%" },
     restyle
   ));
   card.appendChild(ovControls);

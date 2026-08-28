@@ -1559,7 +1559,8 @@ body.gate-locked { overflow: hidden; }
   --meta-value: #ffffff;
   font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
   font-weight: 500;
-  font-size: 19px;
+  /* 기본값 — 관리자에서 "개요 크기"를 손대지 않으면 이 값이 쓰인다 */
+  font-size: 14px;
   line-height: calc(23 / 19);
   /* 디자인 프레임이 위아래로 113px씩 비워 둔 그대로 — 아래 콘텐츠와도 그만큼 뗀다 */
   padding: 113px 0;
@@ -1575,7 +1576,8 @@ body.bg-takeover-light .proj-overview,
 .proj-overview-desc {
   margin: 0;
   color: var(--meta-label);
-  letter-spacing: 0.05em;
+  /* 기본값 — 관리자의 "설명 자간"을 손대지 않으면 이 값이 쓰인다 (-2%) */
+  letter-spacing: -0.02em;
   white-space: pre-wrap;
 }
 
@@ -2387,7 +2389,7 @@ body.bg-takeover-light .proj-overview,
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
   /* 개요는 글자와 칸 사이를 한 단계 좁혀 좁은 화면에서도 한눈에 들어오게 한다 */
-  .proj-overview { font-size: 15px; padding: 56px 0; }
+  .proj-overview { font-size: 13px; padding: 56px 0; }
   .proj-meta { margin-top: 46px; gap: 20px 26px; }
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
