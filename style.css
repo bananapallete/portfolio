@@ -1610,6 +1610,24 @@ body.bg-takeover-light .proj-overview,
   transition: opacity 0.25s ease-in-out;
 }
 
+/* 설정을 펼치면 조절 줄이 맨 위로 오므로, 떠 있던 도구 줄을 흐름 안으로 내려
+   조절 줄을 가리지 않게 한다. 이때는 마우스를 올리지 않아도 계속 보인다. */
+.block-head-inline {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+  margin-bottom: 8px;
+  background: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+/* 떠 있을 때와 같이 버튼은 오른쪽 끝에 두어 여닫을 때 자리가 튀지 않게 한다 */
+.block-head-inline .block-head-spacer {
+  display: block;
+  flex: 1 1 auto;
+}
+
 .block-item:hover > .block-head,
 .block-item:focus-within > .block-head {
   opacity: 1;
@@ -1638,8 +1656,8 @@ body.bg-takeover-light .proj-overview,
   color: var(--ink);
 }
 
-/* 개요 설명 글자 조절 줄 — 미리보기 바로 아래에 붙는다 */
-.overview-controls { margin-top: 8px; }
+/* 개요 글자 조절 줄 — 미리보기 바로 위에 붙는다 */
+.overview-controls { margin-bottom: 8px; }
 
 /* 개요도 같은 팝업 안에서 실제 모습 그대로 그리고, 눌러서 바로 고친다 */
 .overview-preview {
@@ -1704,11 +1722,11 @@ body.bg-takeover-light .proj-overview,
 /* 조절값 줄(배열·간격)보다 한 단계 아래인 항목이므로 한 칸 내려 놓는다 */
 .block-settings .thumb-row { margin-top: 16px; }
 
-/* 조절값은 미리보기 아래에 한 칸 띄워 놓는다 */
+/* 조절값은 미리보기 위에 한 칸 띄워 놓는다 (아래에 있으면 어느 블록 것인지 헷갈린다) */
 .block-settings {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--line);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
 }
 
 /* 접어둔 영상 자리 */

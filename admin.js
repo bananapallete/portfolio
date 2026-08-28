@@ -1227,8 +1227,6 @@ function renderEditModalBody() {
       });
     },
   }));
-  card.appendChild(overviewWrap);
-
   // 개요 글자 조절 줄 (디자인 기본값은 19px · 자간 5%)
   // 크기는 작업년도 · 기여도 · 사용 툴까지 함께 따라오고, 자간은 설명에만 걸린다
   const ovControls = document.createElement("div");
@@ -1254,6 +1252,7 @@ function renderEditModalBody() {
     restyle
   ));
   card.appendChild(ovControls);
+  card.appendChild(overviewWrap);
 
   // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
   if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
@@ -1447,6 +1446,9 @@ function renderBlocksEditor(project) {
       }
     });
     bh.appendChild(del);
+    // 설정이 열리면 조절 줄이 맨 위로 오므로, 떠 있던 도구 줄을 흐름 안으로 내려
+    // [도구 줄] → [조절 줄] → [미리보기] 순으로 겹치지 않게 쌓는다
+    if (settingsOpen) bh.classList.add("block-head-inline");
     item.appendChild(bh);
 
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
@@ -1465,14 +1467,16 @@ function renderBlocksEditor(project) {
       if (canFold && folded) preview.classList.add("block-preview-capped");
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
-    if (!hidePreview) item.appendChild(preview);
-
+    // 조절 줄은 미리보기 위에 둔다 — 아래에 있으면 어느 블록 것인지 헷갈린다.
+    // 미리보기를 먼저 만들어야 조절 줄이 그 요소를 붙잡아 바로 갱신할 수 있다.
     if (settingsOpen) {
       const settings = document.createElement("div");
       settings.className = "block-settings";
       settings.appendChild(renderBlockBody(project, block, i));
       item.appendChild(settings);
     }
+
+    if (!hidePreview) item.appendChild(preview);
 
     attachDrag(item, handle, group, project.blocks, i);
     wrap.appendChild(item);
