@@ -63,7 +63,7 @@ function buildSeg(options, current, onPick) {
 
 /* 끌면서 값이 바로 반영되는 슬라이더. 숫자칸으로도 넣을 수 있다.
    끄는 동안 화면을 다시 그리면 손잡이를 놓치므로 onApply로만 반영한다. */
-function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def = 0 } = {}, onApply) {
+function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def = 0, step = 1, unit = "px" } = {}, onApply) {
   const row = document.createElement("div");
   row.className = "slider-field";
 
@@ -75,19 +75,22 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
   range.type = "range";
   range.min = min;
   range.max = max;
-  range.step = 1;
+  range.step = step;
 
   const num = document.createElement("input");
   num.type = "number";
   num.min = min;
   num.max = max;
+  num.step = step;
   num.className = "size-input";
 
   const px = document.createElement("span");
   px.className = "control-label";
-  px.textContent = "px";
+  px.textContent = unit;
 
-  const cur = normalizeGap(getVal());
+  // 자간처럼 음수·소수를 쓰는 값도 있어 0 이상 정수로 자르지 않는다
+  const raw = getVal();
+  const cur = raw == null || raw === "" || !Number.isFinite(parseFloat(raw)) ? null : parseFloat(raw);
   const start = cur == null ? def : cur;
   range.value = start;
   num.value = start;
@@ -100,9 +103,9 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
     saveDraft();
     if (onApply) onApply(g);
   };
-  range.addEventListener("input", () => apply(parseInt(range.value, 10), "range"));
+  range.addEventListener("input", () => apply(parseFloat(range.value), "range"));
   num.addEventListener("input", () => {
-    const v = parseInt(num.value, 10);
+    const v = parseFloat(num.value);
     if (!Number.isNaN(v)) apply(v, "num");
   });
 
@@ -1467,37 +1470,53 @@ function renderBlockBody(project, block, blockIndex) {
     const controls = document.createElement("div");
     controls.className = "block-controls-row";
 
-    const sizeLabel = document.createElement("span");
-    sizeLabel.className = "control-label";
-    sizeLabel.textContent = "크기";
-    const sizeInput = document.createElement("input");
-    sizeInput.type = "number";
-    sizeInput.min = 10;
-    sizeInput.max = 80;
-    sizeInput.value = block.size || 15;
-    sizeInput.className = "size-input";
-    sizeInput.addEventListener("input", () => {
-      const v = parseInt(sizeInput.value, 10);
-      if (v >= 10 && v <= 80) {
-        block.size = v;
-        pv.style.fontSize = v + "px";
-        saveDraft();
-      }
-    });
-    const pxLabel = document.createElement("span");
-    pxLabel.className = "control-label";
-    pxLabel.textContent = "px";
+    // 드래그로 고른 글자만 굵게/보통으로 바꾼다
+    const weightLabel = document.createElement("span");
+    weightLabel.className = "control-label";
+    weightLabel.textContent = "선택 글자";
+
+    const weightBtn = (text, bold, className) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn btn-outline btn-xs " + className;
+      b.textContent = text;
+      b.title = "고칠 글자를 드래그해서 고른 뒤 누르세요";
+      // 버튼을 누를 때 선택이 풀리지 않도록 기본 동작을 막는다
+      b.addEventListener("mousedown", (e) => e.preventDefault());
+      b.addEventListener("click", () => {
+        if (!applyWeightToSelection(pv, block, bold)) {
+          alert("바꿀 글자를 먼저 드래그해서 선택해 주세요.");
+        }
+      });
+      return b;
+    };
+
+    const sizeSlider = buildSliderField(
+      "크기",
+      () => block.size,
+      (v) => { if (v == null) delete block.size; else block.size = v; },
+      { min: 10, max: 80, def: 15, unit: "px" },
+      () => applyTextStyle(pv, block)
+    );
+
+    // 자간은 Figma와 같은 % 표기 (100% = 글자 한 칸). 음수로 좁힐 수도 있다.
+    const trackSlider = buildSliderField(
+      "자간",
+      () => block.tracking,
+      (v) => { if (v == null) delete block.tracking; else block.tracking = v; },
+      { min: -10, max: 30, def: 0, step: 0.5, unit: "%" },
+      () => applyTextStyle(pv, block)
+    );
 
     const colorLabel = document.createElement("span");
     colorLabel.className = "control-label";
     colorLabel.textContent = "색상";
-    colorLabel.style.marginLeft = "12px";
 
     const colorField = buildColorField(
       block.color || "#f5f4f0",
       (v) => {
         block.color = v;
-        pv.style.color = v;
+        applyTextStyle(pv, block);
         saveDraft();
       },
       { swatches: true, rerender: renderEditModalBody }
@@ -1506,7 +1525,6 @@ function renderBlockBody(project, block, blockIndex) {
     const alignLabel = document.createElement("span");
     alignLabel.className = "control-label";
     alignLabel.textContent = "정렬";
-    alignLabel.style.marginLeft = "12px";
 
     const alignSeg = buildSeg(
       [["left", "왼쪽"], ["center", "가운데"], ["right", "오른쪽"]],
@@ -1514,9 +1532,11 @@ function renderBlockBody(project, block, blockIndex) {
       (v) => { block.align = v; }
     );
 
-    controls.appendChild(sizeLabel);
-    controls.appendChild(sizeInput);
-    controls.appendChild(pxLabel);
+    controls.appendChild(weightLabel);
+    controls.appendChild(weightBtn("굵게", true, "weight-bold"));
+    controls.appendChild(weightBtn("보통", false, "weight-normal"));
+    controls.appendChild(sizeSlider);
+    controls.appendChild(trackSlider);
     controls.appendChild(colorLabel);
     controls.appendChild(colorField.field);
     controls.appendChild(alignLabel);
@@ -1756,6 +1776,155 @@ function buildEmbedRatioField(block) {
   return row;
 }
 
+/* ----------------------- 텍스트 블록: 선택 영역 굵게 만들기 -----------------------
+   contentEditable 안의 서식을 브라우저 명령(execCommand)에 맡기면 브라우저마다
+   다른 태그가 생겨 저장 모양을 예측할 수 없다. 그래서 화면을 직접 읽어
+   [{t,b}] 조각으로 바꾼 뒤, 글자 위치로 굵게를 칠하고 다시 그린다.
+   드래그한 범위가 여러 조각에 걸쳐 있어도 결과가 항상 같다. */
+
+// 굵게로 볼 요소인지 (b·strong 이거나 인라인 스타일로 굵게 지정된 경우)
+function isBoldEl(el) {
+  const tag = el.tagName.toLowerCase();
+  if (tag === "b" || tag === "strong") return true;
+  const w = el.style.fontWeight;
+  return w === "bold" || w === "bolder" || parseInt(w, 10) >= 600;
+}
+
+// 줄이 바뀌는 요소 — 저장할 때는 개행 한 칸으로 바꾼다
+const LINE_TAGS = new Set(["div", "p", "li", "tr"]);
+
+/* 편집 중인 요소를 훑어 조각 목록과 "글자 위치 ↔ 텍스트 노드" 대응표를 만든다.
+   커서 위치를 글자 번호로 바꾸고, 다시 그린 뒤 되돌리는 데 쓴다. */
+function scanRichText(root) {
+  const runs = [];
+  const marks = [];
+  let len = 0;
+
+  const push = (text, bold) => {
+    if (!text) return;
+    len += text.length;
+    const last = runs[runs.length - 1];
+    if (last && last.b === bold) last.t += text;
+    else runs.push({ t: text, b: bold });
+  };
+
+  const walk = (node, bold) => {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === 3) {
+        marks.push({ node: child, start: len });
+        push(child.nodeValue, bold);
+        return;
+      }
+      if (child.nodeType !== 1) return;
+      const tag = child.tagName.toLowerCase();
+      if (tag === "br") { push("\n", bold); return; }
+      // 맨 앞 문단 앞에는 빈 줄을 만들지 않는다
+      if (LINE_TAGS.has(tag) && len > 0) push("\n", bold);
+      walk(child, bold || isBoldEl(child));
+    });
+  };
+
+  walk(root, false);
+  return { runs, marks, len };
+}
+
+// 커서·선택 지점을 글자 번호로 바꾼다
+function charIndexOf(scan, node, offset) {
+  if (node && node.nodeType === 3) {
+    const mark = scan.marks.find((m) => m.node === node);
+    if (mark) return mark.start + offset;
+  }
+  return null;
+}
+
+function runsPlainText(runs) {
+  return runs.map((r) => r.t).join("");
+}
+
+// [from, to) 범위의 굵기를 bold로 바꾼 새 조각 목록
+function setBoldRange(runs, from, to, bold) {
+  const out = [];
+  let pos = 0;
+  runs.forEach((r) => {
+    const start = pos;
+    const end = pos + r.t.length;
+    pos = end;
+    // 범위와 겹치는 부분만 잘라 굵기를 바꾸고, 나머지는 그대로 둔다
+    const cut = [
+      [start, Math.min(end, Math.max(start, from)), r.b],
+      [Math.min(end, Math.max(start, from)), Math.max(start, Math.min(end, to)), bold],
+      [Math.max(start, Math.min(end, to)), end, r.b],
+    ];
+    cut.forEach(([a, b, weight]) => {
+      if (b <= a) return;
+      const text = r.t.slice(a - start, b - start);
+      const last = out[out.length - 1];
+      if (last && last.b === weight) last.t += text;
+      else out.push({ t: text, b: weight });
+    });
+  });
+  return out;
+}
+
+// 다시 그린 뒤 글자 번호로 선택을 되돌린다
+function restoreSelection(root, from, to) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const spots = [];
+  let len = 0;
+  let node;
+  while ((node = walker.nextNode())) {
+    spots.push({ node, start: len });
+    len += node.nodeValue.length;
+  }
+  const locate = (index) => {
+    const i = Math.max(0, Math.min(len, index));
+    for (let k = spots.length - 1; k >= 0; k--) {
+      if (i >= spots[k].start) return { node: spots[k].node, offset: i - spots[k].start };
+    }
+    return spots.length ? { node: spots[0].node, offset: 0 } : null;
+  };
+  const a = locate(from);
+  const b = locate(to);
+  if (!a || !b) return;
+  const range = document.createRange();
+  range.setStart(a.node, a.offset);
+  range.setEnd(b.node, b.offset);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+// 편집 중인 화면 상태를 그대로 블록에 담는다 (굵기가 없으면 runs는 지운다)
+function storeRichText(el, block) {
+  const { runs } = scanRichText(el);
+  block.content = runsPlainText(runs);
+  if (runs.some((r) => r.b)) block.runs = runs;
+  else delete block.runs;
+}
+
+// "굵게" · "보통" 버튼이 하는 일
+function applyWeightToSelection(el, block, bold) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return false;
+  const range = sel.getRangeAt(0);
+  if (range.collapsed || !el.contains(range.commonAncestorContainer)) return false;
+
+  const scan = scanRichText(el);
+  const from = charIndexOf(scan, range.startContainer, range.startOffset);
+  const to = charIndexOf(scan, range.endContainer, range.endOffset);
+  if (from == null || to == null || to <= from) return false;
+
+  const runs = setBoldRange(scan.runs, from, to, bold);
+  block.content = runsPlainText(runs);
+  if (runs.some((r) => r.b)) block.runs = runs;
+  else delete block.runs;
+
+  fillTextRuns(el, block);
+  restoreSelection(el, from, to);
+  saveDraft();
+  return true;
+}
+
 /* --------------------- 블록 미리보기 (편집 목록 안에 함께 표시) --------------------- */
 
 function renderPreviewBlockContent(project, block, blockIndex) {
@@ -1765,14 +1934,13 @@ function renderPreviewBlockContent(project, block, blockIndex) {
     p.contentEditable = "true";
     p.spellcheck = false;
     p.dataset.placeholder = "여기에 바로 입력하세요";
-    p.textContent = block.content || "";
-    p.style.fontSize = (block.size || 15) + "px";
-    if (block.color) p.style.color = block.color;
-    p.style.textAlign = block.align || "left";
+    // 굵게가 섞인 글도 공개 화면과 같은 모양으로 그린다
+    fillTextRuns(p, block);
+    applyTextStyle(p, block);
 
-    // 입력할 때마다 다시 그리면 커서가 튀므로 값만 갱신한다
+    // 입력할 때마다 다시 그리면 커서가 튀므로 화면을 읽어 값만 갱신한다
     p.addEventListener("input", () => {
-      block.content = p.innerText;
+      storeRichText(p, block);
       saveDraft();
     });
     // 붙여넣기로 서식이 딸려 들어오지 않도록 글자만 넣는다

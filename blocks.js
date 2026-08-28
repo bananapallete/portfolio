@@ -424,6 +424,48 @@ window.addEventListener("scroll", () => {
   });
 }, { passive: true });
 
+/* ------------------------- 텍스트 블록의 글자 모델 (공용) -------------------------
+   굵게가 섞인 글은 [{ t: "글자", b: true }] 조각 목록으로 담는다.
+   HTML 문자열을 넣지 않고 글자 노드로만 그리므로, data.json에 어떤 값이
+   들어와도 화면에서 코드로 실행되지 않는다. runs가 없으면 예전처럼
+   content(민글자)를 그대로 쓴다. */
+
+function textRunsOf(block) {
+  const runs = Array.isArray(block.runs)
+    ? block.runs.filter((r) => r && typeof r.t === "string" && r.t !== "")
+    : null;
+  if (runs && runs.length) return runs;
+  return [{ t: block.content || "", b: false }];
+}
+
+// 조각들을 글자 노드로 채운다 (굵은 조각만 <b>로 감싼다)
+function fillTextRuns(el, block) {
+  el.textContent = "";
+  textRunsOf(block).forEach((r) => {
+    const text = document.createTextNode(r.t);
+    if (!r.b) { el.appendChild(text); return; }
+    const b = document.createElement("b");
+    b.appendChild(text);
+    el.appendChild(b);
+  });
+}
+
+// 자간은 Figma와 같이 %로 저장하고 em으로 환산한다 (100% = 글자 한 칸)
+function normalizeTracking(v) {
+  if (v == null || v === "") return null;
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+// 크기 · 색 · 정렬 · 자간을 한 곳에서 입힌다 (공개 화면과 관리자 미리보기 공용)
+function applyTextStyle(el, block) {
+  el.style.fontSize = block.size ? block.size + "px" : "";
+  el.style.color = block.color || "";
+  el.style.textAlign = block.align && block.align !== "left" ? block.align : "";
+  const t = normalizeTracking(block.tracking);
+  el.style.letterSpacing = t != null ? t / 100 + "em" : "";
+}
+
 /* ---------------------------------- 블록 렌더링 ---------------------------------- */
 
 function renderBlock(block, defaultGap = null, firstEager = false) {
@@ -431,10 +473,8 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     if (!block.content) return null;
     const p = document.createElement("p");
     p.className = "blk-text";
-    p.textContent = block.content;
-    if (block.size) p.style.fontSize = block.size + "px";
-    if (block.color) p.style.color = block.color;
-    if (block.align && block.align !== "left") p.style.textAlign = block.align;
+    fillTextRuns(p, block);
+    applyTextStyle(p, block);
     return p;
   }
 

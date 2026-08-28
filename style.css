@@ -1218,9 +1218,14 @@ body.gate-locked { overflow: hidden; }
   margin: 0 auto;
   padding: 0 var(--side);
   white-space: pre-wrap;
+  /* 크기를 정하지 않은 글도 관리자 미리보기와 같은 크기로 보이도록 */
+  font-size: 15px;
   line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 80%, transparent);
 }
+
+/* 드래그해서 굵게 지정한 조각 */
+.blk-text b { font-weight: 700; }
 
 .blk-images-single {
   display: flex;
@@ -1757,6 +1762,10 @@ body.bg-takeover-light .proj-overview,
 }
 
 /* 레이아웃 선택 · 간격 등 작은 컨트롤들을 한 줄에 모아 배치 */
+/* "굵게"·"보통" 버튼은 글씨 자체로 결과를 보여준다 */
+.weight-bold { font-weight: 800; }
+.weight-normal { font-weight: 400; }
+
 .block-controls-row {
   display: flex;
   align-items: center;
