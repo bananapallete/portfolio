@@ -613,10 +613,12 @@ body.bg-takeover-light,
 
 /* 관리자 화면의 모든 입력 요소는 다크 테마 색을 따른다
    (브라우저 기본값이 흰 배경/검은 글자라 명시가 필요) */
-.admin-body input:not([type="color"]):not([type="file"]):not([type="checkbox"]),
+/* 글자를 넣는 칸에만 해당한다. 슬라이더 막대는 자기 배경으로 채움 정도를
+   그리므로 여기서 덮어쓰면 막대가 통째로 가려진다. */
+.admin-body input:not([type="color"]):not([type="file"]):not([type="checkbox"]):not([type="range"]),
 .admin-body textarea,
 .admin-body select,
-.admin-modal input:not([type="color"]):not([type="file"]):not([type="checkbox"]),
+.admin-modal input:not([type="color"]):not([type="file"]):not([type="checkbox"]):not([type="range"]),
 .admin-modal textarea,
 .admin-modal select {
   background: var(--paper-soft);
@@ -1935,14 +1937,21 @@ body.bg-takeover-light .proj-overview,
 /* 최대 폭은 네 자리라 기본 숫자칸으로는 잘린다 */
 .slider-field > .size-input { width: 70px; }
 
+/* 막대: 지나온 구간은 강조색, 남은 구간은 흐리게.
+   --fill(0~100%)은 값이 바뀔 때마다 admin.js가 넣어준다.
+   트랙 가상요소는 브라우저마다 이름이 달라, 막대 자체의 배경에 그린다. */
 .slider-field input[type="range"] {
   flex: 1 1 130px;
   min-width: 100px;
   max-width: 200px;
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  /* var(--line)은 너무 옅어 손잡이만 떠 보인다 */
-  background: color-mix(in srgb, var(--ink) 20%, transparent);
+  background:
+    linear-gradient(
+      to right,
+      var(--sun) 0 var(--fill, 0%),
+      color-mix(in srgb, var(--ink) 16%, transparent) var(--fill, 0%) 100%
+    );
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
@@ -1954,8 +1963,9 @@ body.bg-takeover-light .proj-overview,
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: none;
+  border: 2px solid var(--ui-surface, var(--panel));
   background: var(--sun);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   cursor: grab;
 }
 
@@ -1963,8 +1973,9 @@ body.bg-takeover-light .proj-overview,
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: none;
+  border: 2px solid var(--ui-surface, var(--panel));
   background: var(--sun);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   cursor: grab;
 }
 

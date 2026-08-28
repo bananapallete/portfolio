@@ -95,10 +95,21 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
   range.value = start;
   num.value = start;
 
+  /* 지나온 구간을 강조색으로 칠해 손잡이가 어디쯤인지 눈으로 알 수 있게 한다.
+     막대 자체에 그리는 배경이라 브라우저마다 다른 트랙 가상요소를 손대지 않아도 된다.
+     자간처럼 최솟값이 음수인 값도 있어 (값-최소)/(최대-최소)로 비율을 낸다. */
+  const paint = () => {
+    const v = parseFloat(range.value);
+    const pct = max === min ? 0 : ((v - min) / (max - min)) * 100;
+    range.style.setProperty("--fill", Math.min(100, Math.max(0, pct)) + "%");
+  };
+  paint();
+
   const apply = (v, from) => {
     const g = Math.min(max, Math.max(min, v));
     if (from !== "range") range.value = g;
     if (from !== "num") num.value = g;
+    paint();
     setVal(g);
     saveDraft();
     if (onApply) onApply(g);
@@ -115,6 +126,7 @@ function buildSliderField(labelText, getVal, setVal, { min = 0, max = 120, def =
   clearBtn.addEventListener("click", () => {
     range.value = def;
     num.value = def;
+    paint();
     setVal(null);
     saveDraft();
     if (onApply) onApply(null);
