@@ -1191,6 +1191,18 @@ function renderEditModalBody() {
 
   card.appendChild(renderHeroPreview(cat, project));
 
+  // 개요(설명 · 작업년도 · 기여도 · 사용 툴)는 공개 화면과 같은 마크업을 쓰고,
+  // 눌러서 그 자리에서 바로 고친다. 사용 툴은 위 아이콘에서 자동으로 따라온다.
+  const overviewWrap = document.createElement("div");
+  overviewWrap.className = "overview-preview";
+  applyPreviewBg(overviewWrap, project.heroBg || project.bgColor);
+  overviewWrap.appendChild(buildProjectOverview(project, (field, value) => {
+    if (value) project[field] = value;
+    else delete project[field];
+    saveDraft();
+  }));
+  card.appendChild(overviewWrap);
+
   // 자주 손대지 않는 프로젝트 설정은 한 칸에 모아 접어둔다
   if (projectSettingsOpen) card.appendChild(renderProjectSettings(project));
 

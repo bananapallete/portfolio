@@ -1453,6 +1453,69 @@ body.gate-locked { overflow: hidden; }
   gap: 28px;
 }
 
+/* -------- 프로젝트 개요: 설명 + 작업년도 · 기여도 · 사용 툴 (디자인 실측값) --------
+   19px / 줄높이 23px, 라벨과 설명은 #9ca0a8, 값은 흰색.
+   자간 0.95px = 19px 기준 0.05em 이라 글자가 줄어도 비율이 유지된다. */
+.proj-overview {
+  --meta-label: #9ca0a8;
+  --meta-value: #ffffff;
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-weight: 500;
+  font-size: 19px;
+  line-height: calc(23 / 19);
+  /* 디자인 프레임이 위아래로 113px씩 비워 둔 그대로 — 아래 콘텐츠와도 그만큼 뗀다 */
+  padding: 113px 0;
+}
+
+/* 밝은 배경으로 덮으면 제목과 같은 규칙으로 글자색을 뒤집는다 */
+body.bg-takeover-light .proj-overview,
+.preview-light .proj-overview {
+  --meta-label: var(--muted);
+  --meta-value: var(--ink);
+}
+
+.proj-overview-desc {
+  margin: 0;
+  color: var(--meta-label);
+  letter-spacing: 0.05em;
+  white-space: pre-wrap;
+}
+
+/* 설명 끝에서 라벨 줄까지 96px */
+.proj-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 37px;
+  margin: 96px 0 0;
+}
+
+.proj-overview-desc:empty + .proj-meta { margin-top: 0; }
+
+.proj-meta-col { min-width: 0; }
+
+.proj-meta-label {
+  margin: 0;
+  color: var(--meta-label);
+  letter-spacing: 0.05em;
+}
+
+/* 라벨 아래 16px 띄우고 값을 놓는다 */
+.proj-meta-value {
+  margin: 16px 0 0;
+  color: var(--meta-value);
+}
+
+.proj-meta-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.proj-meta-empty {
+  color: var(--meta-label);
+  opacity: 0.6;
+}
+
 /* 여백은 .proj-blocks 가 이미 갖고 있으므로 안에서 또 주면 두 번 들어간다 */
 .proj-blocks .blk-text {
   max-width: none;
@@ -1566,6 +1629,25 @@ body.gate-locked { overflow: hidden; }
   font-size: clamp(26px, 3.2vw, 40px);
   color: var(--ink);
 }
+
+/* 개요도 같은 팝업 안에서 실제 모습 그대로 그리고, 눌러서 바로 고친다 */
+.overview-preview {
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.25s ease-in-out;
+}
+
+.overview-preview:hover,
+.overview-preview:focus-within {
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+/* 팝업 안에서는 제목 칸 바로 아래에 붙으므로 위 여백을 줄인다 */
+.overview-preview .proj-overview { padding: 22px 0 26px; }
+
+/* 설명과 메타 줄 사이도 팝업에서는 한 화면에 들어오도록 좁힌다 */
+.overview-preview .proj-meta { margin-top: 44px; }
 
 /* 머리줄: 안내 문구가 왼쪽을 채우고 버튼이 오른쪽에 붙는다 */
 .project-card-head .mini-label { flex: 1 1 auto; }
@@ -2129,6 +2211,11 @@ body.gate-locked { overflow: hidden; }
   }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
+  /* 개요는 글자와 칸 사이를 한 단계 좁혀 좁은 화면에서도 한눈에 들어오게 한다 */
+  .proj-overview { font-size: 15px; padding: 56px 0; }
+  .proj-meta { margin-top: 46px; gap: 20px 26px; }
+  .proj-meta-value { margin-top: 12px; }
+  .proj-meta-tools { gap: 4px 14px; }
   /* 좁은 화면에서는 아이콘을 제목 아래로 내리고 왼쪽에 맞춘다 */
   .proj-hero {
     flex-direction: column;

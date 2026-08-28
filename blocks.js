@@ -578,6 +578,109 @@ function buildToolTags(project) {
   return row;
 }
 
+/* -------------------- 프로젝트 개요 (상세 페이지 최상단 · 공용) --------------------
+   설명 아래에 작업년도 · 기여도 · 사용 툴을 한 줄로 늘어놓는다.
+   사용 툴은 따로 적지 않는다 — 제목 옆 아이콘에서 켜둔 것이 그대로 따라온다.
+
+   edit 를 넘기면(관리자) 빈 항목도 자리를 지키고 눌러서 바로 고칠 수 있게 만든다.
+   공개 화면과 같은 마크업을 써야 미리보기가 실제와 어긋나지 않는다. */
+
+// 관리자에서 그 자리에 바로 쓰는 한 줄/여러 줄 입력칸
+function makeOverviewEditor(el, placeholder, multiline, onInput) {
+  el.classList.add("blk-text-edit");
+  el.contentEditable = "true";
+  el.spellcheck = false;
+  el.dataset.placeholder = placeholder;
+  el.addEventListener("input", () => {
+    const text = multiline ? el.innerText : el.innerText.replace(/\n/g, " ").trim();
+    onInput(text);
+  });
+  // 한 줄짜리는 엔터로 줄을 늘리지 않는다
+  if (!multiline) {
+    el.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); });
+  }
+  // 서식이 딸려 들어오지 않도록 붙여넣기는 글자만 받는다
+  el.addEventListener("paste", (e) => {
+    e.preventDefault();
+    let text = (e.clipboardData || window.clipboardData).getData("text/plain");
+    if (!multiline) text = text.replace(/\s+/g, " ");
+    document.execCommand("insertText", false, text);
+  });
+}
+
+function buildProjectOverview(project, edit) {
+  const desc = (project.overview || "").trim();
+  const year = (project.year || "").trim();
+  const contribution = (project.contribution || "").trim();
+  const tools = toolsOf(project);
+  // 공개 화면에서는 채워진 게 하나도 없으면 영역 자체를 만들지 않는다
+  if (!edit && !desc && !year && !contribution && !tools.length) return null;
+
+  const sec = document.createElement("section");
+  sec.className = "proj-overview";
+  const inner = document.createElement("div");
+  inner.className = "container";
+  sec.appendChild(inner);
+
+  if (edit || desc) {
+    const p = document.createElement("p");
+    p.className = "proj-overview-desc";
+    p.textContent = project.overview || "";
+    if (edit) makeOverviewEditor(p, "프로젝트 설명", true, (v) => edit("overview", v));
+    inner.appendChild(p);
+  }
+
+  const meta = document.createElement("dl");
+  meta.className = "proj-meta";
+
+  // 라벨 + 값 한 칸
+  const col = (label, build) => {
+    const box = document.createElement("div");
+    box.className = "proj-meta-col";
+    const dt = document.createElement("dt");
+    dt.className = "proj-meta-label";
+    dt.textContent = label;
+    const dd = document.createElement("dd");
+    dd.className = "proj-meta-value";
+    build(dd);
+    box.appendChild(dt);
+    box.appendChild(dd);
+    meta.appendChild(box);
+  };
+
+  if (edit || year) {
+    col("작업년도", (dd) => {
+      dd.textContent = project.year || "";
+      if (edit) makeOverviewEditor(dd, "2026.06", false, (v) => edit("year", v));
+    });
+  }
+  if (edit || contribution) {
+    col("기여도", (dd) => {
+      dd.textContent = project.contribution || "";
+      if (edit) makeOverviewEditor(dd, "100%", false, (v) => edit("contribution", v));
+    });
+  }
+  // 사용 툴은 아이콘에서 켠 것을 그대로 읽어오므로 여기서는 고칠 수 없다
+  if (tools.length) {
+    col("사용 툴", (dd) => {
+      dd.classList.add("proj-meta-tools");
+      tools.forEach((t) => {
+        const name = document.createElement("span");
+        name.textContent = t.label;
+        dd.appendChild(name);
+      });
+    });
+  } else if (edit) {
+    col("사용 툴", (dd) => {
+      dd.classList.add("proj-meta-tools", "proj-meta-empty");
+      dd.textContent = "위 아이콘에서 고르면 여기에 들어와요";
+    });
+  }
+
+  if (meta.children.length) inner.appendChild(meta);
+  return sec;
+}
+
 /* ---------------------------- 푸터 연락처 (공용) ----------------------------
    목록 화면과 상세 화면이 같은 마크업을 쓰므로 한 곳에서 만든다. */
 

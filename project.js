@@ -125,6 +125,10 @@ async function initProject() {
   // 이 프로젝트를 여는 동안 페이지 전체 배경색 적용
   setPageBg(project.bgColor);
 
+  // 제목 영역 바로 아래, 콘텐츠 블록보다 위에 개요를 놓는다
+  const overview = buildProjectOverview(project);
+  if (overview) document.getElementById("projHeroWrap").after(overview);
+
   wrap.innerHTML = "";
   stopSliders();
 
