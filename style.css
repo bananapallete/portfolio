@@ -1525,6 +1525,10 @@ body.gate-locked { overflow: hidden; }
 
 .proj-hero-wrap { padding: 48px 0 8px; }
 
+/* 개요가 바로 뒤에 오면 아래 여백을 개요 쪽에 맡겨, 제목과 설명 사이가
+   개요의 위 여백(15px) 그대로가 되게 한다. 개요가 없는 프로젝트는 8px 유지. */
+.proj-hero-wrap:has(+ .proj-overview) { padding-bottom: 0; }
+
 .proj-hero-wrap.proj-hero-dark .proj-title { color: #fff; }
 /* 툴 아이콘이 타이틀 우측 상단에 오도록 가로 배치.
    DOM 순서는 타이틀 → 아이콘이고, space-between으로 좌/우에 자동 배치된다 */
@@ -1562,8 +1566,8 @@ body.gate-locked { overflow: hidden; }
   /* 기본값 — 관리자에서 "개요 크기"를 손대지 않으면 이 값이 쓰인다 */
   font-size: 14px;
   line-height: calc(23 / 19);
-  /* 디자인 프레임이 위아래로 113px씩 비워 둔 그대로 — 아래 콘텐츠와도 그만큼 뗀다 */
-  padding: 113px 0;
+  /* 위는 제목 바로 아래에 붙이고(15px), 아래는 콘텐츠 블록과 뗀 채로 둔다 */
+  padding: 15px 0 113px;
 }
 
 /* 밝은 배경으로 덮으면 제목과 같은 규칙으로 글자색을 뒤집는다 */
@@ -2389,7 +2393,7 @@ body.bg-takeover-light .proj-overview,
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }
   /* 개요는 글자와 칸 사이를 한 단계 좁혀 좁은 화면에서도 한눈에 들어오게 한다 */
-  .proj-overview { font-size: 13px; padding: 56px 0; }
+  .proj-overview { font-size: 13px; padding: 15px 0 56px; }
   .proj-meta { margin-top: 46px; gap: 20px 26px; }
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
