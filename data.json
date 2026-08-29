@@ -83,6 +83,20 @@
           "contribution": "100%"
         },
         {
+          "id": "new-project-mtb4jh1h",
+          "title": "Graphic Resource Center",
+          "coverImage": "assets/c8cee7d4dc0c1fed2925.webm",
+          "blocks": [],
+          "summary": "사내 아이콘 어셋 플랫폼, 그래픽 리소스센터 ‘비전’",
+          "tools": [
+            "illustrator",
+            "aftereffects",
+            "lottie",
+            "figma"
+          ],
+          "bgColor": "#f9fafb"
+        },
+        {
           "id": "new-project-mt9nq9yg",
           "title": "Quest Hub",
           "coverImage": "assets/34dd338d0a17df203b8f.webm",
@@ -122,20 +136,6 @@
             "kling",
             "redshift"
           ]
-        },
-        {
-          "id": "new-project-mtb4jh1h",
-          "title": "Graphic Resource Center",
-          "coverImage": "assets/c8cee7d4dc0c1fed2925.webm",
-          "blocks": [],
-          "summary": "사내 아이콘 어셋 플랫폼, 그래픽 리소스센터 ‘비전’",
-          "tools": [
-            "illustrator",
-            "aftereffects",
-            "lottie",
-            "figma"
-          ],
-          "bgColor": "#f9fafb"
         },
         {
           "id": "new-project-mte1su0b",
