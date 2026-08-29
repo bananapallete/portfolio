@@ -139,6 +139,13 @@
           "bgColor": "#f9fafb"
         },
         {
+          "id": "new-project-mte1su0b",
+          "title": "H.dot",
+          "coverImage": "assets/523c3cb59e4857a4d93e.webm",
+          "blocks": [],
+          "summary": ""
+        },
+        {
           "id": "new-project-mtcndyjj",
           "title": "MIDAS WEEK",
           "coverImage": "assets/fb6b5ca257b720ef6ddf.webm",
@@ -155,13 +162,6 @@
           "contribution": "75",
           "year": "2025.06",
           "bgColor": "#f3f5f7"
-        },
-        {
-          "id": "new-project-mte1su0b",
-          "title": "H.dot",
-          "coverImage": "assets/523c3cb59e4857a4d93e.webm",
-          "blocks": [],
-          "summary": ""
         }
       ]
     },
