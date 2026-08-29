@@ -2639,9 +2639,14 @@ function getGithubToken(forceAsk = false) {
 
   let token = prompt(
     (why ? why + "\n\n" : "") +
-      "GitHub 토큰(ghp_...)을 입력해주세요.\n\n" +
-      "발급 방법: github.com/settings/tokens → Generate new token (classic) → 'repo' 권한 체크\n\n" +
-      "토큰은 이 브라우저에만 저장되며, 토큰이 없는 사람은 이 페이지를 열어도 사이트를 수정할 수 없어요.",
+      "GitHub 토큰을 입력해주세요.\n\n" +
+      "발급: github.com/settings/tokens\n" +
+      "  · Fine-grained → 이 저장소만 고르고 Contents: Read and write (권장)\n" +
+      "  · classic → 'repo' 권한 체크\n\n" +
+      "만료일을 '없음(No expiration)' 또는 최대한 길게 잡아주세요.\n" +
+      "만료되면 GitHub이 거부(401)해서 지워지고 다시 묻게 됩니다.\n\n" +
+      "토큰은 이 브라우저에만 저장돼요. 기기를 옮기면(회사 ↔ 집) 그 기기에서 한 번은 넣어야 하고,\n" +
+      "한 번 넣으면 그 브라우저에서는 계속 남아 있어요.",
     ""
   );
   if (!token) return null;
