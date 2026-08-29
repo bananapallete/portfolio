@@ -170,6 +170,20 @@
           "contribution": "75",
           "year": "2025.06",
           "bgColor": "#f3f5f7"
+        },
+        {
+          "id": "new-project-mtelwipy",
+          "title": "CIVIL NX",
+          "coverImage": "assets/e7fa604c6b4345cf784d.webm",
+          "blocks": [],
+          "summary": "Hyper CIVIL NX 출시 모션그래픽",
+          "year": "2026.04",
+          "contribution": "100%",
+          "tools": [
+            "aftereffects",
+            "c4d",
+            "redshift"
+          ]
         }
       ]
     },
