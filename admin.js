@@ -256,11 +256,52 @@ async function loadInitial() {
 /* 오래된 초안으로 사이트를 덮어쓰는 사고를 막는 경고 배너.
    예전에 열어둔 탭의 초안이 남아 있으면 그걸로 발행할 때 최신 내용이 통째로
    날아가므로, 서버 내용과 다르면 반영 전에 어느 쪽을 쓸지 먼저 고르게 한다. */
+// 배너가 가리키는 사이트 쪽 내용. "사이트에 올라간 내용 불러오기"가 이 값을 쓴다.
+let staleServer = null;
+// 견줄 때 쓴 정리된 형태. "계속 편집"을 고른 내용과 같은지지 판단하는 기준이다.
+let staleServerJson = null;
+// "임시저장 내용으로 계속 편집"을 고른 시점의 사이트 내용.
+//  그 뒤로 사이트가 또 바뀌지 않았다면 같은 경고를 다시 띄우지 않는다.
+let staleDismissed = null;
+
+/* 버튼은 한 번만 걸어둔다. 확인할 때마다 새로 걸면 이벤트가 쌓인다. */
+function bindStaleBanner() {
+  const banner = document.getElementById("staleBanner");
+  if (!banner) return;
+
+  document.getElementById("staleUseServer").addEventListener("click", () => {
+    if (!staleServer) return;
+    localStorage.removeItem(DRAFT_KEY);
+    data = staleServer;
+    staleDismissed = null;
+    renderAll();
+    banner.hidden = true;
+    document.getElementById("autosaveStatus").textContent = "사이트에 올라간 내용을 불러왔어요.";
+  });
+  document.getElementById("staleKeepDraft").addEventListener("click", () => {
+    staleDismissed = staleServerJson;
+    banner.hidden = true;
+  });
+}
+
+bindStaleBanner();
+
 function checkStaleDraft(server) {
   const banner = document.getElementById("staleBanner");
   if (!banner || !server || !data) return;
-  if (JSON.stringify(data) === JSON.stringify(server)) return;
 
+  // 사이트 내용도 같은 정리를 거친 뒤에 견준다. 화면의 data는 이미 거쳤으므로
+  //  그러지 않으면 빠진 값이 채워진 것만으로 다르다고 판정된다.
+  const serverJson = JSON.stringify(ensureShape(structuredClone(server)));
+  if (JSON.stringify(data) === serverJson) {
+    banner.hidden = true;
+    return;
+  }
+  // 이미 "계속 편집"으로 넘긴 그 내용이면 다시 묻지 않는다
+  if (serverJson === staleDismissed) return;
+
+  staleServer = server;
+  staleServerJson = serverJson;
   const count = (d) => (d.categories || []).reduce((n, c) => n + (c.projects || []).length, 0);
   document.getElementById("staleMsg").innerHTML =
     `⚠️ 지금 화면은 브라우저에 남아 있던 <strong>임시저장 내용</strong>이고, ` +
@@ -268,18 +309,23 @@ function checkStaleDraft(server) {
     `(임시저장 프로젝트 ${count(data)}개 / 사이트 ${count(server)}개)<br/>` +
     `이대로 "사이트에 반영"을 누르면 사이트 쪽 내용이 임시저장 내용으로 덮어써집니다.`;
   banner.hidden = false;
-
-  document.getElementById("staleUseServer").addEventListener("click", () => {
-    localStorage.removeItem(DRAFT_KEY);
-    data = server;
-    renderAll();
-    banner.hidden = true;
-    document.getElementById("autosaveStatus").textContent = "사이트에 올라간 내용을 불러왔어요.";
-  });
-  document.getElementById("staleKeepDraft").addEventListener("click", () => {
-    banner.hidden = true;
-  });
 }
+
+/* 다른 기기에서 발행한 내용을 이 탭이 모른 채 덮어쓰지 않도록,
+   탭을 다시 볼 때 사이트 쪽 내용을 다시 확인한다.
+
+   회사와 집을 오가며 탭을 켜둔 채로 쓰면, 열 때 한 번만 확인해서는
+   어제 열어둔 탭이 그 사이의 발행을 알지 못한다. */
+async function recheckStaleDraft() {
+  // 임시저장이 없으면 덮어쓸 위험도 없다
+  if (!localStorage.getItem(DRAFT_KEY)) return;
+  const server = await fetchServerData();
+  if (server) checkStaleDraft(server);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") recheckStaleDraft();
+});
 
 function showLoadFailure() {
   const msg = `
@@ -298,23 +344,26 @@ function showLoadFailure() {
     "data.json 로딩 실패 — 편집 전에 파일을 먼저 불러와주세요.";
 }
 
-function ensureShape() {
-  if (!data) {
-    data = { profile: {}, categories: [] };
-  }
-  data.profile = data.profile || {};
-  data.profile.contact = data.profile.contact || {};
-  data.profile.contact.emails = data.profile.contact.emails || [];
-  data.categories = data.categories || [];
+/* 빠진 값을 채우고 구버전 데이터를 지금 구조로 옮�다.
+
+   넘겨받은 것만 손대고 그대로 돌려준다. 사이트 내용과 임시저장을 견줄 때도
+   쓰이는데, 한쪽만 이 정리를 거치면 실제로는 같은 내용인데도
+   다르다고 판정돼 헛된 경고가 뜨기 때문이다. */
+function ensureShape(d) {
+  if (!d) d = { profile: {}, categories: [] };
+  d.profile = d.profile || {};
+  d.profile.contact = d.profile.contact || {};
+  d.profile.contact.emails = d.profile.contact.emails || [];
+  d.categories = d.categories || [];
   // 구버전: 프로젝트별 titleWeight가 있으면 전역 설정으로 승격 후 제거
-  if (!data.profile.projectTitleWeight) {
-    for (const c of data.categories) {
+  if (!d.profile.projectTitleWeight) {
+    for (const c of d.categories) {
       const found = (c.projects || []).find((p) => p.titleWeight);
-      if (found) { data.profile.projectTitleWeight = found.titleWeight; break; }
+      if (found) { d.profile.projectTitleWeight = found.titleWeight; break; }
     }
   }
-  (data.categories || []).forEach((c) => (c.projects || []).forEach((p) => { delete p.titleWeight; }));
-  data.categories.forEach((cat) => {
+  d.categories.forEach((c) => (c.projects || []).forEach((p) => { delete p.titleWeight; }));
+  d.categories.forEach((cat) => {
     cat.projects = cat.projects || [];
     cat.projects.forEach((p) => {
       p.summary = p.summary || "";
@@ -340,6 +389,7 @@ function ensureShape() {
       });
     });
   });
+  return d;
 }
 
 /* ------------------------------ 드래그 정렬 공통 ------------------------------ */
@@ -2303,7 +2353,7 @@ function readFileAsDataURL(file) {
 function renderAll() {
   applyLayoutVars(data && data.profile);
   if (!data) return;
-  ensureShape();
+  data = ensureShape(data);
   renderSiteHeader();
   renderTabs();
   renderSections();
