@@ -2707,6 +2707,39 @@ function utf8ToBase64(str) {
   return btoa(bin);
 }
 
+/* GitHub에 파일 하나를 올린다.
+
+   방금 커밋한 직후 같은 브랜치에 또 쓰면, 갱신이 아직 다 퍼지지 않아
+   409(충돌)가 돌아올 때가 있다. 이미지·영상을 올리고 몇 초 뒤 바로
+   data.json을 쓰는 우리 순서에서 특히 걸린다.
+   그럴 때는 파일 상태를 다시 읽어 잠깐 기다렸다 다시 보낸다 —
+   "사이트에 반영"을 한 번 더 누르는 것과 같은 일을 대신 해 주는 것이다.
+
+   withSha: 이미 있는 파일을 덮어쓸 때는 현재 상태를 함께 보내야 한다.
+            재시도마다 다시 읽어야 낡은 값으로 또 부딪치지 않는다. */
+async function putFile(path, token, message, base64, withSha) {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  let put = null;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const body = { message, content: base64, branch: GH_BRANCH };
+    if (withSha) {
+      const cur = await ghRequest(`contents/${path}?ref=${GH_BRANCH}`, token);
+      if (cur.status === 200) body.sha = (await cur.json()).sha;
+    }
+
+    put = await ghRequest(`contents/${path}`, token, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    if (put.ok || put.status !== 409) return put;
+
+    if (attempt === 0) setPublishStatus("GitHub이 아직 정리 중이라 잠시 뒤 다시 시도해요…");
+    await wait(800 * (attempt + 1));
+  }
+  return put;
+}
+
 // data: URL을 저장소의 assets/ 파일로 올리고 경로를 돌려준다.
 // 같은 내용은 같은 파일명이 되므로 이미 올라간 파일은 건너뛴다.
 async function uploadAssetIfNeeded(dataUrl, token) {
@@ -2725,14 +2758,8 @@ async function uploadAssetIfNeeded(dataUrl, token) {
   const check = await ghRequest(`contents/${path}?ref=${GH_BRANCH}`, token);
   if (check.status !== 404) return path; // 이미 업로드된 파일
 
-  const put = await ghRequest(`contents/${path}`, token, {
-    method: "PUT",
-    body: JSON.stringify({
-      message: `assets: ${path} 업로드 (관리자 페이지)`,
-      content: parsed.base64,
-      branch: GH_BRANCH,
-    }),
-  });
+  // 새 파일이라 덮어쓸 상태가 없다 (같은 내용은 같은 이름이라 위에서 걸러진다)
+  const put = await putFile(path, token, `assets: ${path} 업로드 (관리자 페이지)`, parsed.base64, false);
   if (!put.ok) throw new Error(`파일 업로드 실패 (GitHub 응답 ${put.status})`);
   return path;
 }
@@ -2788,22 +2815,21 @@ async function publishToGithub() {
 
     // 2) data.json 커밋
     setPublishStatus("data.json 반영 중…");
-    let sha = null;
-    const cur = await ghRequest(`contents/data.json?ref=${GH_BRANCH}`, token);
-    if (cur.status === 200) sha = (await cur.json()).sha;
-
-    const body = {
-      message: "content: 관리자 페이지에서 콘텐츠 업데이트",
-      content: utf8ToBase64(JSON.stringify(data, null, 2)),
-      branch: GH_BRANCH,
-    };
-    if (sha) body.sha = sha;
-
-    const put = await ghRequest("contents/data.json", token, {
-      method: "PUT",
-      body: JSON.stringify(body),
-    });
-    if (!put.ok) throw new Error(`data.json 반영 실패 (GitHub 응답 ${put.status})`);
+    const put = await putFile(
+      "data.json",
+      token,
+      "content: 관리자 페이지에서 콘텐츠 업데이트",
+      utf8ToBase64(JSON.stringify(data, null, 2)),
+      true
+    );
+    if (!put.ok) {
+      throw new Error(
+        put.status === 409
+          ? "data.json 반영 실패 — 저장소가 방금 다른 곳에서도 바뀐 것 같아요.\n" +
+            "잠시 뒤 \"사이트에 반영\"을 다시 눌러주세요. (GitHub 응답 409)"
+          : `data.json 반영 실패 (GitHub 응답 ${put.status})`
+      );
+    }
 
     setPublishStatus("✅ 배포 완료! 1~2분 뒤 실제 사이트에 반영돼요.");
     alert("배포 완료!\n\nGitHub Pages가 사이트를 다시 빌드하는 데 1~2분 걸려요.\n잠시 후 사이트를 새로고침해서 확인해주세요.");
