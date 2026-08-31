@@ -22,7 +22,7 @@
   "categories": [
     {
       "id": "work",
-      "name": "Works",
+      "name": "프로젝트",
       "projects": [
         {
           "id": "branding-midas-week-2026",
@@ -186,11 +186,12 @@
             "redshift"
           ]
         }
-      ]
+      ],
+      "nameSub": "Works"
     },
     {
       "id": "illustration",
-      "name": "Illustrations",
+      "name": "일러스트레이션",
       "projects": [
         {
           "id": "illustration-jihaksa",
@@ -248,11 +249,12 @@
           "blocks": [],
           "summary": ""
         }
-      ]
+      ],
+      "nameSub": "Illustrations"
     },
     {
       "id": "new-category-mtb40jrr",
-      "name": "Crumbles",
+      "name": "부스러기",
       "projects": [
         {
           "id": "new-project-mtb445wu",
@@ -261,13 +263,14 @@
           "blocks": [],
           "summary": ""
         }
-      ]
+      ],
+      "nameSub": "Crumbles"
     },
     {
       "id": "new-category-mtgtufsu",
-      "name": "Career",
+      "name": "경력",
       "projects": [],
-      "nameSub": ""
+      "nameSub": "Careers"
     }
   ]
 }

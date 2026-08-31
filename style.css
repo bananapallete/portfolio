@@ -291,8 +291,10 @@ body.has-open-category .site-header { position: static; }
   scroll-margin-top: calc(var(--header-h) + 8px);
 }
 
+/* 이름 줄 자체(.acc-head)는 공개 사이트와 똑같은 규칙을 그대로 쓰고,
+   여기서는 카테고리 사이 위쪽 여백만 관리자 전용으로 더해준다. */
 .work-section-head {
-  padding: 44px 0 18px;
+  padding-top: 44px;
 }
 
 /* 섹션 머리를 생략한 경우(카테고리 하나) 그만큼의 위 여백을 섹션이 대신 갖는다 */
@@ -300,23 +302,18 @@ body.has-open-category .site-header { position: static; }
   padding-top: 44px;
 }
 
-.work-section-head .container {
+.work-section-head .acc-head { border-bottom: 0.5px solid var(--ink); }
+
+/* 관리자는 늘 펼쳐진 상태이므로 화살표를 위를 향한 모습으로 고정한다 */
+.ws-chevron-open { transform: rotate(180deg); }
+
+.work-section-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* 바디에 표시되는 카테고리 이름 (입력한 대소문자를 그대로 유지) */
-.work-section-head h2 {
-  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-/* 관리자 전용: 섹션 머리의 카테고리 설정 버튼 */
-.ws-edit { margin-left: 10px; }
+.work-section .work-grid { padding-top: var(--acc-panel-top, 5px); }
 
 /* ---------------------------------- 홈 소개문 ---------------------------------- */
 
@@ -643,7 +640,7 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
 .footer-title {
   font-size: 14px;
   font-weight: 400;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .footer-contact {
@@ -2630,9 +2627,8 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   .proj-meta { margin-top: 46px; gap: 20px 26px; }
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
-  .work-section-head { padding: 28px 0 12px; }
+  .work-section-head { padding-top: 28px; }
   .work-section-bare { padding-top: 28px; }
-  .work-section-head h2 { font-size: 17px; }
   .footer-grid { flex-direction: column; align-items: flex-start; }
 
   /* 관리자 페이지 */

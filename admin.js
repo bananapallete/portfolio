@@ -914,19 +914,49 @@ function renderSections() {
     section.id = `cat-${cat.id}`;
     section.dataset.catId = cat.id;
 
+    // 공개 사이트의 아코디언 이름 줄과 같은 마크업(acc-head/acc-name/acc-sub)을
+    // 그대로 써서 두 화면의 생김새가 어긋나지 않게 한다. 관리자는 늘 펼쳐진
+    // 상태라 화살표는 항상 위를 향한 모습으로 고정해 둔다.
     const head = document.createElement("div");
     head.className = "work-section-head";
     const headInner = document.createElement("div");
     headInner.className = "container";
-    const h2 = document.createElement("h2");
-    h2.textContent = cat.name || "(이름 없음)";
+
+    const row = document.createElement("div");
+    row.className = "acc-head";
+
+    const text = document.createElement("div");
+    text.className = "acc-head-text";
+    const nameEl = document.createElement("span");
+    nameEl.className = "acc-name";
+    nameEl.textContent = cat.name || "(이름 없음)";
+    text.appendChild(nameEl);
+    if (cat.nameSub && cat.nameSub.trim()) {
+      const subEl = document.createElement("span");
+      subEl.className = "acc-sub";
+      subEl.textContent = cat.nameSub;
+      text.appendChild(subEl);
+    }
+    row.appendChild(text);
+
+    const actions = document.createElement("div");
+    actions.className = "work-section-actions";
+
+    const chevron = document.createElement("img");
+    chevron.className = "acc-chevron ws-chevron-open";
+    chevron.src = "assets/icons/chevron-down.svg";
+    chevron.alt = "";
+    actions.appendChild(chevron);
+
     const editBtn = document.createElement("button");
     editBtn.className = "btn btn-outline btn-small ws-edit";
     editBtn.textContent = "⚙ 설정";
     editBtn.title = "카테고리 이름·색상·삭제";
     editBtn.addEventListener("click", () => openCategoryEditor(cat));
-    headInner.appendChild(h2);
-    headInner.appendChild(editBtn);
+    actions.appendChild(editBtn);
+
+    row.appendChild(actions);
+    headInner.appendChild(row);
     head.appendChild(headInner);
     section.appendChild(head);
 

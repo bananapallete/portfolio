@@ -71,14 +71,28 @@ function renderHeader() {
   renderFooterContact(p);
 }
 
-// 언어 전환. 지금은 KR/EN 버튼의 눌린 상태만 바꾼다 — 콘텐츠 자체를
-// 두 언어로 따로 관리하지 않아서다(관리자에 그런 입력칸이 없다).
+// 언어 전환. 콘텐츠 자체를 두 언어로 따로 관리하진 않지만(관리자에 그런
+// 입력칸은 없다), 카테고리 이름 줄만은 국문/영문 중 어느 쪽을 더 크게 보여줄지
+// 실제로 바꾼다 — renderAccordion()이 채워두는 langEntries를 그때그때 다시 칠한다.
+let langEntries = [];
+
+function applyLangToEntries(lang) {
+  const isEn = lang === "en";
+  langEntries.forEach(({ koEl, enEl }) => {
+    koEl.className = isEn ? "acc-sub" : "acc-name";
+    enEl.className = isEn ? "acc-name" : "acc-sub";
+    koEl.style.order = isEn ? "2" : "1";
+    enEl.style.order = isEn ? "1" : "2";
+  });
+}
+
 function initLangSwitch() {
   const wrap = document.getElementById("langSwitch");
   if (!wrap) return;
   wrap.querySelectorAll(".lang-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       wrap.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b === btn));
+      applyLangToEntries(btn.dataset.lang);
     });
   });
 }
@@ -131,7 +145,7 @@ function renderAccordion() {
   wrap.innerHTML = "";
   stopCoverVideos();
 
-  const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
+  const cats = siteData.categories || [];
 
   if (!cats.length) {
     wrap.innerHTML = `<div class="empty-state">No projects yet.</div>`;
@@ -139,6 +153,7 @@ function renderAccordion() {
   }
 
   let openItem = null;
+  langEntries = [];
 
   // 창 크기가 바뀌면(카드 폭이 바뀌어 이미지 높이도 바뀌므로) 열려 있는
   // 패널의 max-height를 다시 재준다. 리스너는 아코디언당 하나만 붙인다.
@@ -175,6 +190,8 @@ function renderAccordion() {
       sub.className = "acc-sub";
       sub.textContent = cat.nameSub;
       text.appendChild(sub);
+      // 영문 버전에서는 이 둘의 크기·순서를 맞바꾼다 (initLangSwitch 참고)
+      langEntries.push({ koEl: name, enEl: sub });
     }
     head.appendChild(text);
 
