@@ -338,7 +338,7 @@ body.has-open-category .site-header { position: static; }
    평소엔 이름 줄만 보이고, 누르면 그 줄 바로 아래로 프로젝트 그리드가 펼쳐진다.
    한 번에 하나만 열리도록 script.js가 다른 항목을 함께 접는다. */
 
-.acc-list { padding-top: 82px; }
+.acc-list { padding-top: var(--acc-list-top, 82px); }
 
 /* 헤더·푸터의 .container 와 같은 폭·좌우 여백을 그대로 맞춘다 (이름 줄이 화면
    끝에 딱 붙어버리던 걸 고침). 그리드는 이미 .work-grid 규칙이 같은 여백을
@@ -353,8 +353,8 @@ body.has-open-category .site-header { position: static; }
 }
 
 .acc-item .work-grid {
-  padding-top: 5px;
-  padding-bottom: 24px;
+  padding-top: var(--acc-panel-top, 5px);
+  padding-bottom: var(--acc-panel-bottom, 24px);
   padding-left: 0;
   padding-right: 0;
   max-width: none;
@@ -392,7 +392,7 @@ body.has-open-category .site-header { position: static; }
   width: 100%;
   border: none;
   background: transparent;
-  padding: 13px 0;
+  padding: var(--acc-head-gap, 13px) 0;
   text-align: left;
   color: var(--ink);
 }
@@ -476,6 +476,7 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
   position: relative;
   cursor: pointer;
   overflow: hidden;
+  border-radius: var(--card-radius, 0px);
   /* 카드 폭을 기준(cqw)으로 글자 크기를 잡아, 화면이 좁아져도 비율이 유지된다 */
   container-type: inline-size;
 }
@@ -2578,18 +2579,24 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 6px 0; font-size: 12px; }
 
-  .container { padding: 0 min(var(--side), 18px); }
+  /* 모바일 좌우 여백은 --side-mobile(홈)/--side-menu-mobile(상세)로 따로 관리한다
+     (관리자 "모바일 화면 여백"). 데스크톱 값을 그대로 줄이는 게 아니라 독립된 값이다. */
+  .container { padding: 0 var(--side-mobile, 18px); }
   .proj-topbar .container {
-    padding-left: min(var(--side-menu), 18px);
-    padding-right: min(var(--side-menu), 18px);
+    padding-left: var(--side-menu-mobile, 18px);
+    padding-right: var(--side-menu-mobile, 18px);
   }
-  .work-grid, .proj-blocks {
-    padding-left: min(var(--side), 18px);
-    padding-right: min(var(--side), 18px);
+  .work-grid {
+    padding-left: var(--side-mobile, 18px);
+    padding-right: var(--side-mobile, 18px);
+  }
+  .proj-blocks {
+    padding-left: var(--side-menu-mobile, 18px);
+    padding-right: var(--side-menu-mobile, 18px);
   }
   .acc-item {
-    padding-left: min(var(--side), 18px);
-    padding-right: min(var(--side), 18px);
+    padding-left: var(--side-mobile, 18px);
+    padding-right: var(--side-mobile, 18px);
   }
   .blk-text { padding: 0 18px; }
   .work-grid { grid-template-columns: 1fr; }

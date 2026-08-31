@@ -737,6 +737,87 @@ function renderLayoutFields(wrap, profile) {
   ));
 
   wrap.appendChild(box);
+
+  // 세부 여백: 홈 화면 카테고리 목록(아코디언)의 안쪽 간격들.
+  // 기본값은 지금 CSS에 실제로 적용돼 있는 수치라서, 처음 열어도 화면이 그대로다.
+  const detailHead = document.createElement("label");
+  detailHead.className = "mini-label";
+  detailHead.textContent = "세부 여백 (카테고리 목록)";
+  wrap.appendChild(detailHead);
+
+  const detailBox = document.createElement("div");
+  detailBox.className = "layout-fields";
+  detailBox.appendChild(buildSliderField(
+    "목록 상단 여백",
+    () => profile.listTopGap,
+    (v) => { if (v == null) delete profile.listTopGap; else profile.listTopGap = v; },
+    { min: 0, max: 160, def: LIST_TOP_GAP_DEFAULT },
+    live
+  ));
+  detailBox.appendChild(buildSliderField(
+    "카테고리 줄 위아래 여백",
+    () => profile.headGap,
+    (v) => { if (v == null) delete profile.headGap; else profile.headGap = v; },
+    { min: 0, max: 40, def: HEAD_GAP_DEFAULT },
+    live
+  ));
+  detailBox.appendChild(buildSliderField(
+    "펼친 영역 상단 여백",
+    () => profile.panelTopGap,
+    (v) => { if (v == null) delete profile.panelTopGap; else profile.panelTopGap = v; },
+    { min: 0, max: 40, def: PANEL_TOP_GAP_DEFAULT },
+    live
+  ));
+  detailBox.appendChild(buildSliderField(
+    "펼친 영역 하단 여백",
+    () => profile.panelBottomGap,
+    (v) => { if (v == null) delete profile.panelBottomGap; else profile.panelBottomGap = v; },
+    { min: 0, max: 80, def: PANEL_BOTTOM_GAP_DEFAULT },
+    live
+  ));
+  wrap.appendChild(detailBox);
+
+  // 모바일 화면 여백. 데스크톱 값을 그냥 줄이는 게 아니라 따로 관리하는 값이다
+  // (지금까지는 18px로 고정돼 있던 걸 조절 가능하게 연 것 — 기본값이 곧 그 18px).
+  const mobileHead = document.createElement("label");
+  mobileHead.className = "mini-label";
+  mobileHead.textContent = "모바일 화면 여백";
+  wrap.appendChild(mobileHead);
+
+  const mobileBox = document.createElement("div");
+  mobileBox.className = "layout-fields";
+  mobileBox.appendChild(buildSliderField(
+    "홈 · 상단 메뉴 여백 (모바일)",
+    () => profile.sideMarginMobile,
+    (v) => { if (v == null) delete profile.sideMarginMobile; else profile.sideMarginMobile = v; },
+    { min: 0, max: 60, def: SIDE_MARGIN_MOBILE_DEFAULT },
+    live
+  ));
+  mobileBox.appendChild(buildSliderField(
+    "콘텐츠 본문 여백 (모바일)",
+    () => profile.contentMarginMobile,
+    (v) => { if (v == null) delete profile.contentMarginMobile; else profile.contentMarginMobile = v; },
+    { min: 0, max: 60, def: CONTENT_MARGIN_MOBILE_DEFAULT },
+    live
+  ));
+  wrap.appendChild(mobileBox);
+
+  // 모서리 둥글기. 지금은 카드가 각지게(0px) 나가는데, 여기서 둥글릴 수 있다.
+  const radiusHead = document.createElement("label");
+  radiusHead.className = "mini-label";
+  radiusHead.textContent = "모서리 둥글기";
+  wrap.appendChild(radiusHead);
+
+  const radiusBox = document.createElement("div");
+  radiusBox.className = "layout-fields";
+  radiusBox.appendChild(buildSliderField(
+    "카드 모서리 둥글기",
+    () => profile.cardRadius,
+    (v) => { if (v == null) delete profile.cardRadius; else profile.cardRadius = v; },
+    { min: 0, max: 60, def: CARD_RADIUS_DEFAULT },
+    live
+  ));
+  wrap.appendChild(radiusBox);
 }
 
 function makeTextField(labelText, value, onChange) {

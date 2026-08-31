@@ -48,6 +48,17 @@ const CARD_GAP_DEFAULT = 0;
 const MAX_WIDTH_DEFAULT = 1350;
 const MAX_WIDTH_FULL = 2560;
 
+// 아코디언 카테고리 목록의 세부 간격. 지금 CSS에 실제로 적용돼 있는
+// 값을 그대로 기본값으로 삼아서, 관리자에서 처음 열어도 화면이 안 바뀐다.
+const LIST_TOP_GAP_DEFAULT = 82; // 목록 맨 위 여백
+const HEAD_GAP_DEFAULT = 13; // 카테고리 이름 줄 위아래 여백
+const PANEL_TOP_GAP_DEFAULT = 5; // 펼친 그리드 위쪽 여백
+const PANEL_BOTTOM_GAP_DEFAULT = 24; // 펼친 그리드 아래쪽 여백
+const CARD_RADIUS_DEFAULT = 0; // 카드 모서리 둥글기
+// 모바일에서는 지금까지 좌우 여백을 18px로 고정해 뒀던 값을 그대로 기본값으로 쓴다
+const SIDE_MARGIN_MOBILE_DEFAULT = 18;
+const CONTENT_MARGIN_MOBILE_DEFAULT = 18;
+
 // 예전 데이터의 "꽉 채우기" 스위치를 최대 폭 값으로 옮겨 읽는다
 function readMaxWidth(value, legacyFull) {
   const v = normalizeGap(value);
@@ -83,6 +94,24 @@ function applyLayoutVars(profile, scope = "home") {
   root.setProperty("--side-menu", menu + "px");
   root.setProperty("--wrap-menu", `min(${menuMax}px, 100%)`);
   root.setProperty("--card-gap", (gap != null ? gap : CARD_GAP_DEFAULT) + "px");
+
+  // 아코디언 세부 여백 · 모서리 둥글기 · 모바일 여백. scope와 무관하게 항상
+  // 같이 넣는다 (--side-menu 등 상단 메뉴 값과 같은 방식).
+  const listTop = normalizeGap(p.listTopGap);
+  const headGap = normalizeGap(p.headGap);
+  const panelTop = normalizeGap(p.panelTopGap);
+  const panelBottom = normalizeGap(p.panelBottomGap);
+  const radius = normalizeGap(p.cardRadius);
+  const sideMobile = normalizeGap(p.sideMarginMobile);
+  const contentMobile = normalizeGap(p.contentMarginMobile);
+
+  root.setProperty("--acc-list-top", (listTop != null ? listTop : LIST_TOP_GAP_DEFAULT) + "px");
+  root.setProperty("--acc-head-gap", (headGap != null ? headGap : HEAD_GAP_DEFAULT) + "px");
+  root.setProperty("--acc-panel-top", (panelTop != null ? panelTop : PANEL_TOP_GAP_DEFAULT) + "px");
+  root.setProperty("--acc-panel-bottom", (panelBottom != null ? panelBottom : PANEL_BOTTOM_GAP_DEFAULT) + "px");
+  root.setProperty("--card-radius", (radius != null ? radius : CARD_RADIUS_DEFAULT) + "px");
+  root.setProperty("--side-mobile", (sideMobile != null ? sideMobile : SIDE_MARGIN_MOBILE_DEFAULT) + "px");
+  root.setProperty("--side-menu-mobile", (contentMobile != null ? contentMobile : CONTENT_MARGIN_MOBILE_DEFAULT) + "px");
 }
 
 // eager: 첫 화면에 걸리는 카드만 미리 받아 둔다
