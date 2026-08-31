@@ -1204,6 +1204,7 @@ function renderHeroPreview(cat, project) {
   // 폰트 두께는 프로필의 전역 설정을 따른다 (실제 페이지와 같은 규칙)
   const weight = (data.profile || {}).projectTitleWeight || project.titleWeight;
   if (weight) h1.style.fontWeight = weight;
+  if (project.titleColor) h1.style.color = project.titleColor;
   h1.addEventListener("input", () => {
     project.title = h1.innerText.replace(/\n/g, " ").trim();
     saveDraft();
@@ -1275,6 +1276,12 @@ function renderProjectSettings(project) {
     () => project.heroBg,
     (v) => { if (v == null) delete project.heroBg; else project.heroBg = v; },
     "배경 없음"
+  );
+  colorField(
+    "상세 페이지 제목 색상",
+    () => project.titleColor,
+    (v) => { if (v == null) delete project.titleColor; else project.titleColor = v; },
+    "자동 (배경에 맞춰 조정)"
   );
   colorField(
     project.bgColor ? "페이지 전체 배경" : "페이지 전체 배경 · 미설정",

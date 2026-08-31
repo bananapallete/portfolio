@@ -82,7 +82,6 @@ async function initProject() {
   // 프로필/푸터
   const profile = siteData.profile || {};
   applyLayoutVars(profile, "content");
-  document.getElementById("projBrand").textContent = profile.nickname || profile.name || "Portfolio";
   document.getElementById("footerName").textContent = profile.name || profile.nickname || "";
   renderFooterContact(profile);
 
@@ -104,6 +103,8 @@ async function initProject() {
   // 폰트 두께는 프로필의 전역 설정을 모든 프로젝트에 일괄 적용
   const gw = profile.projectTitleWeight || (project.titleWeight /* 구버전 호환 */);
   if (gw) titleEl.style.fontWeight = gw;
+  // 지정 안 하면 배경 밝기에 따라 자동으로 대비를 맞춘 색(--ink)을 그대로 쓴다
+  if (project.titleColor) titleEl.style.color = project.titleColor;
 
   // 상세 페이지 상단(태그+제목) 배경색 지정
   if (project.heroBg) {

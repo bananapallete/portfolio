@@ -686,6 +686,18 @@ body.bg-takeover-light,
   --muted: rgba(20, 18, 26, 0.55);
 }
 
+/* 어두운 색으로 덮었을 때는 반대로 글자·선을 밝은 쪽으로 뒤집는다.
+   기본 테마가 원래 어두웠을 땐 --ink가 이미 밝은색이라 이 분기가 필요 없었지만,
+   기본 테마를 라이트로 바꾸면서 --ink가 어두운색이 됐고, 어두운 배경을 고르면
+   어두운 글자가 어두운 배경 위에 얹혀 안 보이게 됐다 — 그 반대쪽 분기. */
+body.bg-takeover:not(.bg-takeover-light) {
+  --ink: #f4f7fa;
+  --paper: #101011;
+  --paper-soft: #1c1c1e;
+  --line: rgba(244, 247, 250, 0.16);
+  --muted: rgba(244, 247, 250, 0.6);
+}
+
 /* 배경 전환에 맞춰 글자색도 서서히 따라오도록 */
 .proj-title,
 .back-link,
@@ -1681,10 +1693,17 @@ body.gate-locked { overflow: hidden; }
 .back-link:hover { color: var(--branding); }
 
 .proj-brand {
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
 }
+
+.proj-brand-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 다크 배경(--ink가 밝은색)에서도 화살표가 보이도록 이미지 자체를 반전시킨다 */
+body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
 
 .proj-hero-wrap { padding: 48px 0 8px; }
 
