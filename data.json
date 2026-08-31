@@ -17,7 +17,7 @@
     "contentMargin": 15,
     "maxWidthHome": 1450,
     "maxWidthContent": 1500,
-    "cardRadius": 10
+    "cardRadius": 5
   },
   "categories": [
     {
