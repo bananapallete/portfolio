@@ -153,6 +153,12 @@ function renderAccordion() {
     item.className = "acc-item";
     item.dataset.catId = cat.id;
 
+    // acc-head 바로 위에 숨어있는 1px짜리 기준점. 이게 뷰포트 위로 넘어가는
+    // 순간이 곧 이름 줄이 최상단에 붙어 GNB 자리를 대신하기 시작하는 순간이다.
+    const sentinel = document.createElement("div");
+    sentinel.className = "acc-sentinel";
+    item.appendChild(sentinel);
+
     const head = document.createElement("button");
     head.type = "button";
     head.className = "acc-head";
@@ -199,6 +205,15 @@ function renderAccordion() {
       panelInner.appendChild(grid);
     };
 
+    // 이름 줄이 최상단에 닿았는지를 스크롤마다 계산하지 않고, 기준점이
+    // 뷰포트 경계를 넘는 순간에만 반응한다(열려 있을 때만 CSS로 보이므로
+    // 닫혀 있는 항목에서 계속 관찰해도 화면엔 아무 영향이 없다).
+    const stickyObserver = new IntersectionObserver(
+      ([entry]) => head.classList.toggle("is-stuck", !entry.isIntersecting),
+      { threshold: 0 }
+    );
+    stickyObserver.observe(sentinel);
+
     head.addEventListener("click", () => {
       const isOpen = item.classList.contains("open");
       if (openItem && openItem !== item) {
@@ -211,6 +226,7 @@ function renderAccordion() {
         head.setAttribute("aria-expanded", "false");
         panel.style.maxHeight = "";
         openItem = null;
+        document.body.classList.remove("has-open-category");
       } else {
         buildGrid();
         item.classList.add("open");
@@ -218,6 +234,9 @@ function renderAccordion() {
         // 실제 콘텐츠 높이를 재서 넣어야 max-height 트랜지션이 부드럽게 펼쳐진다
         panel.style.maxHeight = panel.scrollHeight + "px";
         openItem = item;
+        // 카테고리가 열려 있는 동안엔 GNB가 스크롤을 따라오지 않고 흘러 지나가서,
+        // 이 이름 줄이 최상단에 닿았을 때 그 자리를 대신할 수 있게 한다
+        document.body.classList.add("has-open-category");
       }
     });
 

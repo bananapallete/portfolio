@@ -177,6 +177,11 @@ input, textarea, select { font-family: inherit; }
   transition: background-color 0.65s ease;
 }
 
+/* 카테고리를 펼쳐 놓은 동안엔 GNB가 스크롤을 따라다니지 않고 그냥 흘러
+   지나가게 둔다 — 그래야 열린 카테고리의 이름 줄이 최상단에 닿았을 때
+   그 자리를 자연스럽게 넘겨받는다(.acc-item.open .acc-head 규칙 참고). */
+body.has-open-category .site-header { position: static; }
+
 .site-header .container {
   display: flex;
   align-items: center;
@@ -335,7 +340,49 @@ input, textarea, select { font-family: inherit; }
 
 .acc-list { padding-top: 82px; }
 
-.acc-item { border-bottom: 0.5px solid var(--ink); }
+/* 헤더·푸터의 .container 와 같은 폭·좌우 여백을 그대로 맞춘다 (이름 줄이 화면
+   끝에 딱 붙어버리던 걸 고침). 그리드는 이미 .work-grid 규칙이 같은 여백을
+   자체로 넣고 있어서, 아래 .acc-item .work-grid 에서 그 몫만큼 지워 중복을 막는다. */
+.acc-item {
+  position: relative;
+  border-bottom: 0.5px solid var(--ink);
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding-left: var(--side);
+  padding-right: var(--side);
+}
+
+.acc-item .work-grid {
+  padding-top: 5px;
+  padding-bottom: 24px;
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  margin: 0;
+}
+
+/* 스크롤 위치를 감지하는 투명한 기준점. acc-head 바로 위, 딱 그 자리에
+   숨어있다가 뷰포트 위로 넘어가는 순간을 script.js의 IntersectionObserver가
+   잡아서 is-stuck 을 붙인다(= 지금 GNB 자리를 대신하고 있다는 뜻). */
+.acc-sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* 카테고리가 열린 채로 스크롤해서 이름 줄이 최상단에 닿으면, 그 줄이 GNB
+   자리를 넘겨받아 대신 붙박이가 된다(= GNB는 자연스럽게 스크롤되어 밀려난다.
+   body.has-open-category 규칙 참고). */
+.acc-item.open .acc-head {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--chrome, var(--paper));
+}
 
 .acc-head {
   display: flex;
@@ -355,6 +402,7 @@ input, textarea, select { font-family: inherit; }
   align-items: baseline;
   gap: 5px;
   min-width: 0;
+  transition: gap 0.3s ease-in-out;
 }
 
 .acc-name {
@@ -365,7 +413,14 @@ input, textarea, select { font-family: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: font-size 0.3s ease-in-out;
 }
+
+/* 최상단에 붙어 GNB를 대신하는 동안에는 이름을 20px로 줄여 얇은 바처럼 보이게 한다.
+   .open 으로 한정해야 한다 — 닫힌 채 아래에 있는 다른 카테고리도 스크롤로
+   기준점을 지나칠 수 있는데, 그건 붙박이가 된 게 아니라서 글자가 줄면 안 된다. */
+.acc-item.open .acc-head.is-stuck .acc-name { font-size: 20px; }
+.acc-item.open .acc-head.is-stuck .acc-head-text { gap: 2.5px; }
 
 .acc-sub {
   font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
@@ -2529,6 +2584,10 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
     padding-right: min(var(--side-menu), 18px);
   }
   .work-grid, .proj-blocks {
+    padding-left: min(var(--side), 18px);
+    padding-right: min(var(--side), 18px);
+  }
+  .acc-item {
     padding-left: min(var(--side), 18px);
     padding-right: min(var(--side), 18px);
   }
