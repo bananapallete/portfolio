@@ -1643,8 +1643,6 @@ body.gate-locked { overflow: hidden; }
   background: color-mix(in srgb, var(--chrome, var(--paper)) 88%, transparent);
   backdrop-filter: blur(10px);
   color: var(--ink);
-  font-size: 18px;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1655,6 +1653,14 @@ body.gate-locked { overflow: hidden; }
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s,
     background-color 0.65s ease, color 0.65s ease, border-color 0.65s ease;
 }
+
+.to-top-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 다크 배경(--ink가 밝은색)에서도 화살표가 보이도록 이미지 자체를 반전시킨다 */
+body.bg-takeover:not(.bg-takeover-light) .to-top-icon { filter: invert(1); }
 
 .to-top.to-top-show {
   opacity: 1;
@@ -1686,7 +1692,7 @@ body.gate-locked { overflow: hidden; }
 }
 
 .back-link {
-  font-weight: 700;
+  font-weight: 400;
   font-size: 14px;
 }
 
@@ -2585,7 +2591,7 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 
   /* 좁은 화면에서는 카테고리 뱃지를 아예 표시하지 않는다 */
 
-  .to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; font-size: 16px; }
+  .to-top { right: 16px; bottom: 16px; width: 44px; height: 44px; }
   .tabs {
     /* 성장은 하지 않고(=오른쪽으로 붙고) 필요할 때만 줄어들어(=내부 스크롤) */
     flex: 0 1 auto;

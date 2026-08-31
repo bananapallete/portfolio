@@ -67,7 +67,7 @@ async function initProject() {
   const siteData = await loadSiteData();
 
   if (!siteData) {
-    wrap.innerHTML = `<div class="empty-state">Couldn't load the data. <a href="index.html" style="text-decoration:underline;">← Back to list</a></div>`;
+    wrap.innerHTML = `<div class="empty-state">Couldn't load the data. <a href="index.html" style="text-decoration:underline;">Back to list</a></div>`;
     return;
   }
 
@@ -92,7 +92,7 @@ async function initProject() {
 
   if (!project) {
     document.getElementById("projTitle").textContent = "Project not found";
-    wrap.innerHTML = `<div class="empty-state">This link is invalid or the project has been removed. <a href="index.html" style="text-decoration:underline;">← Back to list</a></div>`;
+    wrap.innerHTML = `<div class="empty-state">This link is invalid or the project has been removed. <a href="index.html" style="text-decoration:underline;">Back to list</a></div>`;
     return;
   }
 
