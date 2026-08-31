@@ -33,11 +33,23 @@ function renderFallback() {
   });
 }
 
-// 홈 화면 프로젝트 영역 배경색 (관리자에서 지정한 경우에만 기본 다크 배경 위에 덮어씀)
+/* 홈 배경색. 목록 영역만 칠하면 헤더·푸터만 기본색으로 남아 띠처럼 보이므로
+   페이지 전체(body)에 깔고, 헤더·푸터는 --chrome 으로 같은 색을 따라가게 한다.
+   밝은 색을 깔면 bg-takeover-light 가 글자·선을 어두운 쪽으로 뒤집어 대비를 지킨다.
+   (상세 페이지의 프로젝트 배경색과 완전히 같은 방식) */
 function applyWorkBg(p) {
-  const work = document.querySelector(".work");
-  if (!work) return;
-  work.style.background = p.workBg || "";
+  const body = document.body;
+  const color = p.workBg;
+  if (!color) {
+    body.style.backgroundColor = "";
+    body.style.removeProperty("--chrome");
+    body.classList.remove("bg-takeover", "bg-takeover-light");
+    return;
+  }
+  body.style.backgroundColor = color;
+  body.style.setProperty("--chrome", color);
+  body.classList.add("bg-takeover");
+  body.classList.toggle("bg-takeover-light", !isDarkColor(color));
 }
 
 function renderHeader() {

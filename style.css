@@ -167,12 +167,14 @@ input, textarea, select { font-family: inherit; }
 
 /* ---------------------------------- Header ---------------------------------- */
 
+/* 배경은 본문(body)과 같은 색. 화면에 붙어 따라다니므로 투명하게 두면
+   아래 내용이 비쳐 글자가 겹쳐 보이기 때문에 같은 색을 직접 칠한다. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  background: var(--chrome, var(--paper));
+  transition: background-color 0.65s ease;
 }
 
 .site-header .container {
@@ -280,13 +282,12 @@ input, textarea, select { font-family: inherit; }
   gap: 10px;
 }
 
-/* 바디에 표시되는 카테고리 이름은 레귤러 + 전부 대문자 */
+/* 바디에 표시되는 카테고리 이름 (입력한 대소문자를 그대로 유지) */
 .work-section-head h2 {
   font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
   font-size: 20px;
   font-weight: 400;
   letter-spacing: -0.02em;
-  text-transform: uppercase;
   margin: 0;
 }
 
@@ -464,7 +465,7 @@ input, textarea, select { font-family: inherit; }
 /* ---------------------------------- Footer ---------------------------------- */
 
 .site-footer {
-  border-top: 1px solid var(--line);
+  background: var(--chrome, var(--paper));
   padding: 50px 0 40px;
 }
 
@@ -698,6 +699,23 @@ body.bg-takeover-light,
   --ui-bg: #15171c;
   --ui-surface: #1e222a;
   --ui-line: rgba(233, 236, 240, 0.13);
+}
+
+/* 관리자 자체 UI(유틸 바·설정 판·경고·팝업·잠금)는 항상 어두운 자기 색을 지킨다.
+   홈 배경색을 밝게 잡으면 body 에 bg-takeover-light 가 붙어 공개 화면 토큰이
+   어두운 글자로 뒤집히는데, 그 뒤집힘이 관리자 바까지 번지면 어두운 바에
+   어두운 글자가 얹혀 읽을 수 없게 되기 때문이다. 미리보기 영역은 그대로 둔다. */
+.admin-utilbar,
+.admin-panel,
+.admin-stale,
+.admin-modal-overlay,
+.admin-gate {
+  --ink: #f5f4f0;
+  --paper: #0d0d0d;
+  --paper-soft: #1a1a1a;
+  --panel: #161616;
+  --line: rgba(245, 244, 240, 0.14);
+  --muted: rgba(245, 244, 240, 0.55);
 }
 
 /* ------------------------------ 관리자 잠금 화면 ------------------------------ */
@@ -1393,11 +1411,8 @@ body.gate-locked { overflow: hidden; }
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--chrome, var(--paper)) 85%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
-  transition: background-color 0.65s ease, border-color 0.65s ease, color 0.65s ease,
-    transform 0.35s ease;
+  background: var(--chrome, var(--paper));
+  transition: background-color 0.65s ease, color 0.65s ease, transform 0.35s ease;
 }
 
 /* 아래로 스크롤하는 동안에는 상단바를 감춘다 (위로 올리면 다시 나타남) */

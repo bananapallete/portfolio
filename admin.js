@@ -624,7 +624,7 @@ function renderProfileFields(wrap, profile) {
 
   // ---- 홈 화면 프로젝트 영역 배경색 ----
   const workBgLabel = document.createElement("label");
-  workBgLabel.textContent = "홈 화면 프로젝트 영역 배경색";
+  workBgLabel.textContent = "홈 화면 배경색 (헤더·푸터까지 함께 적용)";
   workBgLabel.className = "mini-label";
   workBgLabel.style.marginTop = "18px";
   wrap.appendChild(workBgLabel);
@@ -749,8 +749,21 @@ function renderSiteHeader(profile) {
   document.getElementById("brandRole").textContent = p.role || "";
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
 
+  // 공개 사이트(script.js applyWorkBg)와 같은 방식으로 페이지 전체에 깔아
+  // 관리자에서 보는 모습이 실제 사이트와 어긋나지 않게 한다
+  const body = document.body;
   const work = document.querySelector(".work");
-  if (work) work.style.background = p.workBg || "";
+  if (work) work.style.background = "";
+  if (p.workBg) {
+    body.style.backgroundColor = p.workBg;
+    body.style.setProperty("--chrome", p.workBg);
+    body.classList.add("bg-takeover");
+    body.classList.toggle("bg-takeover-light", !isDarkColor(p.workBg));
+  } else {
+    body.style.backgroundColor = "";
+    body.style.removeProperty("--chrome");
+    body.classList.remove("bg-takeover", "bg-takeover-light");
+  }
 
   renderFooterContact(p);
 }
@@ -1397,7 +1410,6 @@ function renderCategoryModalBody() {
     saveDraft();
   }));
   card.appendChild(row);
-
 }
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */
