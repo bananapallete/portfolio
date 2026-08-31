@@ -130,6 +130,32 @@
   </div>
 </div>
 
+<!-- GitHub 토큰 입력. 예전엔 prompt()를 썼는데 임베드 브라우저 등
+     일부 환경에서 prompt가 막혀 입력창이 아예 안 뜨는 문제가 있어 페이지 안에 둔다 -->
+<div class="admin-modal-overlay hidden" id="tokenOverlay">
+  <div class="admin-modal admin-modal-narrow">
+    <div class="admin-modal-topbar">
+      <strong>GitHub 토큰</strong>
+      <button class="admin-modal-close" id="tokenCancel" title="취소">✕</button>
+    </div>
+    <p class="token-msg" id="tokenMsg"></p>
+    <p class="token-help">
+      발급: <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a><br />
+      · Fine-grained → 이 저장소만 고르고 <strong>Contents: Read and write</strong> (권장)<br />
+      · classic → <strong>repo</strong> 권한 체크<br /><br />
+      만료일은 '없음(No expiration)' 또는 최대한 길게 잡아주세요.
+      토큰은 이 브라우저에만 저장되고, 기기를 옮기면 그 기기에서 한 번 넣어주면 됩니다.
+    </p>
+    <form id="tokenForm" autocomplete="off">
+      <input type="password" id="tokenInput" class="token-input" placeholder="github_pat_… 또는 ghp_…" spellcheck="false" />
+      <div class="token-actions">
+        <button type="submit" class="btn btn-primary btn-small">저장</button>
+        <button type="button" class="btn btn-ghost btn-small" id="tokenCancel2">취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- 지금 어느 부분을 수정 중인지 보여주는 안내 칩 (입력창에 포커스하면 나타남) -->
 <div class="editing-indicator" id="editingIndicator" aria-live="polite"></div>
 

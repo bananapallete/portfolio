@@ -2692,27 +2692,57 @@ function initMoreMenu() {
 
 initMoreMenu();
 
-function getGithubToken(forceAsk = false) {
+/* 페이지 안 입력창으로 토큰을 받는다. 취소하면 null.
+   prompt()는 임베드 브라우저 등에서 막혀 아무것도 안 뜨는 경우가 있어 쓰지 않는다. */
+function askGithubToken() {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("tokenOverlay");
+    const form = document.getElementById("tokenForm");
+    const input = document.getElementById("tokenInput");
+    const msg = document.getElementById("tokenMsg");
+
+    // 토큰이 지워진 이유(예: 401로 거부됨)가 있으면 위에 띄워준다
+    let why = "";
+    eachStore((store) => { why = why || store.getItem(GH_TOKEN_GONE_KEY) || ""; });
+    msg.textContent = why || "";
+    msg.hidden = !why;
+
+    input.value = "";
+    overlay.classList.remove("hidden");
+    input.focus();
+
+    const close = (value) => {
+      overlay.classList.add("hidden");
+      form.removeEventListener("submit", onSubmit);
+      document.getElementById("tokenCancel").removeEventListener("click", onCancel);
+      document.getElementById("tokenCancel2").removeEventListener("click", onCancel);
+      overlay.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      resolve(value);
+    };
+    const onSubmit = (e) => {
+      e.preventDefault();
+      const v = input.value.trim();
+      close(v || null);
+    };
+    const onCancel = () => close(null);
+    const onBackdrop = (e) => { if (e.target === overlay) close(null); };
+    const onKey = (e) => { if (e.key === "Escape") close(null); };
+
+    form.addEventListener("submit", onSubmit);
+    document.getElementById("tokenCancel").addEventListener("click", onCancel);
+    document.getElementById("tokenCancel2").addEventListener("click", onCancel);
+    overlay.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+  });
+}
+
+async function getGithubToken(forceAsk = false) {
   const saved = readStoredToken();
   if (saved && !forceAsk) return saved;
 
-  let why = "";
-  eachStore((store) => { why = why || store.getItem(GH_TOKEN_GONE_KEY) || ""; });
-
-  let token = prompt(
-    (why ? why + "\n\n" : "") +
-      "GitHub 토큰을 입력해주세요.\n\n" +
-      "발급: github.com/settings/tokens\n" +
-      "  · Fine-grained → 이 저장소만 고르고 Contents: Read and write (권장)\n" +
-      "  · classic → 'repo' 권한 체크\n\n" +
-      "만료일을 '없음(No expiration)' 또는 최대한 길게 잡아주세요.\n" +
-      "만료되면 GitHub이 거부(401)해서 지워지고 다시 묻게 됩니다.\n\n" +
-      "토큰은 이 브라우저에만 저장돼요. 기기를 옮기면(회사 ↔ 집) 그 기기에서 한 번은 넣어야 하고,\n" +
-      "한 번 넣으면 그 브라우저에서는 계속 남아 있어요.",
-    ""
-  );
+  const token = await askGithubToken();
   if (!token) return null;
-  token = token.trim();
   if (!storeToken(token)) {
     setPublishStatus(
       "토큰을 브라우저에 저장하지 못했어요. 이 탭에서는 계속 쓸 수 있지만, " +
@@ -2857,7 +2887,7 @@ async function publishToGithub() {
     alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 반영해주세요.");
     return false;
   }
-  const token = getGithubToken();
+  const token = await getGithubToken();
   if (!token) return false;
 
   const btns = [
@@ -2906,9 +2936,9 @@ async function publishToGithub() {
 }
 
 document.getElementById("publishBtn").addEventListener("click", publishToGithub);
-document.getElementById("tokenBtn").addEventListener("click", () => {
+document.getElementById("tokenBtn").addEventListener("click", async () => {
   const had = !!readStoredToken();
-  if (getGithubToken(true)) {
+  if (await getGithubToken(true)) {
     setPublishStatus("토큰을 저장했어요. 이제 \"사이트에 반영\"을 누르면 배포됩니다.");
   } else if (had) {
     setPublishStatus("토큰 입력을 취소했어요. 기존 토큰은 그대로 남아 있어요.");

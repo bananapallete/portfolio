@@ -1146,6 +1146,44 @@ body.gate-locked { overflow: hidden; }
   margin-bottom: 40px;
 }
 
+/* 토큰 입력처럼 내용이 적은 팝업은 넓게 벌어지지 않도록 폭을 좁힌다 */
+.admin-modal-narrow { width: min(90vw, 460px); }
+
+.token-msg {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ffb4a2;
+}
+
+.token-msg[hidden] { display: none; }
+
+.token-help {
+  margin: 14px 0 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.token-help a { text-decoration: underline; }
+
+.token-input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ui-line, var(--line));
+  background: var(--ui-surface, var(--paper-soft));
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.token-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 /* 팝업 상단 바: [저장되지 않음 표시] ... [저장 버튼] [닫기 버튼] */
 .admin-modal-topbar {
   display: flex;
