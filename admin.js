@@ -16,6 +16,11 @@ const isBlockFolded = (block) =>
 
 const openSettings = new WeakSet(); // 조절값 줄은 기본으로 접고, 연 것만 기억한다
 
+/* 카테고리 접힘 상태. 공개 사이트와 달리 한 번에 하나만 열리는 게 아니라
+   (드래그로 카테고리 사이에 프로젝트를 옮기려면 양쪽 다 열려 있어야 한다),
+   각자 따로 접고 편다. 기본은 전부 펼침 — 여기 들어있는 id만 접힌 상태다. */
+const closedCategoryIds = new Set();
+
 /* 마우스를 누르고 있는 동안인지. 누르는 도중에 화면이 길어지면 버튼이 밀려
    손을 떼는 지점이 빗나가 클릭이 씹힌다. 그래서 화면을 늘리는 일은
    손을 뗄 때까지 미룬다. */
@@ -909,21 +914,24 @@ function renderSections() {
   stopCoverVideos();
 
   (data.categories || []).forEach((cat) => {
+    const isOpen = !closedCategoryIds.has(cat.id);
+
     const section = document.createElement("section");
-    section.className = "work-section";
+    section.className = "work-section" + (isOpen ? "" : " ws-collapsed");
     section.id = `cat-${cat.id}`;
     section.dataset.catId = cat.id;
 
     // 공개 사이트의 아코디언 이름 줄과 같은 마크업(acc-head/acc-name/acc-sub)을
-    // 그대로 써서 두 화면의 생김새가 어긋나지 않게 한다. 관리자는 늘 펼쳐진
-    // 상태라 화살표는 항상 위를 향한 모습으로 고정해 둔다.
+    // 그대로 써서 두 화면의 생김새가 어긋나지 않게 한다. 단, 공개 사이트와
+    // 달리 여기서는 카테고리마다 따로 접고 펼 수 있다(드래그로 다른
+    // 카테고리에 프로젝트를 옮기려면 양쪽 다 열려 있어야 하니까).
     const head = document.createElement("div");
     head.className = "work-section-head";
     const headInner = document.createElement("div");
     headInner.className = "container";
 
     const row = document.createElement("div");
-    row.className = "acc-head";
+    row.className = "acc-head ws-head-clickable";
 
     const text = document.createElement("div");
     text.className = "acc-head-text";
@@ -943,7 +951,7 @@ function renderSections() {
     actions.className = "work-section-actions";
 
     const chevron = document.createElement("img");
-    chevron.className = "acc-chevron ws-chevron-open";
+    chevron.className = "acc-chevron" + (isOpen ? " ws-chevron-open" : "");
     chevron.src = "assets/icons/chevron-down.svg";
     chevron.alt = "";
     actions.appendChild(chevron);
@@ -952,10 +960,18 @@ function renderSections() {
     editBtn.className = "btn btn-outline btn-small ws-edit";
     editBtn.textContent = "⚙ 설정";
     editBtn.title = "카테고리 이름·색상·삭제";
-    editBtn.addEventListener("click", () => openCategoryEditor(cat));
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openCategoryEditor(cat);
+    });
     actions.appendChild(editBtn);
 
     row.appendChild(actions);
+    row.addEventListener("click", () => {
+      if (closedCategoryIds.has(cat.id)) closedCategoryIds.delete(cat.id);
+      else closedCategoryIds.add(cat.id);
+      renderSections();
+    });
     headInner.appendChild(row);
     head.appendChild(headInner);
     section.appendChild(head);

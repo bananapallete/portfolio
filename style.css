@@ -304,7 +304,8 @@ body.has-open-category .site-header { position: static; }
 
 .work-section-head .acc-head { border-bottom: 0.5px solid var(--ink); }
 
-/* 관리자는 늘 펼쳐진 상태이므로 화살표를 위를 향한 모습으로 고정한다 */
+/* 이름 줄을 누르면 접고 펼 수 있다. 화살표는 열려 있을 때만 위를 향한다 */
+.ws-head-clickable { cursor: pointer; }
 .ws-chevron-open { transform: rotate(180deg); }
 
 .work-section-actions {
@@ -314,6 +315,11 @@ body.has-open-category .site-header { position: static; }
 }
 
 .work-section .work-grid { padding-top: var(--acc-panel-top, 5px); }
+
+/* 접힌 카테고리는 그리드만 감춘다 — 드래그로 다른 카테고리에 프로젝트를
+   옮기려면 양쪽 다 펼쳐 놓아야 하므로, 공개 사이트처럼 하나만 열리게
+   하지 않고 카테고리마다 따로 접고 편다(renderSections 참고). */
+.work-section.ws-collapsed .work-grid { display: none; }
 
 /* ---------------------------------- 홈 소개문 ---------------------------------- */
 
