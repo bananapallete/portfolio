@@ -585,6 +585,19 @@ function renderProfileFields(wrap, profile) {
   row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; live(); }));
   wrap.appendChild(row1);
 
+  // ---- 소개문 (홈 화면 헤더 아래에 표시) ----
+  const bioField = document.createElement("div");
+  bioField.className = "field";
+  const bioLabel = document.createElement("label");
+  bioLabel.textContent = "소개문 (홈 화면 헤더 아래에 표시, 비워두면 표시 안 함)";
+  const bioTa = document.createElement("textarea");
+  bioTa.rows = 3;
+  bioTa.value = profile.bio || "";
+  bioTa.addEventListener("input", () => { profile.bio = bioTa.value; live(); });
+  bioField.appendChild(bioLabel);
+  bioField.appendChild(bioTa);
+  wrap.appendChild(bioField);
+
   const row3 = document.createElement("div");
   row3.className = "field-row";
   row3.appendChild(makeTextField("전화번호", profile.contact.phone, (v) => { profile.contact.phone = v; live(); }));
@@ -1007,7 +1020,7 @@ function openCategoryEditor(cat) {
   editingContext = {
     type: "category",
     cat,
-    copy: { name: cat.name || "" },
+    copy: { name: cat.name || "", nameSub: cat.nameSub || "" },
     dirty: false,
   };
   openEditModal();
@@ -1058,6 +1071,7 @@ async function saveModalAndPublish() {
     data.profile = ctx.profile;
   } else if (ctx.type === "category") {
     ctx.cat.name = ctx.copy.name;
+    ctx.cat.nameSub = ctx.copy.nameSub;
   }
   saveDraft();
   const ok = await publishToGithub();
@@ -1407,6 +1421,10 @@ function renderCategoryModalBody() {
   row.className = "field-row";
   row.appendChild(makeTextField("카테고리 이름 (헤더 탭과 상세 페이지 태그에 표시)", copy.name, (v) => {
     copy.name = v;
+    saveDraft();
+  }));
+  row.appendChild(makeTextField("부제 (선택, 이름 옆에 작게 표시 — 예: Works)", copy.nameSub, (v) => {
+    copy.nameSub = v;
     saveDraft();
   }));
   card.appendChild(row);

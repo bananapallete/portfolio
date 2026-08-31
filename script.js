@@ -60,24 +60,26 @@ function renderHeader() {
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
   applyWorkBg(p);
 
+  const bio = document.getElementById("siteBio");
+  if (p.bio && p.bio.trim()) {
+    bio.textContent = p.bio;
+    bio.hidden = false;
+  } else {
+    bio.hidden = true;
+  }
+
   renderFooterContact(p);
 }
 
-function renderTabs() {
-  const tabs = document.getElementById("tabs");
-  tabs.innerHTML = "";
-
-  // 빈 카테고리는 섹션이 없으므로 탭도 생략
-  const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
-
-  // 카테고리가 하나뿐이면 "All"과 가리키는 곳이 같아 탭을 나눌 이유가 없다
-  if (cats.length > 1) {
-    tabs.appendChild(makeTab("All", activeCatId === null, () => scrollToCategory(null)));
-  }
-
-  cats.forEach((cat) => {
-    const active = cats.length === 1 ? true : activeCatId === cat.id;
-    tabs.appendChild(makeTab(cat.name, active, () => scrollToCategory(cat.id)));
+// 언어 전환. 지금은 KR/EN 버튼의 눌린 상태만 바꾼다 — 콘텐츠 자체를
+// 두 언어로 따로 관리하지 않아서다(관리자에 그런 입력칸이 없다).
+function initLangSwitch() {
+  const wrap = document.getElementById("langSwitch");
+  if (!wrap) return;
+  wrap.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      wrap.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b === btn));
+    });
   });
 }
 
@@ -121,56 +123,108 @@ function goToProject(project) {
   location.href = "project.html?" + q.toString();
 }
 
-// 카테고리별로 단(섹션)을 나눠서 렌더링: 섹션 제목 + 그 카테고리의 카드 그리드
-function renderSections() {
+/* 카테고리를 아코디언으로 렌더링: 이름 줄을 누르면 바로 아래로 그 카테고리의
+   프로젝트 그리드가 펼쳐진다. 한 번에 하나만 열리도록 다른 항목은 함께 접는다.
+   그리드는 처음 열 때 한 번만 만들고(이미지 낭비 없이), 이후로는 열고 닫기만 한다. */
+function renderAccordion() {
   const wrap = document.getElementById("workSections");
   wrap.innerHTML = "";
   stopCoverVideos();
 
   const cats = (siteData.categories || []).filter((cat) => (cat.projects || []).length);
 
-  // 지금까지 그린 카드 수 — 첫 두 장만 즉시 로드할지 판단하는 데 쓴다
-  let total = 0;
-  cats.forEach((cat) => {
-    const projects = cat.projects || [];
+  if (!cats.length) {
+    wrap.innerHTML = `<div class="empty-state">No projects yet.</div>`;
+    return;
+  }
 
-    const section = document.createElement("section");
-    section.className = "work-section";
-    section.id = `cat-${cat.id}`;
-    section.dataset.catId = cat.id;
+  let openItem = null;
 
-    // 카테고리가 하나뿐이면 탭 이름과 똑같은 제목이라 섹션 머리는 생략한다
-    if (cats.length === 1) {
-      section.classList.add("work-section-bare"); // 머리가 빠진 만큼 위 여백을 대신 준다
-    } else {
-      const head = document.createElement("div");
-      head.className = "work-section-head";
-      const headInner = document.createElement("div");
-      headInner.className = "container";
-      const h2 = document.createElement("h2");
-      h2.textContent = cat.name || "";
-      headInner.appendChild(h2);
-      head.appendChild(headInner);
-      section.appendChild(head);
-    }
-
-    const grid = document.createElement("div");
-    grid.className = "work-grid";
-    projects.forEach((project) => {
-      // 2열 그리드라 처음 두 장만 첫 화면에 걸린다
-      grid.appendChild(buildCard(project, total < 2));
-      total++;
-    });
-    section.appendChild(grid);
-
-    wrap.appendChild(section);
+  // 창 크기가 바뀌면(카드 폭이 바뀌어 이미지 높이도 바뀌므로) 열려 있는
+  // 패널의 max-height를 다시 재준다. 리스너는 아코디언당 하나만 붙인다.
+  window.addEventListener("resize", () => {
+    if (!openItem) return;
+    const panel = openItem.querySelector(".acc-panel");
+    panel.style.maxHeight = panel.scrollHeight + "px";
   });
 
-  if (total === 0) {
-    wrap.innerHTML = `<div class="empty-state">No projects yet.</div>`;
-  } else {
-    initScrollReveal(wrap);
-  }
+  cats.forEach((cat) => {
+    const item = document.createElement("div");
+    item.className = "acc-item";
+    item.dataset.catId = cat.id;
+
+    const head = document.createElement("button");
+    head.type = "button";
+    head.className = "acc-head";
+    head.setAttribute("aria-expanded", "false");
+
+    const text = document.createElement("span");
+    text.className = "acc-head-text";
+    const name = document.createElement("span");
+    name.className = "acc-name";
+    name.textContent = cat.name || "";
+    text.appendChild(name);
+    if (cat.nameSub && cat.nameSub.trim()) {
+      const sub = document.createElement("span");
+      sub.className = "acc-sub";
+      sub.textContent = cat.nameSub;
+      text.appendChild(sub);
+    }
+    head.appendChild(text);
+
+    const chevron = document.createElement("img");
+    chevron.className = "acc-chevron";
+    chevron.src = "assets/icons/chevron-down.svg";
+    chevron.alt = "";
+    head.appendChild(chevron);
+
+    const panel = document.createElement("div");
+    panel.className = "acc-panel";
+    const panelInner = document.createElement("div");
+    panelInner.className = "acc-panel-inner";
+    panel.appendChild(panelInner);
+
+    let built = false;
+    const buildGrid = () => {
+      if (built) return;
+      built = true;
+      const grid = document.createElement("div");
+      grid.className = "work-grid";
+      (cat.projects || []).forEach((project, i) => {
+        const card = buildCard(project, i < 2);
+        // 스크롤로 발견하는 카드가 아니라 눌러서 여는 카드라, 관찰 없이 바로 보여준다
+        card.classList.add("reveal-in");
+        grid.appendChild(card);
+      });
+      panelInner.appendChild(grid);
+    };
+
+    head.addEventListener("click", () => {
+      const isOpen = item.classList.contains("open");
+      if (openItem && openItem !== item) {
+        openItem.classList.remove("open");
+        openItem.querySelector(".acc-head").setAttribute("aria-expanded", "false");
+        openItem.querySelector(".acc-panel").style.maxHeight = "";
+      }
+      if (isOpen) {
+        item.classList.remove("open");
+        head.setAttribute("aria-expanded", "false");
+        panel.style.maxHeight = "";
+        openItem = null;
+      } else {
+        buildGrid();
+        item.classList.add("open");
+        head.setAttribute("aria-expanded", "true");
+        // 실제 콘텐츠 높이를 재서 넣어야 max-height 트랜지션이 부드럽게 펼쳐진다
+        panel.style.maxHeight = panel.scrollHeight + "px";
+        openItem = item;
+      }
+    });
+
+    item.appendChild(head);
+    item.appendChild(panel);
+    wrap.appendChild(item);
+  });
 }
 
 function init() {
@@ -179,9 +233,8 @@ function init() {
     return;
   }
   renderHeader();
-  renderTabs();
-  renderSections();
-  updateActiveTab();
+  renderAccordion();
+  initLangSwitch();
 }
 
 loadSiteData().then((data) => {

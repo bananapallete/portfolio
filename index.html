@@ -6,7 +6,7 @@
 <title>Unlimit_Cho — Portfolio</title>
 <link rel="stylesheet" href="style.css" />
 </head>
-<body class="theme-dark">
+<body>
 
 <header class="site-header">
   <div class="container">
@@ -14,12 +14,18 @@
       <span class="brand-name" id="brandName">Unlimit_Cho</span>
       <span class="brand-role" id="brandRole">Designer</span>
     </div>
-    <nav class="tabs" id="tabs"></nav>
+    <div class="lang-switch" id="langSwitch">
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+      <button type="button" class="lang-btn active" data-lang="kr">KR</button>
+    </div>
   </div>
 </header>
 
 <section class="work">
-  <div id="workSections">
+  <div class="container">
+    <p class="site-bio" id="siteBio" hidden></p>
+  </div>
+  <div class="acc-list" id="workSections">
     <div class="empty-state">Loading...</div>
   </div>
 </section>

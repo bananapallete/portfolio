@@ -90,11 +90,11 @@
 }
 
 :root {
-  --ink: #14121a;
-  --paper: #faf9f6;
-  --paper-soft: #f1efe9;
-  --line: rgba(20, 18, 26, 0.12);
-  --muted: rgba(20, 18, 26, 0.55);
+  --ink: #101011;
+  --paper: #f4f7fa;
+  --paper-soft: #eaeaea;
+  --line: rgba(16, 16, 17, 0.12);
+  --muted: rgba(16, 16, 17, 0.55);
 
   /* 카테고리 필터용으로만 쓰는 최소한의 포인트 컬러 */
   --branding: #ff4d6d;
@@ -192,17 +192,36 @@ input, textarea, select { font-family: inherit; }
 }
 
 .brand-name {
-  font-weight: 800;
-  font-size: 20px;
+  font-weight: 700;
+  font-size: 12px;
   letter-spacing: -0.02em;
   transition: color 0.2s ease;
 }
 
-.brand-role {
+/* 디자인에는 로고 아래 부제가 없다. 관리자 헤더도 실제 사이트와 같은
+   마크업을 재사용하므로, 여기서 감추면 두 화면이 함께 맞는다. */
+.brand-role { display: none; }
+
+/* ---------------------------------- 언어 전환 ---------------------------------- */
+
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 12px;
-  color: var(--muted);
-  font-weight: 600;
 }
+
+.lang-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lang-btn.active { font-weight: 700; color: var(--ink); }
 
 .tabs {
   display: flex;
@@ -293,6 +312,92 @@ input, textarea, select { font-family: inherit; }
 
 /* 관리자 전용: 섹션 머리의 카테고리 설정 버튼 */
 .ws-edit { margin-left: 10px; }
+
+/* ---------------------------------- 홈 소개문 ---------------------------------- */
+
+.site-bio {
+  max-width: 560px;
+  margin: 0;
+  padding-top: 32px;
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+.site-bio[hidden] { display: none; }
+
+/* ------------------------------- 카테고리 아코디언 -------------------------------
+   평소엔 이름 줄만 보이고, 누르면 그 줄 바로 아래로 프로젝트 그리드가 펼쳐진다.
+   한 번에 하나만 열리도록 script.js가 다른 항목을 함께 접는다. */
+
+.acc-list { padding-top: 82px; }
+
+.acc-item { border-bottom: 0.5px solid var(--ink); }
+
+.acc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 13px 0;
+  text-align: left;
+  color: var(--ink);
+}
+
+.acc-head-text {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+
+.acc-name {
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: clamp(22px, 3vw, 40px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.acc-sub {
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.acc-chevron {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  transition: transform 0.3s ease;
+}
+
+/* 다크 배경(--ink가 밝은색)에서도 화살표가 보이도록 이미지 자체를 반전시킨다 */
+body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
+
+.acc-item.open .acc-chevron { transform: rotate(180deg); }
+
+/* 높이를 모르는 콘텐츠를 부드럽게 접고 펴는 기법. grid-template-rows: 0fr↔1fr
+   트랜지션이 더 깔끔하지만 일부 브라우저에서 트랙 높이가 0으로 무너지는
+   렌더링 버그가 있어, 열 때 JS가 실제 높이를 재서 max-height로 넣어준다
+   (script.js의 아코디언 클릭 핸들러 참고). */
+.acc-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.acc-item .work-grid { padding-top: 5px; padding-bottom: 24px; }
 
 /* 화면 끝에 붙지 않도록 좌우 여백을 준다. 헤더·섹션 제목·푸터가 쓰는
    .container 와 같은 폭·여백이라 카드가 브랜드명·제목과 같은 선에서 시작한다. */
