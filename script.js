@@ -223,7 +223,8 @@ function buildCareerSkills(skillGroups) {
 
 // 첫 항목(최종 경력/학력)만 라벨이 붙은 상세 카드로, 나머지는 이전 이력으로
 // 화살표로 이어 붙인다. fields: [[데이터 키, 라벨], ...] 순서대로 한 줄씩 채운다.
-function buildCareerTimeline(items, fields, moreLabel, panel) {
+// 모바일에서는 이 줄 전체가 가로로 스크롤돼 좌우로 슬라이드해 볼 수 있다.
+function buildCareerTimeline(items, fields) {
   const wrap = document.createElement("div");
   wrap.className = "career-timeline-wrap";
 
@@ -271,31 +272,10 @@ function buildCareerTimeline(items, fields, moreLabel, panel) {
   });
 
   wrap.appendChild(list);
-
-  if (items.length > 1) {
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "career-more-toggle";
-    toggle.textContent = moreLabel;
-    toggle.addEventListener("click", () => {
-      const open = wrap.classList.toggle("career-more-open");
-      toggle.textContent = open ? "접기" : moreLabel;
-      // 모바일에서 숨겨뒀던 이전 이력이 펼쳐지면 늘어난 만큼 패널 높이도 다시 잰다
-      if (panel && isPanelOpen(panel)) panel.style.maxHeight = panel.scrollHeight + "px";
-    });
-    wrap.appendChild(toggle);
-  }
-
   return wrap;
 }
 
-// panel의 아코디언 항목이 지금 펼쳐져 있는지 (max-height 재계산 여부 판단용)
-function isPanelOpen(panel) {
-  const item = panel.closest(".acc-item");
-  return !!item && item.classList.contains("open");
-}
-
-function buildCareerSection(career, panel) {
+function buildCareerSection(career) {
   const wrap = document.createElement("div");
   wrap.className = "career";
 
@@ -306,17 +286,13 @@ function buildCareerSection(career, panel) {
   if (career.experience && career.experience.length) {
     wrap.appendChild(buildCareerRow("Experience", buildCareerTimeline(
       career.experience,
-      [["company", "직장명"], ["period", "기간"], ["role", "업무"]],
-      "이전 경력 보기",
-      panel
+      [["company", "직장명"], ["period", "기간"], ["role", "업무"]]
     )));
   }
   if (career.education && career.education.length) {
     wrap.appendChild(buildCareerRow("Education", buildCareerTimeline(
       career.education,
-      [["school", "학교"], ["major", "전공"], ["years", "년도"]],
-      "이전 학력 보기",
-      panel
+      [["school", "학교"], ["major", "전공"], ["years", "년도"]]
     )));
   }
 
@@ -399,7 +375,7 @@ function renderAccordion() {
       built = true;
       // "경력" 같은 카테고리는 프로젝트 그리드 대신 이력서 형태의 전용 레이아웃을 쓴다
       if (cat.career) {
-        panelInner.appendChild(buildCareerSection(cat.career, panel));
+        panelInner.appendChild(buildCareerSection(cat.career));
         return;
       }
       const grid = document.createElement("div");

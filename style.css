@@ -545,28 +545,28 @@ body.bg-takeover:not(.bg-takeover-light) .career-arrow { filter: invert(1); }
 .career-card-value { color: var(--muted); }
 .career-card-value-strong { color: var(--muted); font-weight: 700; }
 
-.career-more-toggle {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 12px;
-  color: var(--muted);
-  text-decoration: underline;
-  cursor: pointer;
-  display: none;
-}
-
-/* 모바일에서는 최종 경력/학력 카드만 남기고 나머지는 토글로 숨긴다 */
+/* 모바일에서는 세로로 쌓지 않고, 최종 경력/학력 카드부터 가로로 늘어놓아
+   손가락으로 밀어 이전 이력을 볼 수 있게 한다(스크롤 스냅으로 카드 단위로 붙는다). */
 @media (max-width: 640px) {
-  .career-row { flex-direction: column; gap: 8px; }
+  /* align-items를 stretch로 바꿔야 아래 줄(career-timeline-wrap)이 카드 내용
+     너비만큼 늘어나 버리지 않고 화면 폭에 맞춰지고, 그 안에서 overflow-x가 먹는다 */
+  .career-row { flex-direction: column; align-items: stretch; gap: 8px; }
   .career-row-label { flex: none; }
-  .career-arrow,
-  .career-card-more {
-    display: none;
+  .career-timeline-wrap { align-items: stretch; min-width: 0; }
+  .career-timeline {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    min-width: 0;
+    padding-bottom: 4px;
   }
-  .career-timeline-wrap.career-more-open .career-arrow { display: block; }
-  .career-timeline-wrap.career-more-open .career-card-more { display: flex; }
-  .career-more-toggle { display: inline-block; }
+  .career-timeline::-webkit-scrollbar { display: none; }
+  .career-card,
+  .career-arrow {
+    flex: none;
+  }
+  .career-card { scroll-snap-align: start; }
 }
 
 /* 화면 끝에 붙지 않도록 좌우 여백을 준다. 헤더·섹션 제목·푸터가 쓰는
