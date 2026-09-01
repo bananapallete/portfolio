@@ -457,6 +457,118 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
 
 .acc-item .work-grid { padding-top: 5px; padding-bottom: 24px; }
 
+/* ------------------------------- 경력(이력서) 레이아웃 -------------------------------
+   프로젝트 그리드 대신 쓰는 이력서 형태. About·Skills·Experience·Education을
+   왼쪽 영문 라벨 + 오른쪽 내용의 행으로 나열한다 (Figma node 501:1626). */
+.career {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 5px var(--side) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.career-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.career-row-label {
+  flex: 0 0 120px;
+  font-family: "Poppins", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* About */
+.career-about { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.career-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--paper-soft);
+  flex: none;
+}
+.career-about-info { display: flex; flex-direction: column; gap: 10px; }
+.career-about-line { display: flex; gap: 24px; font-size: 12px; flex-wrap: wrap; }
+.career-about-name { font-size: 16px; color: var(--ink); }
+.career-about-sub { color: var(--muted); }
+
+/* Skills */
+.career-skills { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.career-skill-group-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0 8px 0 16px;
+}
+.career-skill-group-label:first-child { margin-left: 0; }
+.career-skill-icon { width: 28px; height: 28px; display: block; flex: none; }
+
+/* Experience / Education */
+.career-timeline-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.career-timeline { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.career-arrow { width: 24px; height: 24px; flex: none; }
+body.bg-takeover:not(.bg-takeover-light) .career-arrow { filter: invert(1); }
+
+.career-card {
+  border-radius: 5px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-size: 12px;
+  letter-spacing: -0.02em;
+}
+.career-card-main {
+  border: 1.1px solid var(--ink);
+  min-width: 200px;
+}
+.career-card-more {
+  border: 0.5px dashed var(--line);
+  min-width: 180px;
+}
+.career-card-line { display: flex; gap: 8px; }
+.career-card-label { flex: 0 0 40px; color: var(--ink); }
+.career-card-value { color: var(--muted); }
+.career-card-value-strong { color: var(--muted); font-weight: 700; }
+
+.career-more-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+  display: none;
+}
+
+/* 모바일에서는 최종 경력/학력 카드만 남기고 나머지는 토글로 숨긴다 */
+@media (max-width: 640px) {
+  .career-row { flex-direction: column; gap: 8px; }
+  .career-row-label { flex: none; }
+  .career-arrow,
+  .career-card-more {
+    display: none;
+  }
+  .career-timeline-wrap.career-more-open .career-arrow { display: block; }
+  .career-timeline-wrap.career-more-open .career-card-more { display: flex; }
+  .career-more-toggle { display: inline-block; }
+}
+
 /* 화면 끝에 붙지 않도록 좌우 여백을 준다. 헤더·섹션 제목·푸터가 쓰는
    .container 와 같은 폭·여백이라 카드가 브랜드명·제목과 같은 선에서 시작한다. */
 .work-grid,

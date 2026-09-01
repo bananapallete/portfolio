@@ -137,6 +137,192 @@ function goToProject(project) {
   location.href = "project.html?" + q.toString();
 }
 
+/* -------------------------------- 경력(이력서) 레이아웃 --------------------------------
+   프로젝트 그리드 대신 About·Skills·Experience·Education 네 줄로 이루어진
+   이력서 형태를 쓴다. cat.career 가 있는 카테고리에서만 쓰인다(buildGrid 참고). */
+
+// 줄 왼쪽의 영문 라벨(About 등) + 오른쪽 내용을 한 행으로 묶는다
+function buildCareerRow(labelText, contentEl) {
+  const row = document.createElement("div");
+  row.className = "career-row";
+  const label = document.createElement("div");
+  label.className = "career-row-label";
+  label.textContent = labelText;
+  row.appendChild(label);
+  row.appendChild(contentEl);
+  return row;
+}
+
+function buildCareerAbout(about) {
+  const wrap = document.createElement("div");
+  wrap.className = "career-about";
+
+  const avatar = document.createElement("div");
+  avatar.className = "career-avatar";
+  wrap.appendChild(avatar);
+
+  const info = document.createElement("div");
+  info.className = "career-about-info";
+
+  const nameLine = document.createElement("div");
+  nameLine.className = "career-about-line";
+  const nameEl = document.createElement("span");
+  nameEl.className = "career-about-name";
+  nameEl.textContent = about.name || "";
+  nameLine.appendChild(nameEl);
+  if (about.birthday) {
+    const bday = document.createElement("span");
+    bday.className = "career-about-sub";
+    bday.textContent = about.birthday;
+    nameLine.appendChild(bday);
+  }
+  info.appendChild(nameLine);
+
+  if (about.phone || about.email) {
+    const contactLine = document.createElement("div");
+    contactLine.className = "career-about-line";
+    if (about.phone) {
+      const phone = document.createElement("span");
+      phone.className = "career-about-sub";
+      phone.textContent = about.phone;
+      contactLine.appendChild(phone);
+    }
+    if (about.email) {
+      const email = document.createElement("span");
+      email.className = "career-about-sub";
+      email.textContent = about.email;
+      contactLine.appendChild(email);
+    }
+    info.appendChild(contactLine);
+  }
+
+  wrap.appendChild(info);
+  return wrap;
+}
+
+function buildCareerSkills(skillGroups) {
+  const wrap = document.createElement("div");
+  wrap.className = "career-skills";
+  skillGroups.forEach((group) => {
+    const label = document.createElement("span");
+    label.className = "career-skill-group-label";
+    label.textContent = group.label || "";
+    wrap.appendChild(label);
+    (group.tools || []).forEach((toolId) => {
+      const tool = TOOL_BY_ID[toolId];
+      if (!tool) return;
+      const badge = document.createElement("span");
+      badge.className = "career-skill-icon";
+      badge.title = tool.label;
+      badge.appendChild(buildToolIcon(tool));
+      wrap.appendChild(badge);
+    });
+  });
+  return wrap;
+}
+
+// 첫 항목(최종 경력/학력)만 라벨이 붙은 상세 카드로, 나머지는 이전 이력으로
+// 화살표로 이어 붙인다. fields: [[데이터 키, 라벨], ...] 순서대로 한 줄씩 채운다.
+function buildCareerTimeline(items, fields, moreLabel, panel) {
+  const wrap = document.createElement("div");
+  wrap.className = "career-timeline-wrap";
+
+  const list = document.createElement("div");
+  list.className = "career-timeline";
+
+  items.forEach((item, i) => {
+    if (i > 0) {
+      const arrow = document.createElement("img");
+      arrow.className = "career-arrow";
+      arrow.src = "assets/icons/arrow-left-sm.svg";
+      arrow.alt = "";
+      list.appendChild(arrow);
+    }
+
+    const card = document.createElement("div");
+    card.className = "career-card" + (i === 0 ? " career-card-main" : " career-card-more");
+
+    if (i === 0) {
+      fields.forEach(([key, label]) => {
+        if (!item[key]) return;
+        const line = document.createElement("div");
+        line.className = "career-card-line";
+        const l = document.createElement("span");
+        l.className = "career-card-label";
+        l.textContent = label;
+        const v = document.createElement("span");
+        v.className = "career-card-value";
+        v.textContent = item[key];
+        line.appendChild(l);
+        line.appendChild(v);
+        card.appendChild(line);
+      });
+    } else {
+      fields.forEach(([key], fi) => {
+        if (!item[key]) return;
+        const v = document.createElement("div");
+        v.className = "career-card-value" + (fi === 0 ? " career-card-value-strong" : "");
+        v.textContent = item[key];
+        card.appendChild(v);
+      });
+    }
+
+    list.appendChild(card);
+  });
+
+  wrap.appendChild(list);
+
+  if (items.length > 1) {
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "career-more-toggle";
+    toggle.textContent = moreLabel;
+    toggle.addEventListener("click", () => {
+      const open = wrap.classList.toggle("career-more-open");
+      toggle.textContent = open ? "접기" : moreLabel;
+      // 모바일에서 숨겨뒀던 이전 이력이 펼쳐지면 늘어난 만큼 패널 높이도 다시 잰다
+      if (panel && isPanelOpen(panel)) panel.style.maxHeight = panel.scrollHeight + "px";
+    });
+    wrap.appendChild(toggle);
+  }
+
+  return wrap;
+}
+
+// panel의 아코디언 항목이 지금 펼쳐져 있는지 (max-height 재계산 여부 판단용)
+function isPanelOpen(panel) {
+  const item = panel.closest(".acc-item");
+  return !!item && item.classList.contains("open");
+}
+
+function buildCareerSection(career, panel) {
+  const wrap = document.createElement("div");
+  wrap.className = "career";
+
+  if (career.about) wrap.appendChild(buildCareerRow("About", buildCareerAbout(career.about)));
+  if (career.skillGroups && career.skillGroups.length) {
+    wrap.appendChild(buildCareerRow("Skills", buildCareerSkills(career.skillGroups)));
+  }
+  if (career.experience && career.experience.length) {
+    wrap.appendChild(buildCareerRow("Experience", buildCareerTimeline(
+      career.experience,
+      [["company", "직장명"], ["period", "기간"], ["role", "업무"]],
+      "이전 경력 보기",
+      panel
+    )));
+  }
+  if (career.education && career.education.length) {
+    wrap.appendChild(buildCareerRow("Education", buildCareerTimeline(
+      career.education,
+      [["school", "학교"], ["major", "전공"], ["years", "년도"]],
+      "이전 학력 보기",
+      panel
+    )));
+  }
+
+  return wrap;
+}
+
 /* 카테고리를 아코디언으로 렌더링: 이름 줄을 누르면 바로 아래로 그 카테고리의
    프로젝트 그리드가 펼쳐진다. 한 번에 하나만 열리도록 다른 항목은 함께 접는다.
    그리드는 처음 열 때 한 번만 만들고(이미지 낭비 없이), 이후로는 열고 닫기만 한다. */
@@ -211,6 +397,11 @@ function renderAccordion() {
     const buildGrid = () => {
       if (built) return;
       built = true;
+      // "경력" 같은 카테고리는 프로젝트 그리드 대신 이력서 형태의 전용 레이아웃을 쓴다
+      if (cat.career) {
+        panelInner.appendChild(buildCareerSection(cat.career, panel));
+        return;
+      }
       const grid = document.createElement("div");
       grid.className = "work-grid";
       (cat.projects || []).forEach((project, i) => {

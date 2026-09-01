@@ -270,7 +270,88 @@
       "id": "new-category-mtgtufsu",
       "name": "경력",
       "projects": [],
-      "nameSub": "Careers"
+      "nameSub": "Careers",
+      "career": {
+        "about": {
+          "name": "조한정",
+          "birthday": "1991.11.29",
+          "phone": "010.5678.0569",
+          "email": "unlimit_cho@kakao.com"
+        },
+        "skillGroups": [
+          {
+            "label": "2D",
+            "tools": [
+              "photoshop",
+              "illustrator",
+              "aftereffects",
+              "procreate"
+            ]
+          },
+          {
+            "label": "Motion",
+            "tools": [
+              "lottie",
+              "figma"
+            ]
+          },
+          {
+            "label": "3D",
+            "tools": [
+              "c4d",
+              "redshift"
+            ]
+          },
+          {
+            "label": "AI",
+            "tools": [
+              "kling",
+              "gemini",
+              "gpt",
+              "claude"
+            ]
+          }
+        ],
+        "experience": [
+          {
+            "company": "마이다스 아이티 - 판교",
+            "period": "2022.01 - 재직중",
+            "role": "그래픽 디자이너"
+          },
+          {
+            "company": "카카오 VX - 판교",
+            "period": "2021.03 - 2022.01",
+            "role": "그래픽 디자이너"
+          },
+          {
+            "company": "아모레 퍼시픽 - 용산",
+            "period": "2019.10 - 2021.03",
+            "role": "그래픽 디자이너 - 계약직"
+          },
+          {
+            "company": "서울드래곤시티 호텔 - 용산",
+            "period": "2017.09 - 2019.01",
+            "role": "그래픽 디자이너"
+          }
+        ],
+        "education": [
+          {
+            "school": "학점은행 - 학사 취득",
+            "major": "시각디자인학",
+            "years": "2020-2021"
+          },
+          {
+            "school": "경기과학기술대학교 - 졸업",
+            "major": "그래픽디자인학과",
+            "years": "2010 - 2016"
+          },
+          {
+            "school": "경기도 오산고등학교",
+            "major": "인문계",
+            "years": "2008 - 2010"
+          }
+        ]
+      }
     }
   ]
 }
