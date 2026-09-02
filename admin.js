@@ -1652,9 +1652,10 @@ function renderBlocksEditor(project) {
   project.blocks = project.blocks || [];
   const wrap = document.createElement("div");
   wrap.className = "block-list";
-  // 블록 사이 간격도 실제 페이지와 같은 값을 쓴다 (미설정이면 사이트 기본 28px)
+  // 콘텐츠 간격(실제 페이지 값, 미설정이면 기본 28px)에 편집 카드끼리
+  // 구분되도록 여유를 더 얹는다 — 실제 페이지 간격 자체는 그대로 둔다
   const blockGap = normalizeGap(project.blockGap);
-  wrap.style.gap = (blockGap != null ? blockGap : 28) + "px";
+  wrap.style.gap = ((blockGap != null ? blockGap : 28) + 20) + "px";
   const group = `blocks-${project.id}`;
 
   project.blocks.forEach((block, i) => {
