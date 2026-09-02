@@ -665,64 +665,86 @@ function buildFoldSection(title) {
 /* 레이아웃 값 두 가지를 한 자리에 모아 맨 위에 둔다.
    손잡이를 끄는 동안 화면이 바로 따라오도록 다시 그리지 않고 변수만 갱신한다. */
 function renderLayoutFields(wrap, profile) {
+  // 레이아웃(데스크톱 여백·최대 폭)과 모바일 화면 여백을 한 구획에 모으고,
+  // 텍스트 크기처럼 웹/모바일 두 칸으로 나눠 보여준다.
   const layoutFold = buildFoldSection("레이아웃 (최대 폭을 화면보다 크게 올리면 양 끝까지 차요)");
   wrap.appendChild(layoutFold.card);
 
-  const box = document.createElement("div");
-  box.className = "layout-fields";
-  layoutFold.body.appendChild(box);
-
   const live = () => applyLayoutVars(profile);
 
-  // 여백 슬라이더와 "꽉 채우기" 스위치를 한 덩어리로 묶는다
-  const marginItem = (slider, sw) => {
-    const item = document.createElement("div");
-    item.className = "layout-item";
-    item.appendChild(slider);
-    item.appendChild(sw);
-    return item;
-  };
+  const layoutColumns = document.createElement("div");
+  layoutColumns.className = "text-scale-columns";
+  layoutFold.body.appendChild(layoutColumns);
 
-  box.appendChild(marginItem(
-    buildSliderField(
-      "홈 · 상단 메뉴 여백",
-      () => profile.sideMargin,
-      (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
-      { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
-      live
-    ),
-    buildSliderField(
-      "최대 폭",
-      () => readMaxWidth(profile.maxWidthHome, profile.fullBleedHome),
-      (v) => {
-        delete profile.fullBleedHome;      // 예전 스위치 값은 버린다
-        if (v == null) delete profile.maxWidthHome;
-        else profile.maxWidthHome = v;
-      },
-      { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT },
-      live
-    )
+  const webCol = document.createElement("div");
+  webCol.className = "text-scale-column";
+  const webColLabel = document.createElement("div");
+  webColLabel.className = "text-scale-column-label";
+  webColLabel.textContent = "웹";
+  webCol.appendChild(webColLabel);
+
+  webCol.appendChild(buildSliderField(
+    "홈 · 상단 메뉴 여백",
+    () => profile.sideMargin,
+    (v) => { if (v == null) delete profile.sideMargin; else profile.sideMargin = v; },
+    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT },
+    live
+  ));
+  webCol.appendChild(buildSliderField(
+    "최대 폭 (홈)",
+    () => readMaxWidth(profile.maxWidthHome, profile.fullBleedHome),
+    (v) => {
+      delete profile.fullBleedHome;      // 예전 스위치 값은 버린다
+      if (v == null) delete profile.maxWidthHome;
+      else profile.maxWidthHome = v;
+    },
+    { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT },
+    live
   ));
 
   // 상세 화면 값이라 관리자 목록에는 바로 보이지 않는다 (미리보기로 확인)
-  box.appendChild(marginItem(
-    buildSliderField(
-      "콘텐츠 본문 여백",
-      () => profile.contentMargin,
-      (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
-      { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
-    ),
-    buildSliderField(
-      "최대 폭",
-      () => readMaxWidth(profile.maxWidthContent, profile.fullBleedContent),
-      (v) => {
-        delete profile.fullBleedContent;
-        if (v == null) delete profile.maxWidthContent;
-        else profile.maxWidthContent = v;
-      },
-      { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT }
-    )
+  webCol.appendChild(buildSliderField(
+    "콘텐츠 본문 여백",
+    () => profile.contentMargin,
+    (v) => { if (v == null) delete profile.contentMargin; else profile.contentMargin = v; },
+    { min: 0, max: 120, def: SIDE_MARGIN_DEFAULT }
   ));
+  webCol.appendChild(buildSliderField(
+    "최대 폭 (콘텐츠)",
+    () => readMaxWidth(profile.maxWidthContent, profile.fullBleedContent),
+    (v) => {
+      delete profile.fullBleedContent;
+      if (v == null) delete profile.maxWidthContent;
+      else profile.maxWidthContent = v;
+    },
+    { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT }
+  ));
+  layoutColumns.appendChild(webCol);
+
+  // 모바일 화면 여백. 데스크톱 값을 그냥 줄이는 게 아니라 따로 관리하는 값이다
+  // (지금까지는 18px로 고정돼 있던 걸 조절 가능하게 연 것 — 기본값이 곧 그 18px).
+  const mobileCol = document.createElement("div");
+  mobileCol.className = "text-scale-column";
+  const mobileColLabel = document.createElement("div");
+  mobileColLabel.className = "text-scale-column-label";
+  mobileColLabel.textContent = "모바일";
+  mobileCol.appendChild(mobileColLabel);
+
+  mobileCol.appendChild(buildSliderField(
+    "홈 · 상단 메뉴 여백",
+    () => profile.sideMarginMobile,
+    (v) => { if (v == null) delete profile.sideMarginMobile; else profile.sideMarginMobile = v; },
+    { min: 0, max: 60, def: SIDE_MARGIN_MOBILE_DEFAULT },
+    live
+  ));
+  mobileCol.appendChild(buildSliderField(
+    "콘텐츠 본문 여백",
+    () => profile.contentMarginMobile,
+    (v) => { if (v == null) delete profile.contentMarginMobile; else profile.contentMarginMobile = v; },
+    { min: 0, max: 60, def: CONTENT_MARGIN_MOBILE_DEFAULT },
+    live
+  ));
+  layoutColumns.appendChild(mobileCol);
 
   // 세부 조절: 자주 안 건드리는 값들을 한데 모아 접어 둔다. 기본값은 지금
   // 실제로 적용돼 있는 수치라서, 처음 열어도 화면이 그대로다.
@@ -801,29 +823,6 @@ function renderLayoutFields(wrap, profile) {
   });
   workBgRow.appendChild(workBgClear);
   detailFold.body.appendChild(workBgRow);
-
-  // 모바일 화면 여백. 데스크톱 값을 그냥 줄이는 게 아니라 따로 관리하는 값이다
-  // (지금까지는 18px로 고정돼 있던 걸 조절 가능하게 연 것 — 기본값이 곧 그 18px).
-  const mobileFold = buildFoldSection("모바일 화면 여백");
-  wrap.appendChild(mobileFold.card);
-
-  const mobileBox = document.createElement("div");
-  mobileBox.className = "layout-fields";
-  mobileFold.body.appendChild(mobileBox);
-  mobileBox.appendChild(buildSliderField(
-    "홈 · 상단 메뉴 여백 (모바일)",
-    () => profile.sideMarginMobile,
-    (v) => { if (v == null) delete profile.sideMarginMobile; else profile.sideMarginMobile = v; },
-    { min: 0, max: 60, def: SIDE_MARGIN_MOBILE_DEFAULT },
-    live
-  ));
-  mobileBox.appendChild(buildSliderField(
-    "콘텐츠 본문 여백 (모바일)",
-    () => profile.contentMarginMobile,
-    (v) => { if (v == null) delete profile.contentMarginMobile; else profile.contentMarginMobile = v; },
-    { min: 0, max: 60, def: CONTENT_MARGIN_MOBILE_DEFAULT },
-    live
-  ));
 
   // 텍스트 크기: "본문 기본"만 실제 px이고, 나머지 7단계는 본문 기본의
   // 배율(rem 개념)이다. 그래서 평소에 건드릴 건 "본문 기본" 하나뿐 —

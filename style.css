@@ -2389,14 +2389,6 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   gap: 14px 28px;
 }
 
-/* 여백 슬라이더 + 그 화면의 "꽉 채우기" 스위치를 한 덩어리로 */
-.layout-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: nowrap;
-}
-
 /* 접었다 펼치는 설정 구획. 제목(머리글)과 내용이 같은 카드 안에 함께
    들어가, 접으면 머리글만 남고 펼치면 카드가 아래로 늘어난다. */
 .settings-fold {
@@ -2430,6 +2422,13 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   flex: none;
   opacity: 0.7;
   transition: transform 0.2s ease;
+}
+
+/* 아이콘 파일 자체는 어두운 선이라, 항상 어두운 관리자 화면(theme-dark)에서는
+   뒤집어야 보인다. 같은 이유로 관리자의 카테고리 화살표(.acc-chevron)도 함께 */
+body.theme-dark .settings-fold-chevron,
+body.theme-dark .acc-chevron {
+  filter: invert(1);
 }
 
 .settings-fold-chevron.is-open { transform: rotate(180deg); }
