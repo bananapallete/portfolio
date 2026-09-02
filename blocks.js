@@ -627,10 +627,13 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     if (!embedUrl && isVideoFile(src)) {
       const v = document.createElement("video");
       v.src = src;
-      v.controls = true;
-      v.autoplay = true;
-      v.muted = true;
-      v.loop = true;
+      const autoplayOn = block.videoAutoplay !== false;
+      v.controls = block.videoControls !== false;
+      v.autoplay = autoplayOn;
+      // 브라우저는 음소거 상태가 아니면 자동재생을 막으므로, 자동재생을
+      // 켰다면 "음소거" 설정과 상관없이 소리는 끈 채로 재생한다
+      v.muted = autoplayOn || block.videoMuted !== false;
+      v.loop = block.videoLoop !== false;
       v.setAttribute("playsinline", "");
       div.appendChild(v);
     } else {

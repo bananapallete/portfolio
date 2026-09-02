@@ -1913,17 +1913,68 @@ function renderBlockBody(project, block, blockIndex) {
   }
 
   if (block.type === "embed") {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "embed-input";
-    input.placeholder = "유튜브/비메오 링크 또는 <iframe> 임베드 코드 붙여넣기";
-    input.value = block.src && !block.src.startsWith("data:") && !block.src.startsWith("assets/") ? block.src : "";
-    if (block.src && (block.src.startsWith("data:") || block.src.startsWith("assets/"))) {
+    const uploadedFile = block.src && (block.src.startsWith("data:") || block.src.startsWith("assets/"));
+
+    const uploadRow = document.createElement("div");
+    uploadRow.className = "block-controls-row";
+    uploadRow.appendChild(makeUploadTile(uploadedFile ? "다른 영상으로 교체" : "영상 파일 올리기", { accept: "video/*" }, (files) => {
+      if (!files.length) return;
+      readFileAsDataURL(files[0]).then((dataUrl) => {
+        block.src = dataUrl;
+        blockFolds.set(block, false); // 방금 올린 영상은 펼친 채로 둔다
+        saveDraft();
+        autoFillEmbedRatio(block); // 원본 비율은 뒤에서 알아내 조용히 저장한다
+        renderEditModalBody();
+      });
+    }));
+    body.appendChild(uploadRow);
+
+    if (uploadedFile) {
       const note = document.createElement("div");
       note.className = "block-hint";
       note.textContent = "🎬 업로드된 영상 파일이 연결되어 있어요.";
       body.appendChild(note);
+
+      // 넷 다 미리보기의 실제 <video> 속성에 반영돼야 하므로 바꿀 때마다 다시 그린다
+      const toggles = document.createElement("div");
+      toggles.className = "block-controls-row";
+      toggles.appendChild(buildToggleField(
+        "자동재생",
+        () => block.videoAutoplay !== false,
+        (v) => { block.videoAutoplay = v; },
+        () => renderEditModalBody()
+      ));
+      toggles.appendChild(buildToggleField(
+        "반복 재생",
+        () => block.videoLoop !== false,
+        (v) => { block.videoLoop = v; },
+        () => renderEditModalBody()
+      ));
+      toggles.appendChild(buildToggleField(
+        "음소거",
+        () => block.videoMuted !== false,
+        (v) => { block.videoMuted = v; },
+        () => renderEditModalBody()
+      ));
+      toggles.appendChild(buildToggleField(
+        "재생바 표시",
+        () => block.videoControls !== false,
+        (v) => { block.videoControls = v; },
+        () => renderEditModalBody()
+      ));
+      body.appendChild(toggles);
+      // 자동재생은 브라우저 정책상 음소거일 때만 허용된다
+      const hint = document.createElement("div");
+      hint.className = "block-hint";
+      hint.textContent = "자동재생을 켜면, 음소거를 꺼도 브라우저 정책상 소리 없이 재생돼요.";
+      body.appendChild(hint);
     }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "embed-input";
+    input.placeholder = "유튜브/비메오 링크 또는 <iframe> 임베드 코드 붙여넣기";
+    input.value = block.src && !uploadedFile ? block.src : "";
     input.addEventListener("input", () => {
       block.src = normalizeEmbedSrc(input.value);
       saveDraft();
@@ -2423,12 +2474,17 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div.textContent = "(링크가 없는 임베드 블록)";
       return div;
     }
-    // 실제 사이트와 같은 판별·변환 로직을 공용 함수로 사용
+    // 실제 사이트와 같은 판별·변환 로직을 공용 함수로 사용.
+    // 재생바·클릭은 여기서는 늘 꺼 둔다 — 블록을 드래그해서 순서를 바꿀 때
+    // 영상 컨트롤과 손이 겹치지 않게 하기 위해서다 (실제 사이트에는 안 걸림).
     if (isVideoFile(block.src)) {
       const v = document.createElement("video");
       v.src = block.src;
+      const autoplayOn = block.videoAutoplay !== false;
       v.controls = false;
-      v.muted = true;
+      v.autoplay = autoplayOn;
+      v.muted = autoplayOn || block.videoMuted !== false;
+      v.loop = block.videoLoop !== false;
       v.style.pointerEvents = "none";
       div.appendChild(v);
     } else {
@@ -2442,6 +2498,29 @@ function renderPreviewBlockContent(project, block, blockIndex) {
   }
 
   return document.createElement("div");
+}
+
+// 켜고 끄는 체크박스 한 칸 (업로드한 영상의 자동재생·반복·음소거·재생바 등)
+function buildToggleField(labelText, getVal, setVal, onApply) {
+  const wrap = document.createElement("label");
+  wrap.className = "toggle-field";
+
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = !!getVal();
+  input.addEventListener("change", () => {
+    setVal(input.checked);
+    saveDraft();
+    if (onApply) onApply(input.checked);
+  });
+
+  const text = document.createElement("span");
+  text.className = "control-label";
+  text.textContent = labelText;
+
+  wrap.appendChild(input);
+  wrap.appendChild(text);
+  return wrap;
 }
 
 // 썸네일 줄 안에 함께 놓이는 "＋ 추가" 타일. 버튼이 따로 한 줄을 차지하지 않는다.

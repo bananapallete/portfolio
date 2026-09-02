@@ -2539,6 +2539,21 @@ body.theme-dark .acc-chevron {
   color: var(--muted);
 }
 
+/* 켜고 끄는 체크박스 한 칸 (업로드한 영상의 자동재생·반복·음소거·재생바) */
+.toggle-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.toggle-field input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--sun);
+  cursor: pointer;
+}
+
 .size-input {
   width: 54px;
   padding: 6px 8px;
