@@ -2121,14 +2121,13 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   flex-direction: column;
 }
 
-/* 평소에는 실제 페이지와 똑같이 보이도록 테두리·배경을 비워두고,
-   마우스를 올렸을 때만 편집용 테두리가 서서히 나타난다 */
+/* 블록마다 어디까지가 한 블록인지 늘 눈에 보이도록 옅은 테두리를 두고,
+   마우스를 올리면 좀 더 또렷해진다 */
 .block-item {
   position: relative;
-  border: 1.5px solid transparent;
+  border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  /* 짧은 블록(접힌 영상 등) 위에서도 조작 줄이 테두리를 넘지 않을 만큼은 높이를 준다.
-     조작 줄 35px + 위아래 여백 6px씩 + 테두리 1.5px씩 = 50px */
+  /* 접힌 영상처럼 짧은 블록도 머리줄 + 여백만큼은 최소 높이를 갖게 한다 */
   min-height: 50px;
   transition: border-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
 }
@@ -2139,41 +2138,21 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 
 .block-item.dragging { opacity: 0.4; }
 
-/* 블록 위에 떠 있는 조작 줄. 흐름을 밀어내지 않도록 절대 배치한다 */
+/* 블록 머리줄(핸들·종류 이름·펼치기/접기·설정/삭제) — 늘 흐름 안에 자리
+   잡아, 어떤 블록인지·몇 개 있는지 마우스를 올리지 않아도 바로 보인다. */
 .block-head {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 2;
+  position: static;
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 5px;
-  /* 블록 모서리(10px)보다 완만하게 휘어야 코너에서 테두리 밖으로 새지 않는다.
-     알약 모양(999px)은 반지름이 17.5px이라 10px 곡선을 뚫고 나온다 */
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--panel) 85%, transparent);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  /* 안 보이는 동안 클릭까지 가로채면 안 되므로 마우스를 통과시킨다 */
-  pointer-events: none;
-  transition: opacity 0.25s ease-in-out;
-}
-
-/* 설정을 펼치면 조절 줄이 맨 위로 오므로, 떠 있던 도구 줄을 흐름 안으로 내려
-   조절 줄을 가리지 않게 한다. 이때는 마우스를 올리지 않아도 계속 보인다. */
-.block-head-inline {
-  position: static;
-  opacity: 1;
-  pointer-events: auto;
+  padding: 0;
   margin-bottom: 8px;
   background: none;
-  backdrop-filter: none;
-  padding: 0;
 }
 
-/* 떠 있을 때와 같이 버튼은 오른쪽 끝에 두어 여닫을 때 자리가 튀지 않게 한다 */
-.block-head-inline .block-head-spacer {
+/* 종류 이름 다음, 오른쪽 끝 버튼들 앞에 남는 공간을 모두 차지해
+   설정/삭제가 항상 오른쪽 끝에 붙게 한다 */
+.block-head-spacer {
   display: block;
   flex: 1 1 auto;
 }
@@ -2188,12 +2167,6 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 
 .block-head-merged .block-controls-row {
   margin-top: 0;
-}
-
-.block-item:hover > .block-head,
-.block-item:focus-within > .block-head {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 /* 편집 팝업 안에 실제 모습 그대로 그리는 상세 페이지 상단 */
@@ -2266,9 +2239,6 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 .proj-settings .mini-label { margin-top: 0; }
 .proj-settings .block-controls-row { margin-top: 6px; }
 
-/* 조작 줄이 떠 있으므로 폭을 벌리는 여백은 필요 없다 */
-.block-head-spacer { display: none; }
-
 /* 실제 사이트에 보이는 모습이 들어가는 자리 — 꾸밈 없이 그대로 */
 .block-preview { overflow: hidden; }
 
@@ -2331,15 +2301,6 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   white-space: nowrap;
 }
 
-.embed-folded-hint {
-  flex: none;
-  font-family: var(--font);
-  font-size: 11px;
-  color: color-mix(in srgb, var(--ink) 45%, transparent);
-}
-
-.embed-folded:hover .embed-folded-hint { color: var(--sun); }
-
 /* 링크가 없는 블록은 주소가 아니라 안내문이라 고정폭 글꼴을 쓰지 않는다 */
 .embed-folded-empty { font-family: var(--font); }
 
@@ -2364,6 +2325,13 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 .blk-text-edit:empty::before {
   content: attr(data-placeholder);
   opacity: 0.4;
+}
+
+/* 텍스트 블록만 예외 — 머리줄 조절 메뉴·다음 블록과 바로 붙어 답답해
+   보이므로, 관리자 편집 칸에서만 위아래를 띄운다 (공개 화면의 .blk-text는
+   이 클래스 조합이 없어 그대로다) */
+.blk-text.blk-text-edit {
+  margin: 10px 0 14px;
 }
 
 .drag-handle {

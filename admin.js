@@ -1629,11 +1629,8 @@ function renderFoldedEmbed(block) {
   label.className = "embed-folded-src";
   label.textContent = block.src ? shortenEmbedSrc(block.src) : "(링크가 없는 임베드 블록)";
   if (!block.src) label.classList.add("embed-folded-empty");
-  const hint = document.createElement("span");
-  hint.className = "embed-folded-hint";
-  hint.textContent = "눌러서 펼치기";
+  // "펼치기" 버튼이 이제 머리줄에 늘 붙어 있으므로, 여기서는 중복해서 적지 않는다
   strip.appendChild(label);
-  strip.appendChild(hint);
   strip.addEventListener("click", () => {
     blockFolds.set(block, false);
     renderEditModalBody();
@@ -1688,20 +1685,18 @@ function renderBlocksEditor(project) {
     const folded = isBlockFolded(block);
     const canFold =
       block.type === "embed" || (block.type === "images" && (block.images || []).length > 0);
-    // 접힌 영상은 줄 자체를 누르면 펼쳐지므로 머리줄에 펼치기 버튼을 두지 않는다
-    if (canFold && !(block.type === "embed" && folded)) {
+    // 이미지의 "줄이기/전체 보기"와 영상의 "펼치기/접기"를 한 말로 통일하고,
+    // 종류 이름 바로 옆에 둔다 (오른쪽 끝 설정/삭제와 헷갈리지 않도록)
+    if (canFold) {
       const fold = document.createElement("button");
       fold.type = "button";
       fold.className = "btn btn-ghost btn-xs";
-      fold.textContent =
-        block.type === "embed"
-          ? "▾ 영상 접기"
-          : (folded ? "▸ 전체 보기" : "▾ 줄이기");
+      fold.textContent = folded ? "펼치기" : "접기";
       fold.addEventListener("click", () => {
         blockFolds.set(block, !folded);
         renderEditModalBody();
       });
-      bh.appendChild(fold);
+      bh.insertBefore(fold, spacer);
     }
 
     /* 아직 비어 있는 블록은 넣을 방법이 설정 줄에 있으므로 접지 않는다.
@@ -1736,10 +1731,6 @@ function renderBlocksEditor(project) {
       }
     });
     bh.appendChild(del);
-
-    // 설정이 열리면 조절 줄이 맨 위로 오므로, 떠 있던 도구 줄을 흐름 안으로 내려
-    // [도구 줄] → [조절 줄] → [미리보기] 순으로 겹치지 않게 쌓는다
-    if (settingsOpen) bh.classList.add("block-head-inline");
     item.appendChild(bh);
 
     // 실제 사이트에 보이는 모습. 텍스트는 여기서 바로 고칠 수 있다.
