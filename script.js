@@ -431,6 +431,8 @@ function renderAccordion() {
 }
 
 function init() {
+  // 실제 콘텐츠가 준비됐으니, 그 위에 덮여 있던 로딩 스켈레톤을 걷어낸다
+  document.getElementById("workSkeleton")?.classList.add("is-hidden");
   if (!siteData) {
     renderFallback();
     return;

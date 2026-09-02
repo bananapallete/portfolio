@@ -950,6 +950,57 @@ body.bg-takeover:not(.bg-takeover-light) {
   }
 }
 
+/* -------- 페이지 로딩 스켈레톤: 실제 콘텐츠 자리에 반짝이다가 사라짐 --------
+   데이터가 오기 전까지 실제 콘텐츠 자리(.acc-list-wrap · .proj-blocks-wrap)를
+   빈 채로 두지 않고, 그 위에 겹쳐 반짝이는 판을 깐다. 데이터가 오면 JS가
+   is-hidden을 붙여 서서히 지운다 — 실제 콘텐츠는 이미 밑에 그려져 있으므로
+   막이 걷히듯 자연스럽게 드러난다. */
+.acc-list-wrap,
+.proj-blocks-wrap {
+  position: relative;
+  min-height: 320px;
+}
+
+.page-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.page-skeleton.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skeleton-box {
+  border-radius: var(--radius-sm);
+  background-color: var(--paper-soft);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* 카테고리 이름 줄과 비슷한 높이의 가로 막대 */
+.skeleton-row { height: 76px; }
+
+/* 콘텐츠 블록과 비슷한 두 가지 크기 */
+.skeleton-block-lg { height: 360px; }
+.skeleton-block-md { height: 220px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-skeleton { transition: none; }
+  .skeleton-box { animation: none; }
+}
+
 /* ================================================================
    Admin page
    ================================================================ */
