@@ -1552,10 +1552,10 @@ function renderEditModalBody() {
   card.appendChild(coverRow);
 
   // ---- 콘텐츠 블록 ----
+  // 위쪽(제목·개요·커버 이미지)과 구분되도록 선을 긋고 한 단 띄운다
   const blocksLabel = document.createElement("label");
   blocksLabel.textContent = "상세 콘텐츠 (실제 보이는 모습 그대로 · ⠿ 핸들을 드래그하면 순서가 바뀌어요)";
-  blocksLabel.className = "mini-label";
-  blocksLabel.style.marginTop = "18px";
+  blocksLabel.className = "mini-label content-section-label";
   card.appendChild(blocksLabel);
 
   card.appendChild(renderBlocksEditor(project));

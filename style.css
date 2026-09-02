@@ -2106,6 +2106,14 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   margin: 14px 0 5px;
 }
 
+/* "상세 콘텐츠"처럼 그 위(제목·개요·커버 이미지)와는 다른 단이라는 걸
+   선을 긋고 한 단 더 띄워서 알려준다 */
+.mini-label.content-section-label {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
 /* 실제 페이지처럼 블록이 이어지도록 세로로 쌓고, 간격은 JS가 넣어준다 */
 .block-list {
   margin-top: 4px;
