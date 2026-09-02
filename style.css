@@ -96,14 +96,11 @@
   --line: rgba(16, 16, 17, 0.12);
   --muted: rgba(16, 16, 17, 0.55);
 
-  /* 카테고리 필터용으로만 쓰는 최소한의 포인트 컬러 */
+  /* 포인트 컬러 */
   --branding: #ff4d6d;
-  --illustration: #6c5ce7;
-  --motion: #00c2a8;
   --sun: #ffc93c;
 
   --radius-lg: 28px;
-  --radius-md: 18px;
   --radius-sm: 10px;
   /* 레이아웃 값. 관리자에서 조절하면 JS가 이 값들을 바꾼다 */
   --side: 28px;
@@ -116,7 +113,6 @@
   /* 카드/패널처럼 배경 위에 살짝 떠 있는 면 */
   --panel: #ffffff;
 
-  --shadow-card: 0 10px 30px rgba(20, 18, 26, 0.08);
   --shadow-pop: 0 20px 50px rgba(20, 18, 26, 0.22);
 
   --header-h: 78px;
@@ -131,10 +127,6 @@
   --text-display-mobile: 36px;
   --text-headline: 39px;        /* 헤드라인 */
   --text-headline-mobile: 30px;
-  --text-h1: 31px;              /* 큰 제목 */
-  --text-h1-mobile: 23px;
-  --text-h2: 25px;              /* 중간 제목 */
-  --text-h2-mobile: 18px;
   --text-h3: 20px;              /* 작은 제목 */
   --text-h3-mobile: 15px;
   --text-body: 16px;            /* 본문 기본 */
@@ -348,11 +340,6 @@ body.has-open-category .site-header { position: static; }
   padding-top: 44px;
 }
 
-/* 섹션 머리를 생략한 경우(카테고리 하나) 그만큼의 위 여백을 섹션이 대신 갖는다 */
-.work-section-bare {
-  padding-top: 44px;
-}
-
 /* 이름 줄을 누르면 접고 펼 수 있다. 화살표는 열려 있을 때만 위를 향한다 */
 .ws-head-clickable { cursor: pointer; }
 .ws-chevron-open { transform: rotate(180deg); }
@@ -363,7 +350,10 @@ body.has-open-category .site-header { position: static; }
   gap: 12px;
 }
 
-.work-section .work-grid { padding-top: var(--acc-panel-top, 5px); }
+.work-section .work-grid {
+  padding-top: var(--acc-panel-top, 5px);
+  padding-bottom: var(--acc-panel-bottom, 24px);
+}
 
 /* 접힌 카테고리는 그리드만 감춘다 — 드래그로 다른 카테고리에 프로젝트를
    옮기려면 양쪽 다 펼쳐 놓아야 하므로, 공개 사이트처럼 하나만 열리게
@@ -1545,8 +1535,6 @@ body.gate-locked { overflow: hidden; }
   transition: opacity 0.15s ease;
 }
 
-.project-thumb-card:hover .project-thumb-delete { opacity: 1; }
-
 .project-thumb-handle {
   position: absolute;
   top: 6px;
@@ -1567,10 +1555,7 @@ body.gate-locked { overflow: hidden; }
   transition: opacity 0.15s ease;
 }
 
-.project-thumb-card:hover .project-thumb-handle { opacity: 1; }
 .project-thumb-handle:active { cursor: grabbing; }
-
-.project-thumb-card.dragging { opacity: 0.4; }
 
 /* ---- 프로젝트 편집 팝업 ---- */
 
@@ -2124,11 +2109,6 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   width: 1.6em;
   height: 1.6em;
   flex: none;
-}
-
-.proj-meta-empty {
-  color: var(--meta-label);
-  opacity: 0.6;
 }
 
 /* 여백은 .proj-blocks 가 이미 갖고 있으므로 안에서 또 주면 두 번 들어간다 */
@@ -2974,6 +2954,7 @@ body.theme-dark .acc-chevron {
   .proj-meta-value,
   .proj-meta-tool { font-size: var(--text-label-mobile); }
   .proj-title { font-size: var(--text-display-mobile); }
+  .hero-preview .proj-title { font-size: var(--text-headline-mobile); }
   .proj-overview-desc,
   .blk-text { font-size: var(--text-body-mobile); }
 
@@ -3029,7 +3010,6 @@ body.theme-dark .acc-chevron {
   .proj-meta-value { margin-top: 12px; }
   .proj-meta-tools { gap: 4px 14px; }
   .work-section:not(.ws-collapsed) + .work-section .work-section-head { padding-top: 28px; }
-  .work-section-bare { padding-top: 28px; }
   .footer-grid { flex-direction: column; align-items: flex-start; }
 
   /* 관리자 페이지 */

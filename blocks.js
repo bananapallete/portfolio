@@ -83,8 +83,6 @@ const TEXT_BODY_MOBILE_DEFAULT = 12;
 const TEXT_RATIO_DEFAULTS = {
   display: { desktop: 3.063, mobile: 3.000 },
   headline: { desktop: 2.438, mobile: 2.500 },
-  h1: { desktop: 1.938, mobile: 1.917 },
-  h2: { desktop: 1.563, mobile: 1.500 },
   h3: { desktop: 1.250, mobile: 1.250 },
   label: { desktop: 0.813, mobile: 1.000 },
   caption: { desktop: 0.750, mobile: 0.917 },

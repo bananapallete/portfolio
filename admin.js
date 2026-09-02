@@ -841,8 +841,6 @@ function renderLayoutFields(wrap, profile) {
   const ratioTiers = [
     ["display", "대형 표시", 0.5, 5],
     ["headline", "헤드라인", 0.5, 5],
-    ["h1", "큰 제목", 0.5, 4],
-    ["h2", "중간 제목", 0.5, 3.5],
     ["h3", "작은 제목", 0.5, 3],
     ["label", "라벨 / 작은 텍스트", 0.3, 2],
     ["caption", "캡션", 0.3, 2],
