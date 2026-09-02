@@ -626,48 +626,39 @@ function renderProfileFields(wrap, profile) {
   row3.appendChild(emailField);
 
   wrap.appendChild(row3);
+}
 
-  // ---- 프로젝트명 폰트 두께 (모든 프로젝트 일괄 적용) ----
-  const twLabel = document.createElement("label");
-  twLabel.textContent = "프로젝트명 폰트 두께 (모든 프로젝트 상세 페이지에 일괄 적용)";
-  twLabel.className = "mini-label";
-  twLabel.style.marginTop = "18px";
-  wrap.appendChild(twLabel);
+/* 접었다 펼치는 설정 구획. 자주 안 건드리는 값들을 닫아 둬 화면을 덜 채운다.
+   기본은 닫힌 채로 시작한다 — body를 wrap에 미리 붙여 두고 hidden만 켠다. */
+function buildFoldSection(title) {
+  const wrapEl = document.createElement("div");
+  wrapEl.className = "settings-fold";
 
-  wrap.appendChild(buildSeg(
-    [["400", "Regular"], ["500", "Medium"], ["600", "SemiBold"], ["700", "Bold"], ["800", "ExtraBold"], ["900", "Black"]],
-    profile.projectTitleWeight || "900",
-    (v) => { profile.projectTitleWeight = v; }
-  ));
+  const head = document.createElement("button");
+  head.type = "button";
+  head.className = "settings-fold-head";
 
-  // ---- 홈 화면 프로젝트 영역 배경색 ----
-  const workBgLabel = document.createElement("label");
-  workBgLabel.textContent = "홈 화면 배경색 (헤더·푸터까지 함께 적용)";
-  workBgLabel.className = "mini-label";
-  workBgLabel.style.marginTop = "18px";
-  wrap.appendChild(workBgLabel);
+  const text = document.createElement("span");
+  text.textContent = title;
+  head.appendChild(text);
 
-  const workBgRow = document.createElement("div");
-  workBgRow.className = "block-controls-row";
-  const workBgField = buildColorField(
-    profile.workBg || "#0d0d0d",
-    (v) => { profile.workBg = v; live(); },
-    { swatches: true, rerender: renderEditModalBody }
-  );
-  workBgRow.appendChild(workBgField.field);
+  const chevron = document.createElement("img");
+  chevron.className = "settings-fold-chevron";
+  chevron.src = "assets/icons/chevron-down.svg";
+  chevron.alt = "";
+  head.appendChild(chevron);
 
-  const workBgClear = document.createElement("button");
-  workBgClear.className = "btn btn-outline btn-small";
-  workBgClear.textContent = "기본값";
-  workBgClear.addEventListener("click", () => {
-    delete profile.workBg;
-    renderSiteHeader(profile);
-    saveDraft();
-    renderEditModalBody();
+  const body = document.createElement("div");
+  body.hidden = true;
+
+  head.addEventListener("click", () => {
+    body.hidden = !body.hidden;
+    chevron.classList.toggle("is-open", !body.hidden);
   });
-  workBgRow.appendChild(workBgClear);
-  wrap.appendChild(workBgRow);
 
+  wrapEl.appendChild(head);
+  wrapEl.appendChild(body);
+  return { wrapEl, body };
 }
 
 /* 레이아웃 값 두 가지를 한 자리에 모아 맨 위에 둔다.
@@ -733,25 +724,24 @@ function renderLayoutFields(wrap, profile) {
       { min: 800, max: MAX_WIDTH_FULL, def: MAX_WIDTH_DEFAULT }
     )
   ));
-  box.appendChild(buildSliderField(
+
+  wrap.appendChild(box);
+
+  // 세부 조절: 자주 안 건드리는 값들을 한데 모아 접어 둔다. 기본값은 지금
+  // 실제로 적용돼 있는 수치라서, 처음 열어도 화면이 그대로다.
+  const detailFold = buildFoldSection("세부 조절");
+  wrap.appendChild(detailFold.wrapEl);
+
+  const detailBox = document.createElement("div");
+  detailBox.className = "layout-fields";
+  detailFold.body.appendChild(detailBox);
+  detailBox.appendChild(buildSliderField(
     "카드 사이 간격",
     () => profile.cardGap,
     (v) => { if (v == null) delete profile.cardGap; else profile.cardGap = v; },
     { min: 0, max: 80, def: CARD_GAP_DEFAULT },
     live
   ));
-
-  wrap.appendChild(box);
-
-  // 세부 여백: 홈 화면 카테고리 목록(아코디언)의 안쪽 간격들.
-  // 기본값은 지금 CSS에 실제로 적용돼 있는 수치라서, 처음 열어도 화면이 그대로다.
-  const detailHead = document.createElement("label");
-  detailHead.className = "mini-label";
-  detailHead.textContent = "세부 여백 (카테고리 목록)";
-  wrap.appendChild(detailHead);
-
-  const detailBox = document.createElement("div");
-  detailBox.className = "layout-fields";
   detailBox.appendChild(buildSliderField(
     "목록 상단 여백",
     () => profile.listTopGap,
@@ -780,7 +770,40 @@ function renderLayoutFields(wrap, profile) {
     { min: 0, max: 80, def: PANEL_BOTTOM_GAP_DEFAULT },
     live
   ));
-  wrap.appendChild(detailBox);
+  detailBox.appendChild(buildSliderField(
+    "카드 모서리 둥글기",
+    () => profile.cardRadius,
+    (v) => { if (v == null) delete profile.cardRadius; else profile.cardRadius = v; },
+    { min: 0, max: 60, def: CARD_RADIUS_DEFAULT },
+    live
+  ));
+
+  // 홈 화면 프로젝트 영역 배경색도 여기 함께 접어 둔다
+  const workBgLabel = document.createElement("label");
+  workBgLabel.textContent = "홈 화면 배경색 (헤더·푸터까지 함께 적용)";
+  workBgLabel.className = "mini-label";
+  detailFold.body.appendChild(workBgLabel);
+
+  const workBgRow = document.createElement("div");
+  workBgRow.className = "block-controls-row";
+  const workBgField = buildColorField(
+    profile.workBg || "#0d0d0d",
+    (v) => { profile.workBg = v; saveDraft(); renderSiteHeader(profile); },
+    { swatches: true, rerender: renderEditModalBody }
+  );
+  workBgRow.appendChild(workBgField.field);
+
+  const workBgClear = document.createElement("button");
+  workBgClear.className = "btn btn-outline btn-small";
+  workBgClear.textContent = "기본값";
+  workBgClear.addEventListener("click", () => {
+    delete profile.workBg;
+    renderSiteHeader(profile);
+    saveDraft();
+    renderEditModalBody();
+  });
+  workBgRow.appendChild(workBgClear);
+  detailFold.body.appendChild(workBgRow);
 
   // 모바일 화면 여백. 데스크톱 값을 그냥 줄이는 게 아니라 따로 관리하는 값이다
   // (지금까지는 18px로 고정돼 있던 걸 조절 가능하게 연 것 — 기본값이 곧 그 18px).
@@ -807,23 +830,6 @@ function renderLayoutFields(wrap, profile) {
   ));
   wrap.appendChild(mobileBox);
 
-  // 모서리 둥글기. 지금은 카드가 각지게(0px) 나가는데, 여기서 둥글릴 수 있다.
-  const radiusHead = document.createElement("label");
-  radiusHead.className = "mini-label";
-  radiusHead.textContent = "모서리 둥글기";
-  wrap.appendChild(radiusHead);
-
-  const radiusBox = document.createElement("div");
-  radiusBox.className = "layout-fields";
-  radiusBox.appendChild(buildSliderField(
-    "카드 모서리 둥글기",
-    () => profile.cardRadius,
-    (v) => { if (v == null) delete profile.cardRadius; else profile.cardRadius = v; },
-    { min: 0, max: 60, def: CARD_RADIUS_DEFAULT },
-    live
-  ));
-  wrap.appendChild(radiusBox);
-
   // 텍스트 크기: "본문 기본"만 실제 px이고, 나머지 7단계는 본문 기본의
   // 배율(rem 개념)이다. 그래서 평소에 건드릴 건 "본문 기본" 하나뿐 —
   // 바꾸면 카테고리 이름 줄·소개문·푸터·경력 섹션의 나머지 크기가
@@ -831,10 +837,8 @@ function renderLayoutFields(wrap, profile) {
   // 각 단계의 배율 칸을 고치면 된다. 웹/모바일은 배율 자체가 달라서
   // (모바일에서는 라벨·캡션이 본문과 거의 같이 줄어 배율이 오히려 커진다)
   // 블록을 나눠 따로 둔다.
-  const textHead = document.createElement("label");
-  textHead.className = "mini-label";
-  textHead.textContent = "텍스트 크기 (본문 기본 대비 배율)";
-  wrap.appendChild(textHead);
+  const textFold = buildFoldSection("텍스트 크기 (본문 기본 대비 배율)");
+  wrap.appendChild(textFold.wrapEl);
 
   const ratioTiers = [
     ["display", "대형 표시", 0.5, 5],
@@ -883,7 +887,7 @@ function renderLayoutFields(wrap, profile) {
   textColumns.className = "text-scale-columns";
   textColumns.appendChild(buildScaleColumn("웹", "textBody", 10, 28, "Desktop"));
   textColumns.appendChild(buildScaleColumn("모바일", "textBodyMobile", 8, 20, "Mobile"));
-  wrap.appendChild(textColumns);
+  textFold.body.appendChild(textColumns);
 }
 
 function makeTextField(labelText, value, onChange) {
