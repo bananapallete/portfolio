@@ -1796,7 +1796,7 @@ function renderBlocksEditor(project) {
     });
     return b;
   };
-  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#f5f4f0", align: "left" })));
+  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", color: "#f5f4f0", align: "left" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
   addRow.appendChild(mkAdd("+ 비디오", () => ({ type: "embed", src: "" })));
   wrap.appendChild(addRow);
@@ -1816,23 +1816,6 @@ function renderBlockBody(project, block, blockIndex) {
 
     // 드래그로 고른 글자만 굵게/보통으로 바꾼다
     const weightButtons = buildWeightButtons(() => pv, richSlot(block, "content", "runs"));
-
-    const sizeSlider = buildSliderField(
-      "크기",
-      () => block.size,
-      (v) => { if (v == null) delete block.size; else block.size = v; },
-      { min: 10, max: 80, def: 15, unit: "px" },
-      () => applyTextStyle(pv, block)
-    );
-
-    // 자간은 Figma와 같은 % 표기 (100% = 글자 한 칸). 음수로 좁힐 수도 있다.
-    const trackSlider = buildSliderField(
-      "자간",
-      () => block.tracking,
-      (v) => { if (v == null) delete block.tracking; else block.tracking = v; },
-      { min: -10, max: 30, def: 0, step: 0.5, unit: "%" },
-      () => applyTextStyle(pv, block)
-    );
 
     const colorLabel = document.createElement("span");
     colorLabel.className = "control-label";
@@ -1859,8 +1842,6 @@ function renderBlockBody(project, block, blockIndex) {
     );
 
     controls.appendChild(weightButtons);
-    controls.appendChild(sizeSlider);
-    controls.appendChild(trackSlider);
     controls.appendChild(colorLabel);
     controls.appendChild(colorField.field);
     controls.appendChild(alignLabel);

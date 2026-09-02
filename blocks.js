@@ -561,20 +561,11 @@ function fillTextRuns(el, source) {
   });
 }
 
-// 자간은 Figma와 같이 %로 저장하고 em으로 환산한다 (100% = 글자 한 칸)
-function normalizeTracking(v) {
-  if (v == null || v === "") return null;
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? n : null;
-}
-
-// 크기 · 색 · 정렬 · 자간을 한 곳에서 입힌다 (공개 화면과 관리자 미리보기 공용)
+// 색 · 정렬을 한 곳에서 입힌다 (공개 화면과 관리자 미리보기 공용).
+// 크기·자간은 이제 텍스트 시스템(--text-body)을 그대로 따르므로 여기서 건드리지 않는다
 function applyTextStyle(el, block) {
-  el.style.fontSize = block.size ? block.size + "px" : "";
   el.style.color = block.color || "";
   el.style.textAlign = block.align && block.align !== "left" ? block.align : "";
-  const t = normalizeTracking(block.tracking);
-  el.style.letterSpacing = t != null ? t / 100 + "em" : "";
 }
 
 /* ---------------------------------- 블록 렌더링 ---------------------------------- */

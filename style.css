@@ -2698,6 +2698,9 @@ body.theme-dark .acc-chevron {
    그대로 두면 세로로 너무 크다 — 그냥 올리라는 자리이니 적당한 높이로 줄인다 */
 .blk-images-single .img-slot { min-height: 0; height: 160px; aspect-ratio: auto; }
 
+/* 그리드도 업로드 전 빈 칸은 단일과 같은 높이로 맞춘다 */
+.blk-images-grid .img-slot { min-height: 0; height: 160px; aspect-ratio: auto; }
+
 /* 슬라이드 줄에서는 사진과 같은 높이로 맞춘다 */
 .pv-slider-strip .img-slot {
   flex: none;
