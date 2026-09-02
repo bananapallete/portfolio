@@ -1655,7 +1655,11 @@ function renderBlocksEditor(project) {
   // 콘텐츠 간격(실제 페이지 값, 미설정이면 기본 28px)에 편집 카드끼리
   // 구분되도록 여유를 더 얹는다 — 실제 페이지 간격 자체는 그대로 둔다
   const blockGap = normalizeGap(project.blockGap);
-  wrap.style.gap = ((blockGap != null ? blockGap : 28) + 20) + "px";
+  const gapPx = (blockGap != null ? blockGap : 28) + 20;
+  wrap.style.gap = gapPx + "px";
+  // 드래그 중 뜨는 삽입 표시(막대)가 카드 사이 빈 틈 한가운데 오도록,
+  // 실제 간격 값을 CSS에서 절반씩 끌어당기는 데 쓴다
+  wrap.style.setProperty("--block-gap", gapPx + "px");
   const group = `blocks-${project.id}`;
 
   project.blocks.forEach((block, i) => {
