@@ -2170,6 +2170,18 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   flex: 1 1 auto;
 }
 
+/* 텍스트: 조절 메뉴를 머리줄 안에 바로 붙여 한 줄로 합친 경우.
+   좁은 화면에서는 줄바꿈을 허락하고, 끼워 넣은 조절 줄 자체의 위쪽
+   여백은 없애 머리줄과 같은 높이로 나란히 보이게 한다. */
+.block-head-merged {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.block-head-merged .block-controls-row {
+  margin-top: 0;
+}
+
 .block-item:hover > .block-head,
 .block-item:focus-within > .block-head {
   opacity: 1;

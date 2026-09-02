@@ -1735,6 +1735,7 @@ function renderBlocksEditor(project) {
       }
     });
     bh.appendChild(del);
+
     // 설정이 열리면 조절 줄이 맨 위로 오므로, 떠 있던 도구 줄을 흐름 안으로 내려
     // [도구 줄] → [조절 줄] → [미리보기] 순으로 겹치지 않게 쌓는다
     if (settingsOpen) bh.classList.add("block-head-inline");
@@ -1756,11 +1757,23 @@ function renderBlocksEditor(project) {
     } else {
       // 기본은 실제 페이지와 같은 크기. 이미지를 접으면 높이만 잘라 보여준다
       if (canFold && folded) preview.classList.add("block-preview-capped");
+      // 텍스트는 미리보기(textPreviewNodes)를 먼저 만들어야, 뒤이어 만들
+      // 조절 줄의 "굵게/보통" 버튼이 그 실제 글자 요소를 붙잡을 수 있다
       preview.appendChild(renderPreviewBlockContent(project, block, i));
     }
+
+    // 텍스트는 조절 메뉴가 짧아 따로 줄을 만들지 않고 머리줄에 바로 붙인다.
+    // (위 미리보기가 만든 textPreviewNodes를 참조하므로 그 뒤에 만든다)
+    let inlineControls = null;
+    if (settingsOpen && block.type === "text") {
+      inlineControls = renderBlockBody(project, block, i).firstChild;
+      bh.insertBefore(inlineControls, spacer);
+      bh.classList.add("block-head-merged");
+    }
+
     // 조절 줄은 미리보기 위에 둔다 — 아래에 있으면 어느 블록 것인지 헷갈린다.
-    // 미리보기를 먼저 만들어야 조절 줄이 그 요소를 붙잡아 바로 갱신할 수 있다.
-    if (settingsOpen) {
+    // (텍스트는 위에서 이미 머리줄에 합쳐 넣었으니 여기서는 건너뛴다)
+    if (settingsOpen && !inlineControls) {
       const settings = document.createElement("div");
       settings.className = "block-settings";
       settings.appendChild(renderBlockBody(project, block, i));
