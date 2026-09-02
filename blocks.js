@@ -71,18 +71,32 @@ const CARD_RADIUS_DEFAULT = 0; // 카드 모서리 둥글기
 const SIDE_MARGIN_MOBILE_DEFAULT = 18;
 const CONTENT_MARGIN_MOBILE_DEFAULT = 18;
 
-/* 반응형 타이포그래피 스케일(Figma 참고). 8단계 × (데스크톱/모바일) 기본값 —
-   지금 CSS에 이미 적용돼 있는 수치라서 관리자에서 처음 열어도 화면이 안 바뀐다. */
-const TEXT_SCALE_DEFAULTS = {
-  display: { desktop: 49, mobile: 36 },
-  headline: { desktop: 39, mobile: 30 },
-  h1: { desktop: 31, mobile: 23 },
-  h2: { desktop: 25, mobile: 18 },
-  h3: { desktop: 20, mobile: 15 },
-  body: { desktop: 16, mobile: 12 },
-  label: { desktop: 13, mobile: 12 },
-  caption: { desktop: 12, mobile: 11 },
+/* 반응형 타이포그래피 스케일(Figma 참고). "본문 기본"만 실제 px 값이고,
+   나머지 7단계는 본문 기본의 배율(rem 개념)로 정의한다 — 본문 기본만
+   바꾸면 전부 비례해서 함께 바뀐다. 배율은 지금 CSS에 실제로 적용돼
+   있는 px를 본문 기본으로 나눈 값이라, 관리자에서 처음 열어도 화면이
+   안 바뀐다(예: 49 ÷ 16 = 3.063).
+   데스크톱/모바일은 배율 자체가 다르다(모바일에서 라벨·캡션은 본문 기본과
+   거의 같이 줄어 배율이 오히려 커진다) — 그래서 배율도 화면별로 따로 둔다. */
+const TEXT_BODY_DEFAULT = 16;
+const TEXT_BODY_MOBILE_DEFAULT = 12;
+const TEXT_RATIO_DEFAULTS = {
+  display: { desktop: 3.063, mobile: 3.000 },
+  headline: { desktop: 2.438, mobile: 2.500 },
+  h1: { desktop: 1.938, mobile: 1.917 },
+  h2: { desktop: 1.563, mobile: 1.500 },
+  h3: { desktop: 1.250, mobile: 1.250 },
+  label: { desktop: 0.813, mobile: 1.000 },
+  caption: { desktop: 0.750, mobile: 0.917 },
 };
+
+// 배율(소수) 값을 읽는다 — normalizeGap은 정수로 잘라버려서 배율엔 못 쓴다
+function normalizeRatio(v) {
+  if (v == null || v === "") return null;
+  const n = parseFloat(v);
+  if (isNaN(n)) return null;
+  return Math.max(0.1, n);
+}
 
 // 예전 데이터의 "꽉 채우기" 스위치를 최대 폭 값으로 옮겨 읽는다
 function readMaxWidth(value, legacyFull) {
@@ -138,17 +152,27 @@ function applyLayoutVars(profile, scope = "home") {
   root.setProperty("--side-mobile", (sideMobile != null ? sideMobile : SIDE_MARGIN_MOBILE_DEFAULT) + "px");
   root.setProperty("--side-menu-mobile", (contentMobile != null ? contentMobile : CONTENT_MARGIN_MOBILE_DEFAULT) + "px");
 
-  // 타이포그래피 스케일 8단계 × 데스크톱/모바일. profile.text<Tier>[Mobile] 필드를
-  // 읽어 --text-<tier> / --text-<tier>-mobile 로 넣는다(사용처는 style.css 모바일
-  // 분기에서 -mobile 버전을 따로 참조한다 — applyLayoutVars가 인라인 스타일로
-  // 덮어써서 미디어쿼리만으로는 되돌릴 수 없기 때문).
-  Object.keys(TEXT_SCALE_DEFAULTS).forEach((tier) => {
-    const def = TEXT_SCALE_DEFAULTS[tier];
+  // 타이포그래피 스케일: 본문 기본(px) 하나를 기준으로 나머지 7단계는
+  // 그 배율로 계산한다. --text-body 를 바꾸면 전부 비례해서 따라온다.
+  // (사용처는 style.css 모바일 분기에서 -mobile 버전을 따로 참조한다 —
+  // applyLayoutVars가 인라인 스타일로 덮어써서 미디어쿼리만으로는
+  // --text-body 자체를 되돌릴 수 없기 때문.)
+  const bodyDesktop = normalizeGap(p.textBody);
+  const bodyMobile = normalizeGap(p.textBodyMobile);
+  const bd = bodyDesktop != null ? bodyDesktop : TEXT_BODY_DEFAULT;
+  const bm = bodyMobile != null ? bodyMobile : TEXT_BODY_MOBILE_DEFAULT;
+  root.setProperty("--text-body", bd + "px");
+  root.setProperty("--text-body-mobile", bm + "px");
+
+  Object.keys(TEXT_RATIO_DEFAULTS).forEach((tier) => {
+    const def = TEXT_RATIO_DEFAULTS[tier];
     const key = "text" + tier[0].toUpperCase() + tier.slice(1);
-    const desktop = normalizeGap(p[key]);
-    const mobile = normalizeGap(p[key + "Mobile"]);
-    root.setProperty(`--text-${tier}`, (desktop != null ? desktop : def.desktop) + "px");
-    root.setProperty(`--text-${tier}-mobile`, (mobile != null ? mobile : def.mobile) + "px");
+    const ratioDesktop = normalizeRatio(p[key + "RatioDesktop"]);
+    const ratioMobile = normalizeRatio(p[key + "RatioMobile"]);
+    const rd = ratioDesktop != null ? ratioDesktop : def.desktop;
+    const rm = ratioMobile != null ? ratioMobile : def.mobile;
+    root.setProperty(`--text-${tier}`, +(rd * bd).toFixed(2) + "px");
+    root.setProperty(`--text-${tier}-mobile`, +(rm * bm).toFixed(2) + "px");
   });
 }
 

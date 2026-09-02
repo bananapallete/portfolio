@@ -824,47 +824,66 @@ function renderLayoutFields(wrap, profile) {
   ));
   wrap.appendChild(radiusBox);
 
-  // 텍스트 크기: Figma에서 재정립한 반응형 타이포그래피 스케일(8단계) 그대로.
-  // 콘텐츠를 쓸 때도 이 8단계를 기준으로 삼는다 — 여기서 값을 바꾸면
-  // 카테고리 이름 줄·소개문·푸터·경력 섹션이 전부 함께 바뀐다.
+  // 텍스트 크기: "본문 기본"만 실제 px이고, 나머지 7단계는 본문 기본의
+  // 배율(rem 개념)이다. 그래서 평소에 건드릴 건 "본문 기본" 하나뿐 —
+  // 바꾸면 카테고리 이름 줄·소개문·푸터·경력 섹션의 나머지 크기가
+  // 전부 비례해서 함께 바뀐다. 배율 자체를 다시 잡고 싶을 때만 아래
+  // 각 단계의 배율 칸을 고치면 된다. 웹/모바일은 배율 자체가 달라서
+  // (모바일에서는 라벨·캡션이 본문과 거의 같이 줄어 배율이 오히려 커진다)
+  // 블록을 나눠 따로 둔다.
   const textHead = document.createElement("label");
   textHead.className = "mini-label";
-  textHead.textContent = "텍스트 크기 (타이포그래피 스케일)";
+  textHead.textContent = "텍스트 크기 (본문 기본 대비 배율)";
   wrap.appendChild(textHead);
 
-  const textBox = document.createElement("div");
-  textBox.className = "layout-fields";
-  [
-    ["display", "대형 표시", 20, 80],
-    ["headline", "헤드라인", 16, 70],
-    ["h1", "큰 제목", 14, 60],
-    ["h2", "중간 제목", 12, 50],
-    ["h3", "작은 제목", 10, 40],
-    ["body", "본문 기본", 10, 28],
-    ["label", "라벨 / 작은 텍스트", 8, 24],
-    ["caption", "캡션", 8, 20],
-  ].forEach(([tier, labelText, min, max]) => {
-    const def = TEXT_SCALE_DEFAULTS[tier];
-    const key = "text" + tier[0].toUpperCase() + tier.slice(1);
-    const mobileKey = key + "Mobile";
-    textBox.appendChild(marginItem(
-      buildSliderField(
+  const ratioTiers = [
+    ["display", "대형 표시", 0.5, 5],
+    ["headline", "헤드라인", 0.5, 5],
+    ["h1", "큰 제목", 0.5, 4],
+    ["h2", "중간 제목", 0.5, 3.5],
+    ["h3", "작은 제목", 0.5, 3],
+    ["label", "라벨 / 작은 텍스트", 0.3, 2],
+    ["caption", "캡션", 0.3, 2],
+  ];
+
+  // suffix: "Desktop" | "Mobile" — profile.text<Tier>Ratio<Desktop|Mobile> 필드명에 쓴다
+  const buildScaleColumn = (title, bodyKey, bodyMin, bodyMax, suffix) => {
+    const col = document.createElement("div");
+    col.className = "text-scale-column";
+
+    const colLabel = document.createElement("div");
+    colLabel.className = "text-scale-column-label";
+    colLabel.textContent = title;
+    col.appendChild(colLabel);
+
+    col.appendChild(buildSliderField(
+      "본문 기본",
+      () => profile[bodyKey],
+      (v) => { if (v == null) delete profile[bodyKey]; else profile[bodyKey] = v; },
+      { min: bodyMin, max: bodyMax, def: suffix === "Desktop" ? TEXT_BODY_DEFAULT : TEXT_BODY_MOBILE_DEFAULT },
+      live
+    ));
+
+    ratioTiers.forEach(([tier, labelText, min, max]) => {
+      const def = TEXT_RATIO_DEFAULTS[tier][suffix === "Desktop" ? "desktop" : "mobile"];
+      const key = "text" + tier[0].toUpperCase() + tier.slice(1) + "Ratio" + suffix;
+      col.appendChild(buildSliderField(
         labelText,
         () => profile[key],
         (v) => { if (v == null) delete profile[key]; else profile[key] = v; },
-        { min, max, def: def.desktop },
+        { min, max, def, step: 0.001, unit: "배" },
         live
-      ),
-      buildSliderField(
-        labelText + " (모바일)",
-        () => profile[mobileKey],
-        (v) => { if (v == null) delete profile[mobileKey]; else profile[mobileKey] = v; },
-        { min: Math.round(min * 0.8), max: Math.round(max * 0.8), def: def.mobile },
-        live
-      )
-    ));
-  });
-  wrap.appendChild(textBox);
+      ));
+    });
+
+    return col;
+  };
+
+  const textColumns = document.createElement("div");
+  textColumns.className = "text-scale-columns";
+  textColumns.appendChild(buildScaleColumn("웹", "textBody", 10, 28, "Desktop"));
+  textColumns.appendChild(buildScaleColumn("모바일", "textBodyMobile", 8, 20, "Mobile"));
+  wrap.appendChild(textColumns);
 }
 
 function makeTextField(labelText, value, onChange) {

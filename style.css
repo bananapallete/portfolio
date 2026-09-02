@@ -2353,6 +2353,33 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   flex-wrap: nowrap;
 }
 
+/* 텍스트 크기: 웹/모바일 블록을 좌우로 나눠, 각 블록 안에서는
+   본문 기본 + 배율 슬라이더들을 세로로 쌓는다 */
+.text-scale-columns {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.text-scale-column {
+  flex: 1 1 320px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+}
+.text-scale-column-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
 /* 끌면서 바로 반영되는 슬라이더 (라벨 + 손잡이 + 숫자 + px + 기본값) */
 .slider-field {
   display: flex;
