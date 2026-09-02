@@ -204,10 +204,16 @@ function buildCareerSkills(skillGroups) {
   const wrap = document.createElement("div");
   wrap.className = "career-skills";
   skillGroups.forEach((group) => {
+    // 라벨 + 그 그룹의 아이콘들을 한 덩어리로 묶어야, 좁은 화면에서 줄바꿈이
+    // 일어나도 라벨과 아이콘이 떨어지지 않고 그룹째로 다음 줄로 넘어간다
+    const groupEl = document.createElement("span");
+    groupEl.className = "career-skill-group";
+
     const label = document.createElement("span");
     label.className = "career-skill-group-label";
     label.textContent = group.label || "";
-    wrap.appendChild(label);
+    groupEl.appendChild(label);
+
     (group.tools || []).forEach((toolId) => {
       const tool = TOOL_BY_ID[toolId];
       if (!tool) return;
@@ -215,15 +221,17 @@ function buildCareerSkills(skillGroups) {
       badge.className = "career-skill-icon";
       badge.title = tool.label;
       badge.appendChild(buildToolIcon(tool));
-      wrap.appendChild(badge);
+      groupEl.appendChild(badge);
     });
+
+    wrap.appendChild(groupEl);
   });
   return wrap;
 }
 
 // 첫 항목(최종 경력/학력)만 라벨이 붙은 상세 카드로, 나머지는 이전 이력으로
-// 화살표로 이어 붙인다. fields: [[데이터 키, 라벨], ...] 순서대로 한 줄씩 채운다.
-// 모바일에서는 이 줄 전체가 가로로 스크롤돼 좌우로 슬라이드해 볼 수 있다.
+// 옅게 이어 붙인다. fields: [[데이터 키, 라벨], ...] 순서대로 한 줄씩 채운다.
+// 데스크톱은 한 줄로 늘어놓고, 모바일은 2열 그리드로 접어 전부 한눈에 보인다.
 function buildCareerTimeline(items, fields) {
   const wrap = document.createElement("div");
   wrap.className = "career-timeline-wrap";
@@ -232,14 +240,6 @@ function buildCareerTimeline(items, fields) {
   list.className = "career-timeline";
 
   items.forEach((item, i) => {
-    if (i > 0) {
-      const arrow = document.createElement("img");
-      arrow.className = "career-arrow";
-      arrow.src = "assets/icons/arrow-left-sm.svg";
-      arrow.alt = "";
-      list.appendChild(arrow);
-    }
-
     const card = document.createElement("div");
     card.className = "career-card" + (i === 0 ? " career-card-main" : " career-card-more");
 
