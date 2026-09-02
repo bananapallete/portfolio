@@ -3,6 +3,18 @@
    데이터 로딩 · 임베드 주소 정규화 · 블록 렌더링 · 카테고리 탭 내비게이션
    ========================================================================== */
 
+/* 스크롤바를 평소엔 거의 안 보이게 뒀다가, 실제로 스크롤하는 동안만
+   옅게 드러낸다(style.css의 html.is-scrolling 참고). 스크롤이 멎고
+   나서도 잠깐 남아있다 사라지게, 마지막 스크롤 뒤 타이머로 지운다. */
+let scrollBarHideTimer = null;
+window.addEventListener("scroll", () => {
+  document.documentElement.classList.add("is-scrolling");
+  clearTimeout(scrollBarHideTimer);
+  scrollBarHideTimer = setTimeout(() => {
+    document.documentElement.classList.remove("is-scrolling");
+  }, 700);
+}, { passive: true });
+
 let sliderTimers = [];
 
 function stopSliders() {
@@ -59,6 +71,19 @@ const CARD_RADIUS_DEFAULT = 0; // 카드 모서리 둥글기
 const SIDE_MARGIN_MOBILE_DEFAULT = 18;
 const CONTENT_MARGIN_MOBILE_DEFAULT = 18;
 
+/* 반응형 타이포그래피 스케일(Figma 참고). 8단계 × (데스크톱/모바일) 기본값 —
+   지금 CSS에 이미 적용돼 있는 수치라서 관리자에서 처음 열어도 화면이 안 바뀐다. */
+const TEXT_SCALE_DEFAULTS = {
+  display: { desktop: 49, mobile: 36 },
+  headline: { desktop: 39, mobile: 30 },
+  h1: { desktop: 31, mobile: 23 },
+  h2: { desktop: 25, mobile: 18 },
+  h3: { desktop: 20, mobile: 15 },
+  body: { desktop: 16, mobile: 12 },
+  label: { desktop: 13, mobile: 12 },
+  caption: { desktop: 12, mobile: 11 },
+};
+
 // 예전 데이터의 "꽉 채우기" 스위치를 최대 폭 값으로 옮겨 읽는다
 function readMaxWidth(value, legacyFull) {
   const v = normalizeGap(value);
@@ -112,6 +137,19 @@ function applyLayoutVars(profile, scope = "home") {
   root.setProperty("--card-radius", (radius != null ? radius : CARD_RADIUS_DEFAULT) + "px");
   root.setProperty("--side-mobile", (sideMobile != null ? sideMobile : SIDE_MARGIN_MOBILE_DEFAULT) + "px");
   root.setProperty("--side-menu-mobile", (contentMobile != null ? contentMobile : CONTENT_MARGIN_MOBILE_DEFAULT) + "px");
+
+  // 타이포그래피 스케일 8단계 × 데스크톱/모바일. profile.text<Tier>[Mobile] 필드를
+  // 읽어 --text-<tier> / --text-<tier>-mobile 로 넣는다(사용처는 style.css 모바일
+  // 분기에서 -mobile 버전을 따로 참조한다 — applyLayoutVars가 인라인 스타일로
+  // 덮어써서 미디어쿼리만으로는 되돌릴 수 없기 때문).
+  Object.keys(TEXT_SCALE_DEFAULTS).forEach((tier) => {
+    const def = TEXT_SCALE_DEFAULTS[tier];
+    const key = "text" + tier[0].toUpperCase() + tier.slice(1);
+    const desktop = normalizeGap(p[key]);
+    const mobile = normalizeGap(p[key + "Mobile"]);
+    root.setProperty(`--text-${tier}`, (desktop != null ? desktop : def.desktop) + "px");
+    root.setProperty(`--text-${tier}-mobile`, (mobile != null ? mobile : def.mobile) + "px");
+  });
 }
 
 // eager: 첫 화면에 걸리는 카드만 미리 받아 둔다

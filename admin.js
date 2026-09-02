@@ -823,6 +823,48 @@ function renderLayoutFields(wrap, profile) {
     live
   ));
   wrap.appendChild(radiusBox);
+
+  // 텍스트 크기: Figma에서 재정립한 반응형 타이포그래피 스케일(8단계) 그대로.
+  // 콘텐츠를 쓸 때도 이 8단계를 기준으로 삼는다 — 여기서 값을 바꾸면
+  // 카테고리 이름 줄·소개문·푸터·경력 섹션이 전부 함께 바뀐다.
+  const textHead = document.createElement("label");
+  textHead.className = "mini-label";
+  textHead.textContent = "텍스트 크기 (타이포그래피 스케일)";
+  wrap.appendChild(textHead);
+
+  const textBox = document.createElement("div");
+  textBox.className = "layout-fields";
+  [
+    ["display", "대형 표시", 20, 80],
+    ["headline", "헤드라인", 16, 70],
+    ["h1", "큰 제목", 14, 60],
+    ["h2", "중간 제목", 12, 50],
+    ["h3", "작은 제목", 10, 40],
+    ["body", "본문 기본", 10, 28],
+    ["label", "라벨 / 작은 텍스트", 8, 24],
+    ["caption", "캡션", 8, 20],
+  ].forEach(([tier, labelText, min, max]) => {
+    const def = TEXT_SCALE_DEFAULTS[tier];
+    const key = "text" + tier[0].toUpperCase() + tier.slice(1);
+    const mobileKey = key + "Mobile";
+    textBox.appendChild(marginItem(
+      buildSliderField(
+        labelText,
+        () => profile[key],
+        (v) => { if (v == null) delete profile[key]; else profile[key] = v; },
+        { min, max, def: def.desktop },
+        live
+      ),
+      buildSliderField(
+        labelText + " (모바일)",
+        () => profile[mobileKey],
+        (v) => { if (v == null) delete profile[mobileKey]; else profile[mobileKey] = v; },
+        { min: Math.round(min * 0.8), max: Math.round(max * 0.8), def: def.mobile },
+        live
+      )
+    ));
+  });
+  wrap.appendChild(textBox);
 }
 
 function makeTextField(labelText, value, onChange) {

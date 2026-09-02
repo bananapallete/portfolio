@@ -121,17 +121,28 @@
 
   --header-h: 78px;
 
-  /* 반응형 타이포그래피 스케일(Figma 참고). 국문/영문 크기는 같고 글꼴만
-     Pretendard/Poppins로 갈린다 — 각 요소가 이미 그렇게 쓰고 있다.
-     640px 아래는 아래 모바일 분기에서 각 값을 다시 줄인다. */
-  --text-display: 49px;  /* 대형 표시 */
-  --text-headline: 39px; /* 헤드라인 */
-  --text-h1: 31px;       /* 큰 제목 */
-  --text-h2: 25px;       /* 중간 제목 */
-  --text-h3: 20px;       /* 작은 제목 */
-  --text-body: 16px;     /* 본문 기본 */
-  --text-label: 13px;    /* 라벨 / 작은 텍스트 */
-  --text-caption: 12px;  /* 캡션 */
+  /* 반응형 타이포그래피 스케일(Figma 참고, 관리자 "텍스트 크기"에서 조절).
+     국문/영문 크기는 같고 글꼴만 Pretendard/Poppins로 갈린다 — 각 요소가
+     이미 그렇게 쓰고 있다. -mobile 값은 blocks.js가 인라인 스타일로 항상
+     덮어쓰므로, 640px 아래에서 쓰는 곳마다 그 변수를 따로 참조해야 한다
+     (미디어쿼리로 --text-display 자체를 되돌리는 방식은 인라인 스타일보다
+     우선순위가 낮아 먹히지 않는다). */
+  --text-display: 49px;         /* 대형 표시 */
+  --text-display-mobile: 36px;
+  --text-headline: 39px;        /* 헤드라인 */
+  --text-headline-mobile: 30px;
+  --text-h1: 31px;              /* 큰 제목 */
+  --text-h1-mobile: 23px;
+  --text-h2: 25px;              /* 중간 제목 */
+  --text-h2-mobile: 18px;
+  --text-h3: 20px;              /* 작은 제목 */
+  --text-h3-mobile: 15px;
+  --text-body: 16px;            /* 본문 기본 */
+  --text-body-mobile: 12px;
+  --text-label: 13px;           /* 라벨 / 작은 텍스트 */
+  --text-label-mobile: 12px;
+  --text-caption: 12px;         /* 캡션 */
+  --text-caption-mobile: 11px;
 
   /* Poppins가 라틴 문자를 담당하고, 한글은 자동으로 Pretendard로 대체됩니다 */
   --font: "Poppins", "Pretendard", "Apple SD Gothic Neo", "Helvetica Neue", Arial, sans-serif;
@@ -152,6 +163,28 @@ body.theme-dark {
 html, body {
   margin: 0;
   padding: 0;
+}
+
+/* 스크롤바는 늘 자리를 차지해 둬서(스크롤이 생기고 없어질 때 본문이 옆으로
+   덜컹거리지 않게) 하되, 평소엔 거의 안 보이다가 스크롤하는 동안만 옅게
+   나타난다. 실제 표시는 blocks.js가 스크롤 중에 붙이는 is-scrolling으로 켠다. */
+html {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+html.is-scrolling {
+  scrollbar-color: color-mix(in srgb, var(--ink) 35%, transparent) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+html.is-scrolling ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
 body {
@@ -314,8 +347,6 @@ body.has-open-category .site-header { position: static; }
   padding-top: 44px;
 }
 
-.work-section-head .acc-head { border-bottom: 0.5px solid var(--ink); }
-
 /* 이름 줄을 누르면 접고 펼 수 있다. 화살표는 열려 있을 때만 위를 향한다 */
 .ws-head-clickable { cursor: pointer; }
 .ws-chevron-open { transform: rotate(180deg); }
@@ -360,7 +391,6 @@ body.has-open-category .site-header { position: static; }
    자체로 넣고 있어서, 아래 .acc-item .work-grid 에서 그 몫만큼 지워 중복을 막는다. */
 .acc-item {
   position: relative;
-  border-bottom: 0.5px solid var(--ink);
   max-width: var(--wrap);
   margin: 0 auto;
   padding-left: var(--side);
@@ -406,6 +436,9 @@ body.has-open-category .site-header { position: static; }
   gap: 16px;
   width: 100%;
   border: none;
+  /* 경계선을 패딩이 붙은 .acc-item이 아니라 여기(.acc-head)에 둬야, 좌우
+     여백을 넘어 화면 끝까지 삐져나가지 않고 글자와 같은 선에서 끝난다. */
+  border-bottom: 0.5px solid var(--ink);
   background: transparent;
   padding: var(--acc-head-gap, 13px) 0;
   text-align: left;
@@ -2717,17 +2750,21 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 /* ---------------------------- 모바일 반응형 ---------------------------- */
 
 @media (max-width: 640px) {
-  :root {
-    --header-h: 48px;
-    --text-display: 36px;
-    --text-headline: 30px;
-    --text-h1: 23px;
-    --text-h2: 18px;
-    --text-h3: 15px;
-    --text-body: 12px;
-    --text-label: 12px;
-    --text-caption: 11px;
-  }
+  :root { --header-h: 48px; }
+
+  /* blocks.js가 --text-*를 인라인 스타일로 늘 채워두므로, 여기서 :root의
+     --text-* 자체를 다시 정의해도 우선순위에서 밀려 소용없다. 그래서 실제
+     쓰는 곳마다 -mobile 변수로 따로 덮어쓴다(각 규칙은 위에서 이미 정의). */
+  .site-bio { font-size: var(--text-body-mobile); }
+  .acc-name { font-size: var(--text-display-mobile); }
+  .acc-item.open .acc-head.is-stuck .acc-name { font-size: var(--text-h3-mobile); }
+  .acc-sub { font-size: var(--text-label-mobile); }
+  .career-row-label { font-size: var(--text-h3-mobile); }
+  .career-about-line { font-size: var(--text-body-mobile); }
+  .career-skill-group-label { font-size: var(--text-caption-mobile); }
+  .footer-title,
+  .footer-contact,
+  .footer-admin-link { font-size: var(--text-label-mobile); }
 
   .site-header .container {
     flex-direction: row;
