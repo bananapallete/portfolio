@@ -1706,11 +1706,12 @@ function renderBlocksEditor(project) {
 
     /* 아직 비어 있는 블록은 넣을 방법이 설정 줄에 있으므로 접지 않는다.
        영상은 펼쳤을 때 링크 칸이 늘 영상 위에 함께 보이므로,
-       따로 여닫는 설정 버튼을 두지 않는다. */
-    const mustShowSettings = needsSetup(block) || (block.type === "embed" && !folded);
+       따로 여닫는 설정 버튼을 두지 않는다. 텍스트는 조절 메뉴를 머리줄에
+       바로 붙여 늘 보이므로, 이쪽도 여닫는 버튼이 필요 없다. */
+    const mustShowSettings =
+      needsSetup(block) || (block.type === "embed" && !folded) || block.type === "text";
     const settingsOpen = mustShowSettings || openSettings.has(block);
-    // 영상은 접으면 줄을 눌러 펼치고, 펼치면 링크 칸이 늘 함께 뜨므로
-    // 어느 쪽이든 여닫는 설정 버튼이 필요 없다
+    // 영상·텍스트는 늘 설정이 함께 뜨므로 여닫는 버튼이 필요 없다
     if (!mustShowSettings && block.type !== "embed") {
       const gear = document.createElement("button");
       gear.type = "button";
@@ -1809,7 +1810,7 @@ function renderBlocksEditor(project) {
     });
     return b;
   };
-  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", color: "#f5f4f0", align: "left" })));
+  addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", color: "#000000", align: "left" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
   addRow.appendChild(mkAdd("+ 비디오", () => ({ type: "embed", src: "" })));
   wrap.appendChild(addRow);
@@ -1835,7 +1836,7 @@ function renderBlockBody(project, block, blockIndex) {
     colorLabel.textContent = "색상";
 
     const colorField = buildColorField(
-      block.color || "#f5f4f0",
+      block.color || "#000000",
       (v) => {
         block.color = v;
         applyTextStyle(pv, block);
