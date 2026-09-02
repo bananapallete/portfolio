@@ -2381,16 +2381,12 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   margin-top: 10px;
 }
 
-/* 레이아웃 조절값 묶음 — 프로필 편집 맨 위 */
+/* 레이아웃 조절값 묶음 — 순수 배치만 맡는다. 테두리·배경은 이제
+   바깥의 .settings-fold 카드가 지고, 라벨은 그 카드의 머리글로 들어간다. */
 .layout-fields {
   display: flex;
   flex-wrap: wrap;
   gap: 14px 28px;
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--paper-soft);
 }
 
 /* 여백 슬라이더 + 그 화면의 "꽉 채우기" 스위치를 한 덩어리로 */
@@ -2401,15 +2397,23 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   flex-wrap: nowrap;
 }
 
-/* 접었다 펼치는 설정 구획 제목. .mini-label과 같은 글자 모양을 쓰되
-   버튼이라 별도 규칙으로 둔다(속성이 뒤섞여 서로 지우지 않도록). */
+/* 접었다 펼치는 설정 구획. 제목(머리글)과 내용이 같은 카드 안에 함께
+   들어가, 접으면 머리글만 남고 펼치면 카드가 아래로 늘어난다. */
+.settings-fold {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+}
+
 .settings-fold-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  margin: 14px 0 5px;
+  margin: 0;
   padding: 0;
   border: none;
   background: none;
@@ -2429,6 +2433,8 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 }
 
 .settings-fold-chevron.is-open { transform: rotate(180deg); }
+
+.settings-fold-body { margin-top: 14px; }
 
 /* 텍스트 크기: 웹/모바일 블록을 좌우로 나눠, 각 블록 안에서는
    본문 기본 + 배율 슬라이더들을 세로로 쌓는다 */

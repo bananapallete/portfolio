@@ -631,8 +631,8 @@ function renderProfileFields(wrap, profile) {
 /* 접었다 펼치는 설정 구획. 자주 안 건드리는 값들을 닫아 둬 화면을 덜 채운다.
    기본은 닫힌 채로 시작한다 — body를 wrap에 미리 붙여 두고 hidden만 켠다. */
 function buildFoldSection(title) {
-  const wrapEl = document.createElement("div");
-  wrapEl.className = "settings-fold";
+  const card = document.createElement("div");
+  card.className = "settings-fold";
 
   const head = document.createElement("button");
   head.type = "button";
@@ -649,6 +649,7 @@ function buildFoldSection(title) {
   head.appendChild(chevron);
 
   const body = document.createElement("div");
+  body.className = "settings-fold-body";
   body.hidden = true;
 
   head.addEventListener("click", () => {
@@ -656,22 +657,20 @@ function buildFoldSection(title) {
     chevron.classList.toggle("is-open", !body.hidden);
   });
 
-  wrapEl.appendChild(head);
-  wrapEl.appendChild(body);
-  return { wrapEl, body };
+  card.appendChild(head);
+  card.appendChild(body);
+  return { card, body };
 }
 
 /* 레이아웃 값 두 가지를 한 자리에 모아 맨 위에 둔다.
    손잡이를 끄는 동안 화면이 바로 따라오도록 다시 그리지 않고 변수만 갱신한다. */
 function renderLayoutFields(wrap, profile) {
-  const head = document.createElement("label");
-  head.className = "mini-label";
-  head.textContent = "레이아웃 (최대 폭을 화면보다 크게 올리면 양 끝까지 차요)";
-  head.style.marginTop = "0";
-  wrap.appendChild(head);
+  const layoutFold = buildFoldSection("레이아웃 (최대 폭을 화면보다 크게 올리면 양 끝까지 차요)");
+  wrap.appendChild(layoutFold.card);
 
   const box = document.createElement("div");
   box.className = "layout-fields";
+  layoutFold.body.appendChild(box);
 
   const live = () => applyLayoutVars(profile);
 
@@ -725,12 +724,10 @@ function renderLayoutFields(wrap, profile) {
     )
   ));
 
-  wrap.appendChild(box);
-
   // 세부 조절: 자주 안 건드리는 값들을 한데 모아 접어 둔다. 기본값은 지금
   // 실제로 적용돼 있는 수치라서, 처음 열어도 화면이 그대로다.
   const detailFold = buildFoldSection("세부 조절");
-  wrap.appendChild(detailFold.wrapEl);
+  wrap.appendChild(detailFold.card);
 
   const detailBox = document.createElement("div");
   detailBox.className = "layout-fields";
@@ -807,13 +804,12 @@ function renderLayoutFields(wrap, profile) {
 
   // 모바일 화면 여백. 데스크톱 값을 그냥 줄이는 게 아니라 따로 관리하는 값이다
   // (지금까지는 18px로 고정돼 있던 걸 조절 가능하게 연 것 — 기본값이 곧 그 18px).
-  const mobileHead = document.createElement("label");
-  mobileHead.className = "mini-label";
-  mobileHead.textContent = "모바일 화면 여백";
-  wrap.appendChild(mobileHead);
+  const mobileFold = buildFoldSection("모바일 화면 여백");
+  wrap.appendChild(mobileFold.card);
 
   const mobileBox = document.createElement("div");
   mobileBox.className = "layout-fields";
+  mobileFold.body.appendChild(mobileBox);
   mobileBox.appendChild(buildSliderField(
     "홈 · 상단 메뉴 여백 (모바일)",
     () => profile.sideMarginMobile,
@@ -828,7 +824,6 @@ function renderLayoutFields(wrap, profile) {
     { min: 0, max: 60, def: CONTENT_MARGIN_MOBILE_DEFAULT },
     live
   ));
-  wrap.appendChild(mobileBox);
 
   // 텍스트 크기: "본문 기본"만 실제 px이고, 나머지 7단계는 본문 기본의
   // 배율(rem 개념)이다. 그래서 평소에 건드릴 건 "본문 기본" 하나뿐 —
@@ -838,7 +833,7 @@ function renderLayoutFields(wrap, profile) {
   // (모바일에서는 라벨·캡션이 본문과 거의 같이 줄어 배율이 오히려 커진다)
   // 블록을 나눠 따로 둔다.
   const textFold = buildFoldSection("텍스트 크기 (본문 기본 대비 배율)");
-  wrap.appendChild(textFold.wrapEl);
+  wrap.appendChild(textFold.card);
 
   const ratioTiers = [
     ["display", "대형 표시", 0.5, 5],
