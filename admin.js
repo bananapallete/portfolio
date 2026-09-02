@@ -1514,30 +1514,11 @@ function renderEditModalBody() {
       });
     },
   }));
-  // 개요 글자 조절 줄 (기본값 14px · 자간 -2%)
-  // 크기는 작업년도 · 기여도 · 사용 툴까지 함께 따라오고, 자간은 설명에만 걸린다
+  // 개요의 글자 크기·자간은 이제 텍스트 시스템(라벨/본문 토큰)을 그대로 따르므로
+  // 굵게/보통 선택만 남긴다
   const ovControls = document.createElement("div");
   ovControls.className = "block-controls-row overview-controls";
   ovControls.appendChild(buildWeightButtons(() => descEl, descSlot));
-  // 크기는 묶음 전체에 걸리므로 설명 칸이 아니라 개요 묶음을 다시 칠한다
-  const restyle = () => {
-    const sec = overviewWrap.querySelector(".proj-overview");
-    if (sec) applyOverviewStyle(sec, project);
-  };
-  ovControls.appendChild(buildSliderField(
-    "개요 크기",
-    () => project.overviewSize,
-    (v) => { if (v == null) delete project.overviewSize; else project.overviewSize = v; },
-    { min: 10, max: 60, def: 14, unit: "px" },
-    restyle
-  ));
-  ovControls.appendChild(buildSliderField(
-    "설명 자간",
-    () => project.overviewTracking,
-    (v) => { if (v == null) delete project.overviewTracking; else project.overviewTracking = v; },
-    { min: -10, max: 30, def: -2, step: 0.5, unit: "%" },
-    restyle
-  ));
   card.appendChild(ovControls);
   card.appendChild(overviewWrap);
 

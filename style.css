@@ -698,7 +698,7 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
 
 .card-desc {
   font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-  font-size: clamp(10px, 1.82cqw, 12px);
+  font-size: var(--text-label);
   line-height: 1.39;
   letter-spacing: -0.02em;
   color: #fff;
@@ -881,24 +881,71 @@ body.bg-takeover:not(.bg-takeover-light) {
   transition: color 0.65s ease;
 }
 
-/* ---------------------- 스크롤 리빌: 화면에 들어오면 슬라이드 인 ---------------------- */
+/* --------- 스크롤 리빌: 스켈레톤으로 반짝이다가 위→아래 순서로 등장 ---------
+   블록 자신은 그대로 살려 두고(따로 opacity로 숨기지 않는다), 그 위에
+   ::before로 스켈레톤 판을 얹어 반짝이게 한 뒤 지워서 내용을 드러낸다.
+   같이 화면에 들어온 블록은 --reveal-delay(JS가 문서 순서대로 채움)만큼
+   차례로 늦게 걷히므로 위에서 아래로 등장하는 것처럼 보인다. */
 
 .reveal {
-  opacity: 0;
+  --reveal-delay: 0ms;
+  position: relative;
   transform: translateY(48px);
-  transition: opacity 0.7s ease-in, transform 0.7s ease-in;
-  will-change: opacity, transform;
+  transition: transform 0.6s ease-out;
+  transition-delay: var(--reveal-delay);
+  will-change: transform;
 }
 
 .reveal.reveal-in {
-  opacity: 1;
   transform: none;
 }
 
+/* .blk-text는 배경 전환 색 트랜지션도 함께 걸려 있어, 더 구체적인 선택자로
+   두 트랜지션을 한 선언에 같이 적어야 서로 지우지 않는다 */
+.blk-text.reveal {
+  transition: color 0.65s ease, transform 0.6s ease-out;
+  transition-delay: 0s, var(--reveal-delay);
+}
+
+.reveal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-color: var(--paper-soft);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  opacity: 1;
+  transition: opacity 0.6s ease-out;
+  transition-delay: var(--reveal-delay);
+  pointer-events: none;
+}
+
+.reveal.reveal-in::before {
+  opacity: 0;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
+  .reveal,
+  .blk-text.reveal {
     transform: none;
+    transition: none;
+  }
+  .reveal::before {
+    opacity: 0;
+    animation: none;
     transition: none;
   }
 }
@@ -1662,8 +1709,8 @@ body.gate-locked { overflow: hidden; }
   margin: 0 auto;
   padding: 0 var(--side);
   white-space: pre-wrap;
-  /* 크기를 정하지 않은 글도 관리자 미리보기와 같은 크기로 보이도록 */
-  font-size: 15px;
+  /* 블록마다 크기를 따로 정하지 않으면 본문 기본 크기(--text-body)를 따른다 */
+  font-size: var(--text-body);
   line-height: 1.65;
   color: color-mix(in srgb, var(--ink) 80%, transparent);
 }
@@ -1902,7 +1949,7 @@ body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
 }
 
 .proj-title {
-  font-size: clamp(30px, 5vw, 52px);
+  font-size: var(--text-display);
   font-weight: 900;
   letter-spacing: -0.02em;
   margin: 0;
@@ -1917,15 +1964,13 @@ body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
 }
 
 /* -------- 프로젝트 개요: 설명 + 작업년도 · 기여도 · 사용 툴 (디자인 실측값) --------
-   19px / 줄높이 23px, 라벨과 설명은 #9ca0a8, 값은 흰색.
-   자간 0.95px = 19px 기준 0.05em 이라 글자가 줄어도 비율이 유지된다. */
+   줄높이 비율(23/19)은 글자 크기가 바뀌어도 그대로 유지되는 비율이라 남겨 둔다.
+   라벨과 설명은 #9ca0a8, 값은 흰색. */
 .proj-overview {
   --meta-label: #9ca0a8;
   --meta-value: #ffffff;
   font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
   font-weight: 500;
-  /* 기본값 — 관리자에서 "개요 크기"를 손대지 않으면 이 값이 쓰인다 */
-  font-size: 14px;
   line-height: calc(23 / 19);
   /* 위는 제목 바로 아래에 붙이고(15px), 아래는 콘텐츠 블록과 뗀 채로 둔다 */
   padding: 15px 0 113px;
@@ -1941,7 +1986,7 @@ body.bg-takeover-light .proj-overview,
 .proj-overview-desc {
   margin: 0;
   color: var(--meta-label);
-  /* 기본값 — 관리자의 "설명 자간"을 손대지 않으면 이 값이 쓰인다 (-2%) */
+  font-size: var(--text-body);
   letter-spacing: -0.02em;
   white-space: pre-wrap;
 }
@@ -1964,6 +2009,7 @@ body.bg-takeover-light .proj-overview,
 .proj-meta-label {
   margin: 0;
   color: var(--meta-label);
+  font-size: var(--text-label);
   letter-spacing: 0.05em;
 }
 
@@ -1971,6 +2017,7 @@ body.bg-takeover-light .proj-overview,
 .proj-meta-value {
   margin: 16px 0 0;
   color: var(--meta-value);
+  font-size: var(--text-label);
 }
 
 /* 가로 간격 18px은 디자인 실측값. 세로만 아이콘 높이에 맞춰 넉넉히 준다 */
@@ -1985,6 +2032,7 @@ body.bg-takeover-light .proj-overview,
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-size: var(--text-label);
 }
 
 /* 관리자에서는 이 한 짝이 눌러서 켜고 끄는 버튼이 된다.
@@ -2006,7 +2054,7 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 .proj-meta-tool.tool-off { opacity: 0.32; filter: grayscale(1); }
 .proj-meta-tool.tool-off:hover { opacity: 0.6; filter: grayscale(0.4); }
 
-/* 아이콘 크기는 글자를 따라간다 — "개요 크기"를 올리면 함께 커진다 */
+/* 아이콘 크기는 글자를 따라간다 — 라벨 크기(--text-label)가 커지면 함께 커진다 */
 .proj-meta-tool-icon {
   display: block;
   width: 1.6em;
@@ -2145,7 +2193,7 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
    색을 var(--ink)로 다시 잡아야 밝은 배경에서 .preview-light 뒤집기가 먹는다
    (상속된 색은 이미 계산이 끝난 값이라 지역 변수를 다시 보지 않는다) */
 .hero-preview .proj-title {
-  font-size: clamp(26px, 3.2vw, 40px);
+  font-size: var(--text-headline);
   color: var(--ink);
 }
 
@@ -2792,6 +2840,13 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   .footer-title,
   .footer-contact,
   .footer-admin-link { font-size: var(--text-label-mobile); }
+  .card-desc,
+  .proj-meta-label,
+  .proj-meta-value,
+  .proj-meta-tool { font-size: var(--text-label-mobile); }
+  .proj-title { font-size: var(--text-display-mobile); }
+  .proj-overview-desc,
+  .blk-text { font-size: var(--text-body-mobile); }
 
   .site-header .container {
     flex-direction: row;

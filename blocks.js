@@ -215,10 +215,15 @@ function isPreviewMode() {
 }
 
 /* ------------------- 스크롤 리빌 애니메이션 (공개 사이트 공용) -------------------
-   .reveal 클래스가 붙은 요소는 화면에 들어오는 순간 슬라이드 인 된다.
-   한 번 나타난 요소는 다시 관찰하지 않는다 (재방문 시 매번 재생되지 않도록). */
+   .reveal 클래스가 붙은 요소는 화면에 들어오는 순간까지 스켈레톤으로 반짝이다가
+   슬라이드 인 된다. 한 번 나타난 요소는 다시 관찰하지 않는다
+   (재방문 시 매번 재생되지 않도록).
+
+   같은 순간에 함께 화면에 들어온(=IntersectionObserver 콜백 한 번에 묶인)
+   블록들은 위에서 아래 문서 순서대로 조금씩 지연을 줘 차례대로 등장하게 한다. */
 
 let revealObserver = null;
+const REVEAL_STAGGER_MS = 90;
 
 function initScrollReveal(root) {
   const els = (root || document).querySelectorAll(".reveal:not(.reveal-in)");
@@ -231,10 +236,24 @@ function initScrollReveal(root) {
   if (!revealObserver) {
     revealObserver = new IntersectionObserver(
       (entries) => {
+        const arrived = entries
+          .filter((entry) => entry.isIntersecting)
+          .map((entry) => entry.target)
+          .sort((a, b) =>
+            a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+          );
+        arrived.forEach((el, i) => {
+          el.style.setProperty("--reveal-delay", i * REVEAL_STAGGER_MS + "ms");
+          el.classList.add("reveal-in");
+          // 등장이 끝나면 지연값을 지워, 이후 다른 전환(색 변경 등)에 남지 않게 한다
+          el.addEventListener(
+            "transitionend",
+            () => el.style.removeProperty("--reveal-delay"),
+            { once: true }
+          );
+        });
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("reveal-in");
-          revealObserver.unobserve(entry.target);
+          if (entry.isIntersecting) revealObserver.unobserve(entry.target);
         });
       },
       { threshold: 0.01, rootMargin: "0px 0px -10% 0px" }
@@ -564,7 +583,7 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
   if (block.type === "text") {
     if (!block.content) return null;
     const p = document.createElement("p");
-    p.className = "blk-text";
+    p.className = "blk-text reveal";
     fillTextRuns(p, block);
     applyTextStyle(p, block);
     return p;
@@ -603,7 +622,7 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     const src = normalizeEmbedSrc(block.src);
     if (!src) return null;
     const div = document.createElement("div");
-    div.className = "blk-embed";
+    div.className = "blk-embed reveal";
     const embedUrl = toEmbedUrl(src);
     if (!embedUrl && isVideoFile(src)) {
       const v = document.createElement("video");
@@ -745,19 +764,6 @@ function overviewSource(project) {
   return { runs: project.overviewRuns, content: project.overview };
 }
 
-/* 개요의 크기·자간. 손대지 않으면 값을 비워 둬서 디자인 기본값
-   (19px · 자간 5%)이 CSS에서 그대로 적용되게 한다.
-
-   크기는 묶음 전체에 걸어 작업년도 · 기여도 · 사용 툴까지 함께 따라오게 하고,
-   자간은 설명에만 준다 (디자인에서 값 줄은 자간이 0이다). */
-function applyOverviewStyle(sec, project) {
-  sec.style.fontSize = project.overviewSize ? project.overviewSize + "px" : "";
-  const desc = sec.querySelector(".proj-overview-desc");
-  if (!desc) return;
-  const t = normalizeTracking(project.overviewTracking);
-  desc.style.letterSpacing = t != null ? t / 100 + "em" : "";
-}
-
 /* 아이콘 + 이름 한 짝. 공개 화면은 보여주기만 하고(span),
    관리자는 눌러서 켜고 끄므로 버튼으로 만든다. 마크업이 같아야
    관리자 미리보기가 실제 화면과 어긋나지 않는다. */
@@ -846,7 +852,6 @@ function buildProjectOverview(project, edit) {
   }
 
   if (meta.children.length) inner.appendChild(meta);
-  applyOverviewStyle(sec, project);
   return sec;
 }
 
