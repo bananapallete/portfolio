@@ -582,13 +582,17 @@ function renderProfileFields(wrap, profile) {
 
   renderLayoutFields(wrap, profile);
 
+  // 이름·닉네임·역할·소개문·연락처를 "프로필" 한 구획으로 묶는다
+  const profileFold = buildFoldSection("프로필");
+  wrap.appendChild(profileFold.card);
+
   const row1 = document.createElement("div");
   row1.className = "field-row";
 
   row1.appendChild(makeTextField("이름", profile.name, (v) => { profile.name = v; live(); }));
   row1.appendChild(makeTextField("닉네임", profile.nickname, (v) => { profile.nickname = v; live(); }));
   row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; live(); }));
-  wrap.appendChild(row1);
+  profileFold.body.appendChild(row1);
 
   // ---- 소개문 (홈 화면 헤더 아래에 표시) ----
   const bioField = document.createElement("div");
@@ -601,7 +605,7 @@ function renderProfileFields(wrap, profile) {
   bioTa.addEventListener("input", () => { profile.bio = bioTa.value; live(); });
   bioField.appendChild(bioLabel);
   bioField.appendChild(bioTa);
-  wrap.appendChild(bioField);
+  profileFold.body.appendChild(bioField);
 
   const row3 = document.createElement("div");
   row3.className = "field-row";
@@ -625,7 +629,7 @@ function renderProfileFields(wrap, profile) {
   emailField.appendChild(emailTa);
   row3.appendChild(emailField);
 
-  wrap.appendChild(row3);
+  profileFold.body.appendChild(row3);
 }
 
 /* 접었다 펼치는 설정 구획. 자주 안 건드리는 값들을 닫아 둬 화면을 덜 채운다.
