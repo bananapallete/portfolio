@@ -2694,6 +2694,10 @@ body.theme-dark .acc-chevron {
 /* 모자이크는 컬럼 흐름이라 칸이 잘리지 않도록 통째로 유지 */
 .blk-images-masonry .img-slot { break-inside: avoid; margin-bottom: 10px; }
 
+/* 단일 레이아웃은 칸을 나누지 않아 폭 전체를 그대로 쓰는데, 4:3 비율을
+   그대로 두면 세로로 너무 크다 — 그냥 올리라는 자리이니 적당한 높이로 줄인다 */
+.blk-images-single .img-slot { min-height: 0; height: 160px; aspect-ratio: auto; }
+
 /* 슬라이드 줄에서는 사진과 같은 높이로 맞춘다 */
 .pv-slider-strip .img-slot {
   flex: none;
@@ -2760,6 +2764,25 @@ body.theme-dark .acc-chevron {
   border: 1.5px solid var(--line);
   background: var(--paper-soft);
   font-size: 13px;
+}
+
+/* 영상 파일 올리기 버튼과 링크/코드 붙여넣기 칸을 좌우 반반, 같은 높이로 */
+.embed-source-row {
+  display: flex;
+  gap: 10px;
+}
+
+.embed-source-row .thumb-add,
+.embed-source-row .embed-input {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 46px;
+}
+
+.embed-source-row .thumb-add {
+  flex-direction: row;
+  gap: 8px;
+  padding: 0 10px;
 }
 
 .summary-input {

@@ -1615,7 +1615,7 @@ function blockTypeLabel(block) {
   if (block.type === "images") {
     return { single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 자동 슬라이드" }[block.layout] || "이미지";
   }
-  return "비디오 임베드";
+  return "비디오";
 }
 
 /* 접어둔 영상 자리에 놓이는 한 줄짜리 표시.
@@ -1798,7 +1798,7 @@ function renderBlocksEditor(project) {
   };
   addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", size: 15, color: "#f5f4f0", align: "left" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
-  addRow.appendChild(mkAdd("+ 비디오 임베드", () => ({ type: "embed", src: "" })));
+  addRow.appendChild(mkAdd("+ 비디오", () => ({ type: "embed", src: "" })));
   wrap.appendChild(addRow);
 
   return wrap;
@@ -1919,9 +1919,11 @@ function renderBlockBody(project, block, blockIndex) {
   if (block.type === "embed") {
     const uploadedFile = block.src && (block.src.startsWith("data:") || block.src.startsWith("assets/"));
 
-    const uploadRow = document.createElement("div");
-    uploadRow.className = "block-controls-row";
-    uploadRow.appendChild(makeUploadTile(uploadedFile ? "다른 영상으로 교체" : "영상 파일 올리기", { accept: "video/*" }, (files) => {
+    // 파일 올리기와 링크/코드 붙여넣기를 좌우 반반, 같은 높이로 나란히 둔다
+    const sourceRow = document.createElement("div");
+    sourceRow.className = "embed-source-row";
+
+    sourceRow.appendChild(makeUploadTile(uploadedFile ? "다른 영상으로 교체" : "영상 파일 올리기", { accept: "video/*" }, (files) => {
       if (!files.length) return;
       readFileAsDataURL(files[0]).then((dataUrl) => {
         block.src = dataUrl;
@@ -1931,7 +1933,19 @@ function renderBlockBody(project, block, blockIndex) {
         renderEditModalBody();
       });
     }));
-    body.appendChild(uploadRow);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "embed-input";
+    input.placeholder = "유튜브/비메오 링크 또는 <iframe> 임베드 코드 붙여넣기";
+    input.value = block.src && !uploadedFile ? block.src : "";
+    input.addEventListener("input", () => {
+      block.src = normalizeEmbedSrc(input.value);
+      saveDraft();
+    });
+    sourceRow.appendChild(input);
+
+    body.appendChild(sourceRow);
 
     if (uploadedFile) {
       const note = document.createElement("div");
@@ -1974,16 +1988,6 @@ function renderBlockBody(project, block, blockIndex) {
       body.appendChild(hint);
     }
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "embed-input";
-    input.placeholder = "유튜브/비메오 링크 또는 <iframe> 임베드 코드 붙여넣기";
-    input.value = block.src && !uploadedFile ? block.src : "";
-    input.addEventListener("input", () => {
-      block.src = normalizeEmbedSrc(input.value);
-      saveDraft();
-    });
-
     const ratioRow = buildEmbedRatioField(block);
 
     // 붙여넣기를 마치면 정리된 주소를 입력창에도 보여준다.
@@ -2014,7 +2018,6 @@ function renderBlockBody(project, block, blockIndex) {
       });
     });
 
-    body.appendChild(input);
     body.appendChild(ratioRow);
     return body;
   }
