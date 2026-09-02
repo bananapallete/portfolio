@@ -2127,6 +2127,8 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   position: relative;
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
+  /* 테두리가 늘 보이니 안쪽 내용이 바로 붙어 답답하지 않도록 여백을 둔다 */
+  padding: 14px 16px;
   /* 접힌 영상처럼 짧은 블록도 머리줄 + 여백만큼은 최소 높이를 갖게 한다 */
   min-height: 50px;
   transition: border-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
