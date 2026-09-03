@@ -313,6 +313,35 @@ async function loadSiteData() {
   }
 }
 
+/* ------------------------------- 방문자 카운팅 -------------------------------
+   백엔드가 없는 사이트라, Google Apps Script를 웹앱으로 배포해 그 주소로
+   조회 신호(GET)만 보낸다. 응답은 읽지 않는 순수 기록용이라 mode:'no-cors'로
+   보낸다 — 크로스오리진 프리플라이트 없이 요청만 전달되고, 응답 내용은
+   못 읽지만 애초에 필요 없다. ANALYTICS_URL을 비워두면(기본값) 아무 일도
+   하지 않으므로, 로컬 테스트나 배포 전에는 안전하게 no-op이다.
+   관리자가 미리보기(?preview=1)로 자기 사이트를 볼 때는 방문으로 치지 않는다. */
+const ANALYTICS_URL = "https://script.google.com/macros/s/AKfycbxwmu1u29l-2mEpJ0mn-MQ2afZNITGQooPdihyPv4eUzym0EC4XvlODyN0wMJGoGczZ/exec";
+
+function trackVisit(page, projectId, projectTitle) {
+  if (!ANALYTICS_URL || isPreviewMode()) return;
+  try {
+    let vid = localStorage.getItem("portfolioVisitorId");
+    if (!vid) {
+      vid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("portfolioVisitorId", vid);
+    }
+    const params = new URLSearchParams({
+      vid,
+      page,
+      pid: projectId || "",
+      pt: projectTitle || "",
+      ref: document.referrer || "",
+      lang: navigator.language || "",
+    });
+    fetch(ANALYTICS_URL + "?" + params.toString(), { mode: "no-cors" });
+  } catch (e) {}
+}
+
 // iframe 임베드 코드에서 src 추출, 프로토콜 없는 링크에 https:// 보완
 function normalizeEmbedSrc(raw) {
   let v = (raw || "").trim();

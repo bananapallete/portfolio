@@ -96,6 +96,8 @@ async function initProject() {
     return;
   }
 
+  trackVisit("project", project.id, project.title);
+
   document.title = `${project.title} — ${profile.nickname || profile.name || "Portfolio"}`;
 
   const titleEl = document.getElementById("projTitle");

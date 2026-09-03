@@ -462,6 +462,7 @@ function init() {
   renderHeader();
   renderAccordion();
   initLangSwitch();
+  trackVisit("list");
 }
 
 loadSiteData().then((data) => {
