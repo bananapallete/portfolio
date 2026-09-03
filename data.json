@@ -125,9 +125,8 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/855eedaf4ef5fe70cedd.png",
-                "assets/fc9e7006dd032fb98c47.png",
-                "assets/6853e040dd57fc78b795.png"
+                "assets/085b9b797b0385aa60f6.png",
+                "assets/855eedaf4ef5fe70cedd.png"
               ]
             },
             {
@@ -138,6 +137,13 @@
                 "assets/269fb480c72a104c93e6.png"
               ],
               "grid": "2"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/6853e040dd57fc78b795.png"
+              ]
             }
           ],
           "summary": "Visual Identity, Motion Graphic",
