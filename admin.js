@@ -1360,6 +1360,11 @@ function renderHeroPreview(cat, project) {
   const dark = applyPreviewBg(wrap, project.heroBg || project.bgColor);
   if (dark || !(project.heroBg || project.bgColor)) wrap.classList.add("proj-hero-dark");
 
+  const hint = document.createElement("span");
+  hint.className = "control-label hero-preview-hint";
+  hint.textContent = "제목을 눌러 바로 고칠 수 있어요";
+  wrap.appendChild(hint);
+
   const inner = document.createElement("div");
   inner.className = "container proj-hero";
 
@@ -1487,7 +1492,7 @@ function renderEditModalBody() {
 
   const headLabel = document.createElement("span");
   headLabel.className = "mini-label";
-  headLabel.textContent = "상세 페이지 상단 (제목을 눌러 바로 고칠 수 있어요)";
+  headLabel.textContent = "상세 페이지";
   headLabel.style.marginTop = "0";
 
   const deleteBtn = document.createElement("button");
@@ -1609,7 +1614,8 @@ function renderEditModalBody() {
   });
   ovControls.appendChild(ovColorClear);
 
-  card.appendChild(ovControls);
+  // 조절 줄을 미리보기와 같은 테두리 안에 넣어 한 덩어리로 보이게 한다
+  overviewWrap.insertBefore(ovControls, overviewWrap.firstChild);
   card.appendChild(overviewWrap);
 
   // ---- 커버 이미지 ----

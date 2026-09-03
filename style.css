@@ -2253,17 +2253,26 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   margin-top: 0;
 }
 
-/* 편집 팝업 안에 실제 모습 그대로 그리는 상세 페이지 상단 */
+/* 편집 팝업 안에 실제 모습 그대로 그리는 상세 페이지 상단.
+   조절 힌트·조절 줄을 같은 테두리 안에 넣어 한 덩어리로 보이게 한다
+   (.block-item과 같은 규칙 — 늘 보이는 테두리). */
 .hero-preview {
-  border: 1.5px solid transparent;
+  border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 34px 0 30px;
+  padding: 12px 0 30px;
   overflow: hidden;
   transition: border-color 0.25s ease-in-out;
 }
 
 .hero-preview:hover {
   border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+/* "제목을 눌러 바로 고칠 수 있어요" 힌트. 실제 페이지 내용이 아니라
+   편집 안내문이라 테두리 안쪽에 자체 여백을 둔다. */
+.hero-preview-hint {
+  display: block;
+  padding: 0 24px 22px;
 }
 
 /* 팝업 안에서는 제목이 지나치게 커지지 않도록 한 단계 줄인다.
@@ -2274,12 +2283,13 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   color: var(--ink);
 }
 
-/* 개요 글자 조절 줄 — 미리보기 바로 위에 붙는다 */
-.overview-controls { margin-bottom: 8px; }
+/* 개요 글자 조절 줄. 이제 .overview-preview 테두리 안 첫 줄이라
+   실제 페이지 내용과 구분되도록 자체 여백을 둔다 */
+.overview-controls { padding: 12px 24px 8px; margin-bottom: 0; }
 
 /* 개요도 같은 팝업 안에서 실제 모습 그대로 그리고, 눌러서 바로 고친다 */
 .overview-preview {
-  border: 1.5px solid transparent;
+  border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
   overflow: hidden;
   transition: border-color 0.25s ease-in-out;
