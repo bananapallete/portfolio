@@ -60,19 +60,21 @@ function renderHeader() {
   document.getElementById("footerName").textContent = p.name || p.nickname || "";
   applyWorkBg(p);
 
-  applyBioLang(currentLang());
+  renderBio(p);
 
   renderFooterContact(p);
 }
 
-// 소개문은 국문/영문을 따로 적어둘 수 있다(관리자 "소개문 · 영문" 칸).
-// 영문을 안 적어뒀으면 언어를 바꿔도 국문 그대로 보인다.
-function applyBioLang(lang) {
+// 소개문은 국문/영문을 따로 적어둘 수 있다(관리자 "소개문 · 국문/영문" 칸).
+// 언어 버튼과 무관하게 둘 다 늘 함께 보여준다 — 둘 사이는 빈 줄로 띄운다
+// (.site-bio가 white-space:pre-line이라 줄바꿈이 그대로 화면에 반영된다).
+function renderBio(p) {
   const bio = document.getElementById("siteBio");
-  if (!bio || !siteData) return;
-  const p = siteData.profile || {};
-  const text = (lang === "en" && p.bioEn && p.bioEn.trim()) ? p.bioEn : (p.bio || "");
-  if (text.trim()) {
+  if (!bio) return;
+  const kr = (p.bio || "").trim();
+  const en = (p.bioEn || "").trim();
+  const text = [kr, en].filter(Boolean).join("\n\n");
+  if (text) {
     bio.textContent = text;
     bio.hidden = false;
   } else {
@@ -80,16 +82,11 @@ function applyBioLang(lang) {
   }
 }
 
-// 언어 전환. 카테고리 이름 줄은 국문/영문 중 어느 쪽을 더 크게 보여줄지만
-// 바꾸고(관리자가 이름 하나에 국문/영문 두 조각을 함께 적어두는 방식 —
-// renderAccordion()이 채워두는 langEntries를 그때그때 다시 칠한다), 소개문은
-// 아예 다른 글로 바뀐다(위 applyBioLang).
+// 언어 전환. 카테고리 이름 줄만 국문/영문 중 어느 쪽을 더 크게 보여줄지 바꾼다
+// (관리자가 이름 하나에 국문/영문 두 조각을 함께 적어두는 방식 —
+// renderAccordion()이 채워두는 langEntries를 그때그때 다시 칠한다).
+// 소개문은 위 renderBio에서 언어 구분 없이 둘 다 늘 보여준다.
 let langEntries = [];
-
-function currentLang() {
-  const active = document.querySelector("#langSwitch .lang-btn.active");
-  return active ? active.dataset.lang : "kr";
-}
 
 function applyLangToEntries(lang) {
   const isEn = lang === "en";
@@ -108,7 +105,6 @@ function initLangSwitch() {
     btn.addEventListener("click", () => {
       wrap.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b === btn));
       applyLangToEntries(btn.dataset.lang);
-      applyBioLang(btn.dataset.lang);
     });
   });
 }
