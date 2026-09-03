@@ -19,7 +19,8 @@
     "bio": "Explore my portfolio! It's a showcase of the skills and creativity I've developed through a variety of projects and experiences. Each piece reflects my passion and dedication to my craft. I'm thrilled.",
     "panelTopGap": 25,
     "panelBottomGap": 25,
-    "contentMargin": 40
+    "contentMargin": 40,
+    "overviewLineHeight": 1.4
   },
   "categories": [
     {
