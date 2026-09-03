@@ -2100,9 +2100,9 @@ body.bg-takeover-light .proj-overview,
   letter-spacing: 0.05em;
 }
 
-/* 라벨 아래 16px 띄우고 값을 놓는다 */
+/* 라벨 아래 10px 띄우고 값을 놓는다 */
 .proj-meta-value {
-  margin: 16px 0 0;
+  margin: 10px 0 0;
   color: var(--meta-value);
   font-size: var(--text-label);
 }
