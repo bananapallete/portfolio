@@ -498,8 +498,6 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
   transition: max-height 0.4s ease;
 }
 
-.acc-item .work-grid { padding-top: 5px; padding-bottom: 24px; }
-
 /* ------------------------------- 경력(이력서) 레이아웃 -------------------------------
    프로젝트 그리드 대신 쓰는 이력서 형태. About·Skills·Experience·Education을
    왼쪽 영문 라벨 + 오른쪽 내용의 행으로 나열한다 (Figma node 501:1626). */
@@ -992,6 +990,14 @@ body.bg-takeover:not(.bg-takeover-light) {
   );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+
+/* 목록·상세의 큰 영역(.page-skeleton) 말고도, 브랜드명·소개문·푸터처럼
+   낱개로 반짝이다 사라지는 작은 조각들에 쓴다 */
+.skeleton-box.is-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* 카테고리 이름 줄과 비슷한 높이의 가로 막대 */
@@ -1000,6 +1006,49 @@ body.bg-takeover:not(.bg-takeover-light) {
 /* 콘텐츠 블록과 비슷한 두 가지 크기 */
 .skeleton-block-lg { height: 360px; }
 .skeleton-block-md { height: 220px; }
+
+/* 헤더 브랜드명 자리. .brand가 비어 있는 동안(position:relative) 그
+   왼쪽 위에 겹쳐 놓는다 */
+.brand { position: relative; }
+.skeleton-brand {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 64px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* 홈 소개문 자리. 문단이 실제로 몇 줄일지 몰라 3줄 정도로 어림잡는다 */
+.skeleton-bio {
+  max-width: 420px;
+  height: 78px;
+  margin-top: 32px;
+}
+
+/* 푸터 이름·연락처 자리. .footer-grid의 첫 칸(position:relative)에 겹친다 */
+.footer-grid > div:first-child { position: relative; }
+.skeleton-footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 160px;
+  height: 62px;
+}
+
+/* 상세 페이지 제목 자리. .proj-hero(position:relative)의 왼쪽 위, 실제
+   h1(.proj-title)이 그려질 자리에 겹친다. flex 자식으로 두면 justify-
+   content:space-between 때문에 빈 h1을 밀어내고 오른쪽으로 가버려서
+   absolute로 뺀다 */
+.skeleton-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: var(--text-display);
+  width: min(420px, 60%);
+  height: 0.72em;
+  margin-top: 0.14em;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .page-skeleton { transition: none; }
@@ -1999,6 +2048,7 @@ body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
 /* 툴 아이콘이 타이틀 우측 상단에 오도록 가로 배치.
    DOM 순서는 타이틀 → 아이콘이고, space-between으로 좌/우에 자동 배치된다 */
 .proj-hero {
+  position: relative;
   padding-top: 0;
   display: flex;
   align-items: flex-start;

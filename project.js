@@ -67,7 +67,10 @@ async function initProject() {
   const siteData = await loadSiteData();
 
   // 실제 콘텐츠가 준비됐으니, 그 위에 덮여 있던 로딩 스켈레톤을 걷어낸다
+  // (데이터를 못 받아와도 스켈레톤이 영원히 반짝이면 안 되므로 여기서 함께 정리한다)
   document.getElementById("blocksSkeleton")?.classList.add("is-hidden");
+  document.getElementById("titleSkeleton")?.classList.add("is-hidden");
+  document.getElementById("footerSkeleton")?.classList.add("is-hidden");
 
   if (!siteData) {
     wrap.innerHTML = `<div class="empty-state">Couldn't load the data. <a href="index.html" style="text-decoration:underline;">Back to list</a></div>`;
