@@ -979,6 +979,13 @@ body.bg-takeover:not(.bg-takeover-light) {
   gap: 14px;
 }
 
+/* 목록 페이지의 실제 카테고리 줄(.acc-list)은 위에 --acc-list-top만큼
+   여백을 두고 시작하는데, 스켈레톤은 그 여백 없이 위에 딱 붙어 있어서
+   소개문과 너무 가까워 보였다. 같은 여백을 넣어 시작 위치를 맞춘다 */
+#workSkeleton .page-skeleton-inner {
+  padding-top: var(--acc-list-top, 82px);
+}
+
 .skeleton-box {
   border-radius: var(--radius-sm);
   background-color: var(--paper-soft);
