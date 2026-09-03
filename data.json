@@ -16,11 +16,12 @@
     "maxWidthHome": 1450,
     "maxWidthContent": 1500,
     "cardRadius": 5,
-    "bio": "Explore my portfolio! It's a showcase of the skills and creativity I've developed through a variety of projects and experiences. Each piece reflects my passion and dedication to my craft. I'm thrilled.",
+    "bio": "그래픽 디자이너 조한정의 작업 창고입니다.\n편히 구경하시고 궁금하신점은 연락처로 문의주세요 :)\n방문해주셔서 감사했습니다.",
     "panelTopGap": 25,
     "panelBottomGap": 25,
     "contentMargin": 40,
-    "overviewLineHeight": 2
+    "overviewLineHeight": 2,
+    "bioEn": "This is the one of my graphic design workspaces.\nFeel free to browse, and if you have any questions, please contact me :)\nThank you for visiting."
   },
   "categories": [
     {
