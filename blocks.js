@@ -60,6 +60,35 @@ const CARD_GAP_DEFAULT = 0;
 const MAX_WIDTH_DEFAULT = 1350;
 const MAX_WIDTH_FULL = 2560;
 
+// 마지막으로 적용된 --side/--wrap 값을 페이지(scope)별로 저장해둔다.
+// 페이지가 열리자마자, 실제 데이터가 오기 전에 이 값부터 되살려 써서
+// 로딩 스켈레톤이 처음부터 실제 콘텐츠와 같은 여백으로 그려지게 한다.
+const LAYOUT_CACHE_KEY = "portfolioLayoutCache";
+
+function cacheLayoutVars(scope, side, max) {
+  try {
+    const all = JSON.parse(localStorage.getItem(LAYOUT_CACHE_KEY) || "{}");
+    all[scope] = { side, max };
+    localStorage.setItem(LAYOUT_CACHE_KEY, JSON.stringify(all));
+  } catch (e) {}
+}
+
+function restoreCachedLayoutVars(scope) {
+  try {
+    const all = JSON.parse(localStorage.getItem(LAYOUT_CACHE_KEY) || "{}");
+    const cached = all[scope];
+    if (!cached) return;
+    const root = document.documentElement.style;
+    if (cached.side != null) root.setProperty("--side", cached.side + "px");
+    if (cached.max != null) root.setProperty("--wrap", `min(${cached.max}px, 100%)`);
+  } catch (e) {}
+}
+
+// blocks.js는 body 맨 아래(스켈레톤 마크업 다음)에서 동기적으로 실행되므로,
+// 여기서 바로 되살리면 첫 페인트 전에 적용된다. 상세 페이지(#blocksSkeleton)와
+// 목록 페이지(#workSkeleton)는 서로 다른 scope 값을 쓴다.
+restoreCachedLayoutVars(document.getElementById("blocksSkeleton") ? "content" : "home");
+
 // 아코디언 카테고리 목록의 세부 간격. 지금 CSS에 실제로 적용돼 있는
 // 값을 그대로 기본값으로 삼아서, 관리자에서 처음 열어도 화면이 안 바뀐다.
 const LIST_TOP_GAP_DEFAULT = 82; // 목록 맨 위 여백
@@ -116,6 +145,12 @@ function applyLayoutVars(profile, scope = "home") {
   const max = scope === "content"
     ? readMaxWidth(p.maxWidthContent, p.fullBleedContent)
     : readMaxWidth(p.maxWidthHome, p.fullBleedHome);
+
+  // 데이터가 로딩되는 동안(스켈레톤이 떠 있는 짧은 순간) --side/--wrap이
+  // 아직 이 값으로 안 바뀐 상태라, 스켈레톤이 기본값(28px/1350px) 기준으로
+  // 그려져 실제 콘텐츠와 어긋나 보인다. 매번 적용된 값을 저장해뒀다가
+  // restoreCachedLayoutVars()가 페이지가 열리자마자(첫 페인트 전) 되살린다.
+  cacheLayoutVars(scope, side, max);
 
   // 상세 화면의 상단 메뉴(← Back to list)는 본문과 따로, 홈과 같은 값을 쓴다.
   // 어느 화면에서든 맨 위 줄의 기준선이 같아 보이도록 하기 위함이다.

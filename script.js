@@ -299,6 +299,20 @@ function buildCareerSection(career) {
   return wrap;
 }
 
+/* 패널을 열고 닫는 트랜지션 시간을 고정값으로 두면, 카드가 많아 패널이
+   긴 카테고리일수록 같은 시간 동안 훨씬 더 먼 거리(높이)를 움직여야 해서
+   "더 빨리 스르륵 열리는" 것처럼 보인다. 실제 펼쳐질 높이에 비례해 시간을
+   늘려, 카테고리마다 체감 속도(px/ms)가 비슷하게 느껴지도록 맞춘다. */
+const ACC_PANEL_DURATION_MIN = 250;
+const ACC_PANEL_DURATION_MAX = 650;
+const ACC_PANEL_DURATION_BASE = 200;
+const ACC_PANEL_DURATION_RATE = 0.35;
+
+function accPanelDuration(height) {
+  const ms = ACC_PANEL_DURATION_BASE + height * ACC_PANEL_DURATION_RATE;
+  return Math.min(ACC_PANEL_DURATION_MAX, Math.max(ACC_PANEL_DURATION_MIN, ms));
+}
+
 /* 카테고리를 아코디언으로 렌더링: 이름 줄을 누르면 바로 아래로 그 카테고리의
    프로젝트 그리드가 펼쳐진다. 한 번에 하나만 열리도록 다른 항목은 함께 접는다.
    그리드는 처음 열 때 한 번만 만들고(이미지 낭비 없이), 이후로는 열고 닫기만 한다. */
@@ -401,11 +415,14 @@ function renderAccordion() {
     head.addEventListener("click", () => {
       const isOpen = item.classList.contains("open");
       if (openItem && openItem !== item) {
+        const prevPanel = openItem.querySelector(".acc-panel");
+        prevPanel.style.transitionDuration = accPanelDuration(prevPanel.scrollHeight) + "ms";
         openItem.classList.remove("open");
         openItem.querySelector(".acc-head").setAttribute("aria-expanded", "false");
-        openItem.querySelector(".acc-panel").style.maxHeight = "";
+        prevPanel.style.maxHeight = "";
       }
       if (isOpen) {
+        panel.style.transitionDuration = accPanelDuration(panel.scrollHeight) + "ms";
         item.classList.remove("open");
         head.setAttribute("aria-expanded", "false");
         panel.style.maxHeight = "";
@@ -416,7 +433,9 @@ function renderAccordion() {
         item.classList.add("open");
         head.setAttribute("aria-expanded", "true");
         // 실제 콘텐츠 높이를 재서 넣어야 max-height 트랜지션이 부드럽게 펼쳐진다
-        panel.style.maxHeight = panel.scrollHeight + "px";
+        const targetHeight = panel.scrollHeight;
+        panel.style.transitionDuration = accPanelDuration(targetHeight) + "ms";
+        panel.style.maxHeight = targetHeight + "px";
         openItem = item;
         // 카테고리가 열려 있는 동안엔 GNB가 스크롤을 따라오지 않고 흘러 지나가서,
         // 이 이름 줄이 최상단에 닿았을 때 그 자리를 대신할 수 있게 한다
