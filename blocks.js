@@ -84,10 +84,10 @@ function restoreCachedLayoutVars(scope) {
   } catch (e) {}
 }
 
-// blocks.js는 body 맨 아래(스켈레톤 마크업 다음)에서 동기적으로 실행되므로,
-// 여기서 바로 되살리면 첫 페인트 전에 적용된다. 상세 페이지(#blocksSkeleton)와
-// 목록 페이지(#workSkeleton)는 서로 다른 scope 값을 쓴다.
-restoreCachedLayoutVars(document.getElementById("blocksSkeleton") ? "content" : "home");
+// blocks.js는 body 맨 아래에서 동기적으로 실행되므로, 여기서 바로 되살리면
+// 첫 페인트 전에 적용된다. 상세 페이지(#projectBlocks)와 목록 페이지는
+// 서로 다른 scope 값을 쓴다.
+restoreCachedLayoutVars(document.getElementById("projectBlocks") ? "content" : "home");
 
 // 아코디언 카테고리 목록의 세부 간격. 지금 CSS에 실제로 적용돼 있는
 // 값을 그대로 기본값으로 삼아서, 관리자에서 처음 열어도 화면이 안 바뀐다.

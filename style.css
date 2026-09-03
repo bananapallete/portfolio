@@ -945,12 +945,13 @@ body.bg-takeover:not(.bg-takeover-light) {
 }
 
 /* -------- 페이지 로딩 스켈레톤: 실제 콘텐츠 자리에 반짝이다가 사라짐 --------
-   데이터가 오기 전까지 실제 콘텐츠 자리(.acc-list-wrap · .proj-blocks-wrap)를
+   데이터가 오기 전까지 목록 페이지의 실제 콘텐츠 자리(.acc-list-wrap)를
    빈 채로 두지 않고, 그 위에 겹쳐 반짝이는 판을 깐다. 데이터가 오면 JS가
    is-hidden을 붙여 서서히 지운다 — 실제 콘텐츠는 이미 밑에 그려져 있으므로
-   막이 걷히듯 자연스럽게 드러난다. */
-.acc-list-wrap,
-.proj-blocks-wrap {
+   막이 걷히듯 자연스럽게 드러난다.
+   (상세 페이지 .proj-blocks-wrap은 블록 높이가 프로젝트마다 크게 달라
+   스켈레톤이 자리를 미리 잡아주는 의미가 없어서 스켈레톤을 쓰지 않는다.) */
+.acc-list-wrap {
   position: relative;
   min-height: 320px;
 }
@@ -967,8 +968,8 @@ body.bg-takeover:not(.bg-takeover-light) {
   pointer-events: none;
 }
 
-/* 실제 카테고리 줄(.acc-item)·콘텐츠 블록(.proj-blocks)과 똑같이 가운데
-   정렬하고 좌우 여백을 줘야, 스켈레톤이 진짜 콘텐츠와 같은 자리에 온다 */
+/* 실제 카테고리 줄(.acc-item)과 똑같이 가운데 정렬하고 좌우 여백을 줘야,
+   스켈레톤이 진짜 콘텐츠와 같은 자리에 온다 */
 .page-skeleton-inner {
   width: 100%;
   max-width: var(--wrap);
@@ -1000,7 +1001,7 @@ body.bg-takeover:not(.bg-takeover-light) {
   transition: opacity 0.3s ease;
 }
 
-/* 목록·상세의 큰 영역(.page-skeleton) 말고도, 브랜드명·소개문·푸터처럼
+/* 목록·상세의 큰 영역(.page-skeleton) 말고도, 브랜드명·소개문처럼
    낱개로 반짝이다 사라지는 작은 조각들에 쓴다 */
 .skeleton-box.is-hidden {
   opacity: 0;
@@ -1009,10 +1010,6 @@ body.bg-takeover:not(.bg-takeover-light) {
 
 /* 카테고리 이름 줄과 비슷한 높이의 가로 막대 */
 .skeleton-row { height: 76px; }
-
-/* 콘텐츠 블록과 비슷한 두 가지 크기 */
-.skeleton-block-lg { height: 360px; }
-.skeleton-block-md { height: 220px; }
 
 /* 헤더 브랜드명 자리. .brand가 비어 있는 동안(position:relative) 그
    왼쪽 위에 겹쳐 놓는다 */
@@ -1031,20 +1028,6 @@ body.bg-takeover:not(.bg-takeover-light) {
   max-width: 420px;
   height: 78px;
   margin-top: 32px;
-}
-
-/* 상세 페이지 제목 자리. .proj-hero(position:relative)의 왼쪽 위, 실제
-   h1(.proj-title)이 그려질 자리에 겹친다. flex 자식으로 두면 justify-
-   content:space-between 때문에 빈 h1을 밀어내고 오른쪽으로 가버려서
-   absolute로 뺀다 */
-.skeleton-title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  font-size: var(--text-display);
-  width: min(420px, 60%);
-  height: 0.72em;
-  margin-top: 0.14em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2045,7 +2028,6 @@ body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
 /* 툴 아이콘이 타이틀 우측 상단에 오도록 가로 배치.
    DOM 순서는 타이틀 → 아이콘이고, space-between으로 좌/우에 자동 배치된다 */
 .proj-hero {
-  position: relative;
   padding-top: 0;
   display: flex;
   align-items: flex-start;
