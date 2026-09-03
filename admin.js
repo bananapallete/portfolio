@@ -884,6 +884,19 @@ function renderLayoutFields(wrap, profile) {
   textColumns.appendChild(buildScaleColumn("웹", "textBody", 10, 28, "Desktop"));
   textColumns.appendChild(buildScaleColumn("모바일", "textBodyMobile", 8, 20, "Mobile"));
   textFold.body.appendChild(textColumns);
+
+  // 상세 페이지 개요(설명 문단 · 작업년도 · 기여도 · 사용 툴)의 줄 간격.
+  // 웹/모바일 구분 없이 하나로 쓴다 (CSS에 모바일 전용 값이 따로 없음).
+  const lhRow = document.createElement("div");
+  lhRow.style.marginTop = "10px";
+  lhRow.appendChild(buildSliderField(
+    "상세 페이지 개요 줄 간격",
+    () => profile.overviewLineHeight,
+    (v) => { if (v == null) delete profile.overviewLineHeight; else profile.overviewLineHeight = v; },
+    { min: 1, max: 2.2, def: OVERVIEW_LINE_HEIGHT_DEFAULT, step: 0.01, unit: "배" },
+    live
+  ));
+  textFold.body.appendChild(lhRow);
 }
 
 function makeTextField(labelText, value, onChange) {

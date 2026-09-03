@@ -117,6 +117,10 @@ const TEXT_RATIO_DEFAULTS = {
   caption: { desktop: 0.750, mobile: 0.917 },
 };
 
+// 지금 CSS에 실제로 적용돼 있는 값(23px 줄 간격 ÷ 19px 글자)을 그대로
+// 기본값으로 삼아서, 관리자에서 처음 열어도 화면이 안 바뀐다.
+const OVERVIEW_LINE_HEIGHT_DEFAULT = 23 / 19;
+
 // 배율(소수) 값을 읽는다 — normalizeGap은 정수로 잘라버려서 배율엔 못 쓴다
 function normalizeRatio(v) {
   if (v == null || v === "") return null;
@@ -207,6 +211,13 @@ function applyLayoutVars(profile, scope = "home") {
     root.setProperty(`--text-${tier}`, +(rd * bd).toFixed(2) + "px");
     root.setProperty(`--text-${tier}-mobile`, +(rm * bm).toFixed(2) + "px");
   });
+
+  // 상세 페이지 개요(설명 문단 · 작업년도 · 기여도 · 사용 툴)의 줄 간격
+  const overviewLh = normalizeRatio(p.overviewLineHeight);
+  root.setProperty(
+    "--proj-overview-line-height",
+    overviewLh != null ? overviewLh : OVERVIEW_LINE_HEIGHT_DEFAULT
+  );
 }
 
 // eager: 첫 화면에 걸리는 카드만 미리 받아 둔다

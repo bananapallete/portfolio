@@ -2058,7 +2058,7 @@ body.bg-takeover:not(.bg-takeover-light) .proj-brand-icon { filter: invert(1); }
   --meta-value: #ffffff;
   font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
   font-weight: 500;
-  line-height: calc(23 / 19);
+  line-height: var(--proj-overview-line-height, calc(23 / 19));
   /* 위는 제목 바로 아래에 붙이고(15px), 아래는 콘텐츠 블록과 뗀 채로 둔다 */
   padding: 15px 0 113px;
 }
