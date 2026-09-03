@@ -629,11 +629,13 @@ function renderProfileFields(wrap, profile) {
   row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; live(); }));
   profileFold.body.appendChild(row1);
 
-  // ---- 소개문 (홈 화면 헤더 아래에 표시) ----
+  // ---- 소개문 (홈 화면 헤더 아래에 표시). 국문/영문을 따로 적어두면
+  // 홈 화면에서 언어 버튼을 누를 때 그 언어의 글로 바뀐다. 영문을
+  // 안 적어두면 언어를 바꿔도 국문 그대로 보인다. ----
   const bioField = document.createElement("div");
   bioField.className = "field";
   const bioLabel = document.createElement("label");
-  bioLabel.textContent = "소개문 (홈 화면 헤더 아래에 표시, 비워두면 표시 안 함)";
+  bioLabel.textContent = "소개문 · 국문 (홈 화면 헤더 아래에 표시, 비워두면 표시 안 함)";
   const bioTa = document.createElement("textarea");
   bioTa.rows = 3;
   bioTa.value = profile.bio || "";
@@ -641,6 +643,18 @@ function renderProfileFields(wrap, profile) {
   bioField.appendChild(bioLabel);
   bioField.appendChild(bioTa);
   profileFold.body.appendChild(bioField);
+
+  const bioEnField = document.createElement("div");
+  bioEnField.className = "field";
+  const bioEnLabel = document.createElement("label");
+  bioEnLabel.textContent = "소개문 · 영문 (EN 선택 시 표시, 비워두면 국문 그대로 표시)";
+  const bioEnTa = document.createElement("textarea");
+  bioEnTa.rows = 3;
+  bioEnTa.value = profile.bioEn || "";
+  bioEnTa.addEventListener("input", () => { profile.bioEn = bioEnTa.value; live(); });
+  bioEnField.appendChild(bioEnLabel);
+  bioEnField.appendChild(bioEnTa);
+  profileFold.body.appendChild(bioEnField);
 
   const row3 = document.createElement("div");
   row3.className = "field-row";
