@@ -1515,10 +1515,39 @@ function renderEditModalBody() {
     },
   }));
   // 개요의 글자 크기·자간은 이제 텍스트 시스템(라벨/본문 토큰)을 그대로 따르므로
-  // 굵게/보통 선택만 남긴다
+  // 굵게/보통 선택과 색상만 남긴다
   const ovControls = document.createElement("div");
   ovControls.className = "block-controls-row overview-controls";
   ovControls.appendChild(buildWeightButtons(() => descEl, descSlot));
+
+  const ovColorLabel = document.createElement("span");
+  ovColorLabel.className = "control-label";
+  ovColorLabel.textContent = "색상";
+  ovControls.appendChild(ovColorLabel);
+
+  const ovColorField = buildColorField(
+    project.overviewColor || "#000000",
+    (v) => {
+      project.overviewColor = v;
+      if (descEl) descEl.style.color = v;
+      saveDraft();
+    },
+    { swatches: true, rerender: renderEditModalBody }
+  );
+  ovControls.appendChild(ovColorField.field);
+
+  const ovColorClear = document.createElement("button");
+  ovColorClear.type = "button";
+  ovColorClear.className = "btn btn-outline btn-xs";
+  ovColorClear.textContent = "자동";
+  ovColorClear.title = "배경 밝기에 맞춰 자동으로 정한 색으로 되돌리기";
+  ovColorClear.addEventListener("click", () => {
+    delete project.overviewColor;
+    saveDraft();
+    renderEditModalBody();
+  });
+  ovControls.appendChild(ovColorClear);
+
   card.appendChild(ovControls);
   card.appendChild(overviewWrap);
 

@@ -858,6 +858,8 @@ function buildProjectOverview(project, edit) {
     const p = document.createElement("p");
     p.className = "proj-overview-desc";
     fillTextRuns(p, overviewSource(project));
+    // 지정 안 하면 배경 밝기에 따라 자동으로 대비를 맞춘 색(CSS 기본값)을 그대로 쓴다
+    if (project.overviewColor) p.style.color = project.overviewColor;
     // 굵게 편집은 관리자에서 붙인다 (여기서는 자리만 내어준다)
     if (edit) edit.desc(p);
     inner.appendChild(p);
