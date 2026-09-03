@@ -2432,6 +2432,21 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 .drag-handle:hover { background: var(--paper-soft); color: var(--ink); }
 .drag-handle:active { cursor: grabbing; }
 
+/* 드래그 핸들 옆, 한 칸씩 올리고 내리는 버튼 */
+.block-move-btn {
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--ink) 45%, transparent);
+  font-size: 10px;
+  line-height: 1;
+  padding: 5px 6px;
+  border-radius: 6px;
+  margin-left: 2px;
+}
+
+.block-move-btn:hover:not(:disabled) { background: var(--paper-soft); color: var(--ink); }
+.block-move-btn:disabled { opacity: 0.25; cursor: default; }
+
 .block-type-label {
   font-size: 11px;
   font-weight: 800;

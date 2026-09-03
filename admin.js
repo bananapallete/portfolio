@@ -48,6 +48,9 @@ function needsSetup(block) {
 
 // 텍스트 블록의 미리보기 요소. 크기·색상을 다시 그리지 않고 바로 반영하는 데 쓴다.
 const textPreviewNodes = new WeakMap();
+// 블록별 현재 카드(.block-item) 요소. 순서를 바꾼 뒤 다시 그리고 나서,
+// 옮겨지기 전/후 위치를 비교해 옮겨가는 애니메이션을 주는 데 쓴다.
+const blockItemEls = new WeakMap();
 // 현재 드래그 중인 항목 정보 { group, list, from }
 let dragCtx = null;
 
@@ -395,6 +398,38 @@ function ensureShape(d) {
     });
   });
   return d;
+}
+
+/* ------------------------------ 블록 순서 변경 애니메이션 ------------------------------
+   편집 팝업은 순서를 바꿀 때마다 통째로 다시 그리므로(renderEditModalBody),
+   그 자체로는 카드가 그냥 다른 자리에 뚝 나타난다. FLIP 기법으로 "옛 자리 →
+   새 자리"를 이어 보이게 한다: 다시 그리기 전 각 카드의 화면 위치를 재고,
+   다시 그린 뒤 새 위치와 비교해 그 차이만큼 카드를 되돌려 놓았다가(순간이동,
+   보이지 않음) 다음 프레임에 transition으로 원래(새) 자리까지 미끄러뜨린다. */
+function animateBlockReorder(blocks) {
+  const oldRects = new Map();
+  blocks.forEach((block) => {
+    const el = blockItemEls.get(block);
+    if (el) oldRects.set(block, el.getBoundingClientRect());
+  });
+
+  renderEditModalBody();
+
+  blocks.forEach((block) => {
+    const oldRect = oldRects.get(block);
+    const newEl = blockItemEls.get(block);
+    if (!oldRect || !newEl) return;
+    const dy = oldRect.top - newEl.getBoundingClientRect().top;
+    if (Math.abs(dy) < 1) return;
+    newEl.style.transition = "none";
+    newEl.style.transform = `translateY(${dy}px)`;
+    newEl.getBoundingClientRect(); // 강제 리플로우 — 위 순간이동을 먼저 그리게 한다
+    requestAnimationFrame(() => {
+      newEl.style.transition = "transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)";
+      newEl.style.transform = "";
+    });
+    newEl.addEventListener("transitionend", () => { newEl.style.transition = ""; }, { once: true });
+  });
 }
 
 /* ------------------------------ 드래그 정렬 공통 ------------------------------ */
@@ -1715,6 +1750,36 @@ function renderBlocksEditor(project) {
     handle.title = "드래그해서 순서 변경";
     handle.textContent = "⠿";
 
+    // 드래그가 아니라 버튼으로도 한 칸씩 옮길 수 있게 한다. 양 끝에서는
+    // 눌러도 소용없으니 비활성으로 표시한다.
+    const moveUp = document.createElement("button");
+    moveUp.type = "button";
+    moveUp.className = "btn btn-ghost btn-xs block-move-btn";
+    moveUp.textContent = "▲";
+    moveUp.title = "위로 이동";
+    moveUp.disabled = i === 0;
+    moveUp.addEventListener("click", () => {
+      if (i === 0) return;
+      const list = project.blocks;
+      [list[i - 1], list[i]] = [list[i], list[i - 1]];
+      saveDraft();
+      animateBlockReorder(list);
+    });
+
+    const moveDown = document.createElement("button");
+    moveDown.type = "button";
+    moveDown.className = "btn btn-ghost btn-xs block-move-btn";
+    moveDown.textContent = "▼";
+    moveDown.title = "아래로 이동";
+    moveDown.disabled = i === project.blocks.length - 1;
+    moveDown.addEventListener("click", () => {
+      const list = project.blocks;
+      if (i === list.length - 1) return;
+      [list[i], list[i + 1]] = [list[i + 1], list[i]];
+      saveDraft();
+      animateBlockReorder(list);
+    });
+
     const label = document.createElement("span");
     label.className = "block-type-label";
     label.textContent = blockTypeLabel(block);
@@ -1723,6 +1788,8 @@ function renderBlocksEditor(project) {
     spacer.className = "block-head-spacer";
 
     bh.appendChild(handle);
+    bh.appendChild(moveUp);
+    bh.appendChild(moveDown);
     bh.appendChild(label);
     bh.appendChild(spacer);
 
@@ -1819,7 +1886,8 @@ function renderBlocksEditor(project) {
 
     if (!hidePreview) item.appendChild(preview);
 
-    attachDrag(item, handle, group, project.blocks, i);
+    attachDrag(item, handle, group, project.blocks, i, () => animateBlockReorder(project.blocks));
+    blockItemEls.set(block, item);
     wrap.appendChild(item);
 
     // 막 추가한 블록이면 바로 쓸 수 있게 커서를 넣어 준다
