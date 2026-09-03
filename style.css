@@ -960,9 +960,6 @@ body.bg-takeover:not(.bg-takeover-light) {
 .page-skeleton {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
   opacity: 1;
   transition: opacity 0.4s ease;
 }
@@ -970,6 +967,18 @@ body.bg-takeover:not(.bg-takeover-light) {
 .page-skeleton.is-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* 실제 카테고리 줄(.acc-item)·콘텐츠 블록(.proj-blocks)과 똑같이 가운데
+   정렬하고 좌우 여백을 줘야, 스켈레톤이 진짜 콘텐츠와 같은 자리에 온다 */
+.page-skeleton-inner {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 var(--side);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .skeleton-box {
