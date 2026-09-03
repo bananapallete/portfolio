@@ -70,7 +70,6 @@ async function initProject() {
   // (데이터를 못 받아와도 스켈레톤이 영원히 반짝이면 안 되므로 여기서 함께 정리한다)
   document.getElementById("blocksSkeleton")?.classList.add("is-hidden");
   document.getElementById("titleSkeleton")?.classList.add("is-hidden");
-  document.getElementById("footerSkeleton")?.classList.add("is-hidden");
 
   if (!siteData) {
     wrap.innerHTML = `<div class="empty-state">Couldn't load the data. <a href="index.html" style="text-decoration:underline;">Back to list</a></div>`;

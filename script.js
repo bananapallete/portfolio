@@ -455,7 +455,6 @@ function init() {
   document.getElementById("workSkeleton")?.classList.add("is-hidden");
   document.getElementById("brandSkeleton")?.classList.add("is-hidden");
   document.getElementById("bioSkeleton")?.classList.add("is-hidden");
-  document.getElementById("footerSkeleton")?.classList.add("is-hidden");
   if (!siteData) {
     renderFallback();
     return;

@@ -1033,16 +1033,6 @@ body.bg-takeover:not(.bg-takeover-light) {
   margin-top: 32px;
 }
 
-/* 푸터 이름·연락처 자리. .footer-grid의 첫 칸(position:relative)에 겹친다 */
-.footer-grid > div:first-child { position: relative; }
-.skeleton-footer {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 160px;
-  height: 62px;
-}
-
 /* 상세 페이지 제목 자리. .proj-hero(position:relative)의 왼쪽 위, 실제
    h1(.proj-title)이 그려질 자리에 겹친다. flex 자식으로 두면 justify-
    content:space-between 때문에 빈 h1을 밀어내고 오른쪽으로 가버려서
