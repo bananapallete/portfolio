@@ -462,7 +462,7 @@ function init() {
   renderHeader();
   renderAccordion();
   initLangSwitch();
-  trackVisit("list");
+  trackVisit("목록");
 }
 
 loadSiteData().then((data) => {

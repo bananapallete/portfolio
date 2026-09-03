@@ -96,7 +96,7 @@ async function initProject() {
     return;
   }
 
-  trackVisit("project", project.id, project.title);
+  trackVisit("상세", project.id, project.title);
 
   document.title = `${project.title} — ${profile.nickname || profile.name || "Portfolio"}`;
 
