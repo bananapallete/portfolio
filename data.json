@@ -107,19 +107,19 @@
               "videoAutoplay": false
             },
             {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/5f28d5b5922272430650.png"
+              ]
+            },
+            {
               "type": "embed",
               "src": "assets/6719ea5d2f1193305027.webm",
               "ratioSrc": "assets/6719ea5d2f1193305027.webm",
               "ratioW": 1920,
               "ratioH": 540,
               "videoControls": false
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/5f28d5b5922272430650.png"
-              ]
             },
             {
               "type": "images",
