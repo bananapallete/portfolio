@@ -3269,7 +3269,15 @@ function collectPendingMedia() {
           });
         }
         if (block.type === "embed" && block.src && block.src.startsWith("data:")) {
-          refs.push({ get: () => block.src, set: (v) => { block.src = v; } });
+          // ratioSrc(비율을 잰 주소)도 이 순간엔 아직 같은 data: 값이니
+          // 함께 실제 주소로 바꿔야, 용량 큰 원본이 data.json에 영영 남지 않는다
+          refs.push({
+            get: () => block.src,
+            set: (v) => {
+              if (block.ratioSrc === block.src) block.ratioSrc = v;
+              block.src = v;
+            },
+          });
         }
       });
     });
