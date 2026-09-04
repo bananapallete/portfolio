@@ -391,6 +391,10 @@ function ensureShape(d) {
       delete p.description;
       delete p.images;
       delete p.videos;
+      // 구버전: 개요 글자 크기·자간을 직접 입력하던 값. 지금은 본문 기본
+      // 대비 배율(텍스트 크기 시스템)을 쓰므로 더 이상 읽지 않는다.
+      delete p.overviewSize;
+      delete p.overviewTracking;
       // 잘못 저장된 임베드(iframe 코드, https 누락)를 정리
       p.blocks.forEach((b) => {
         if (b.type === "embed" && b.src) b.src = normalizeEmbedSrc(b.src);
@@ -3288,12 +3292,42 @@ function collectPendingMedia() {
   return refs;
 }
 
+// block.src는 실제 주소로 바뀌었는데 block.ratioSrc(비율을 잰 주소)만
+// 옛 data: 값 그대로 남아있으면, 영상 원본 전체가 data.json 안에 영영
+// 눌러앉는다(관리자 창을 오래 켜뒀다가 나중에 다시 "반영"을 눌러도
+// 발생할 수 있어, 발행 직전에 늘 한 번 훑어 정리한다 — 마지막 방어선).
+function sanitizeStaleRatioSrc() {
+  let fixed = 0;
+  (data.categories || []).forEach((cat) => {
+    (cat.projects || []).forEach((p) => {
+      (p.blocks || []).forEach((block) => {
+        if (
+          typeof block.ratioSrc === "string" &&
+          block.ratioSrc.startsWith("data:") &&
+          block.ratioSrc !== block.src
+        ) {
+          if (typeof block.src === "string" && !block.src.startsWith("data:")) {
+            block.ratioSrc = block.src;
+          } else {
+            delete block.ratioSrc;
+            delete block.ratioW;
+            delete block.ratioH;
+          }
+          fixed++;
+        }
+      });
+    });
+  });
+  return fixed;
+}
+
 // 성공하면 true, 실패·중단하면 false를 돌려준다
 async function publishToGithub() {
   if (!data) {
     alert("먼저 상단 \"불러오기(json)\" 버튼으로 data.json을 불러온 뒤 반영해주세요.");
     return false;
   }
+  if (sanitizeStaleRatioSrc() > 0) saveDraft();
   const token = await getGithubToken();
   if (!token) return false;
 
