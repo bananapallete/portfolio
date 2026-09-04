@@ -213,8 +213,102 @@
           "id": "new-project-mte1su0b",
           "title": "H.dot",
           "coverImage": "assets/523c3cb59e4857a4d93e.webm",
-          "blocks": [],
-          "summary": "마이다스인의 경영지원 통합 솔루션 “에이치닷\" 브랜딩",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "assets/00a71b37a83b71f621db.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/00a71b37a83b71f621db.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/8aa47da639b841629f11.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/8aa47da639b841629f11.webm"
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/0319046c839999e33375.png",
+                "assets/dbeef3b4d325e0e4e3d3.png"
+              ],
+              "grid": "2"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/0e6895c304237a773873.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/a00b0d39491e846d3b30.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/a00b0d39491e846d3b30.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/d01de836ac13d468afa6.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/53b905deb2c5f442890f.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/53b905deb2c5f442890f.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/0bab97fd0807bfc27d60.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/0bab97fd0807bfc27d60.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/9c7f0c49d7380c8a44f2.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/9c7f0c49d7380c8a44f2.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/0d862c8467456d5350d9.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/0d862c8467456d5350d9.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/01b99e93382785019d94.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/72ceab725ce9f4a1e2fc.png"
+              ]
+            }
+          ],
+          "summary": "마이다스인 경영지원 솔루션 “에이치닷\" 브랜딩",
           "year": "2024",
           "contribution": "100%",
           "tools": [
@@ -223,7 +317,9 @@
             "lottie",
             "c4d"
           ],
-          "overview": "마이다스인의 경영지원 통합 솔루션 “에이치닷\" 브랜딩"
+          "overview": "마이다스인의 경영지원 통합 솔루션 “에이치닷\" 브랜딩",
+          "titleColor": "#f5f4f0",
+          "blockGap": 5
         },
         {
           "id": "new-project-mtcndyjj",
