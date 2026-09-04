@@ -2044,6 +2044,9 @@ function renderBlockBody(project, block, blockIndex) {
     sourceRow.appendChild(makeUploadTile(uploadedFile ? "다른 영상으로 교체" : "영상 파일 올리기", { accept: "video/*" }, (files) => {
       if (!files.length) return;
       readFileAsDataURL(files[0]).then((dataUrl) => {
+        // 처음 올리는 영상은 재생바를 기본으로 꺼둔다(이미 올려둔 영상을
+        // 교체할 때는 그 블록에서 이미 정해둔 값을 그대로 둔다)
+        if (!uploadedFile) block.videoControls = false;
         block.src = dataUrl;
         blockFolds.set(block, false); // 방금 올린 영상은 펼친 채로 둔다
         saveDraft();
