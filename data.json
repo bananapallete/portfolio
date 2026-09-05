@@ -88,9 +88,10 @@
               "ratioW": 1920,
               "ratioH": 1080,
               "ratioSrc": "assets/0c35d561b257cf21c873.webm",
-              "videoMuted": false,
-              "videoLoop": false,
-              "videoAutoplay": false
+              "videoMuted": true,
+              "videoLoop": true,
+              "videoAutoplay": true,
+              "videoControls": false
             },
             {
               "type": "images",
