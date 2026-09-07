@@ -411,10 +411,82 @@
         },
         {
           "id": "new-project-mtjpk8mu",
-          "title": "새 프로젝트",
-          "coverImage": "",
-          "blocks": [],
-          "summary": ""
+          "title": "Jobda Dev",
+          "coverImage": "assets/6580f838cc255920eee0.webm",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "assets/8451e45e87059cefb77c.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/8451e45e87059cefb77c.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/98ddc76daa8e7254844b.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/c2efae885dbf7feef38e.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/ee9ba95a988a52d3bbed.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/de8e4ccb1c73d5917772.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/171b9df785aac673c872.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/171b9df785aac673c872.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/0e1f49aa13284ed7c17f.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/0e1f49aa13284ed7c17f.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/4beba590422c4380ecdb.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/4beba590422c4380ecdb.webm"
+            }
+          ],
+          "summary": "개발자 채용 플랫폼 '잡다데브' 키비주얼 디자인",
+          "year": "2022.04",
+          "contribution": "100%",
+          "overviewColor": "#f5f4f0",
+          "tools": [
+            "illustrator",
+            "aftereffects",
+            "lottie"
+          ],
+          "titleColor": "#f5f4f0",
+          "heroBg": "#16133f",
+          "overview": "개발자 채용 플랫폼 '잡다 데브'의 키비주얼 그래픽을 작업했습니다.\n도트 그래픽을 필두로 Lottie, 3D 모션을 적용해 마치 게임을 하는 듯한 경험을 선사합니다."
         }
       ],
       "nameSub": "Works"
