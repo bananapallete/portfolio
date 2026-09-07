@@ -505,7 +505,7 @@ body.bg-takeover:not(.bg-takeover-light) .acc-chevron { filter: invert(1); }
   width: 100%;
   max-width: var(--wrap);
   margin: 0 auto;
-  padding: 5px var(--side) 24px;
+  padding: var(--acc-panel-top, 5px) var(--side) var(--acc-panel-bottom, 24px);
   display: flex;
   flex-direction: column;
   gap: 32px;
