@@ -134,17 +134,12 @@
             },
             {
               "type": "images",
-              "layout": "single",
+              "layout": "grid",
               "images": [
-                "assets/532d11b639bc8eaa07e7.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
+                "assets/532d11b639bc8eaa07e7.png",
                 "assets/410216f62aba901e78a0.png"
-              ]
+              ],
+              "grid": "3"
             },
             {
               "type": "images",
