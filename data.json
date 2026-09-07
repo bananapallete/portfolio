@@ -426,15 +426,39 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/98ddc76daa8e7254844b.png"
+                "assets/c2efae885dbf7feef38e.png"
               ]
             },
             {
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/c2efae885dbf7feef38e.png"
+                "assets/98ddc76daa8e7254844b.png"
               ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/05a72b1739eb30044335.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/05a72b1739eb30044335.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/9323b4b8d6c601d832b9.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/9323b4b8d6c601d832b9.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/71839d1d62df45164bc3.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/71839d1d62df45164bc3.webm"
             },
             {
               "type": "images",
@@ -449,30 +473,6 @@
               "images": [
                 "assets/de8e4ccb1c73d5917772.png"
               ]
-            },
-            {
-              "type": "embed",
-              "src": "assets/171b9df785aac673c872.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/171b9df785aac673c872.webm"
-            },
-            {
-              "type": "embed",
-              "src": "assets/0e1f49aa13284ed7c17f.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/0e1f49aa13284ed7c17f.webm"
-            },
-            {
-              "type": "embed",
-              "src": "assets/4beba590422c4380ecdb.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/4beba590422c4380ecdb.webm"
             }
           ],
           "summary": "개발자 채용 플랫폼 '잡다데브' 키비주얼 디자인",
