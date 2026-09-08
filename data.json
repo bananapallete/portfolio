@@ -200,13 +200,12 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/2ed622ad0e6a4050a6ad.png",
+                "assets/0652668300440e1d9840.png",
                 "assets/2b71c22dcf6ba119faab.png",
                 "assets/5d7581280a05a0f7bb3e.png",
                 "assets/f00bb4b800c3631e2b2b.png",
                 "assets/0bcd55c45159279163c2.png",
-                "assets/3c4ec1e01c244b1a393a.png",
-                "assets/cd69cdf48222f4295f0e.png"
+                "assets/3c4ec1e01c244b1a393a.png"
               ]
             },
             {
@@ -216,6 +215,13 @@
               "ratioW": 1920,
               "ratioH": 850,
               "ratioSrc": "assets/aac26ce58e3a5440bee7.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/cd69cdf48222f4295f0e.png"
+              ]
             },
             {
               "type": "embed",
@@ -234,10 +240,17 @@
               "ratioSrc": "assets/c0323640aae1449d7f07.webm"
             },
             {
+              "type": "embed",
+              "src": "assets/09bb6b49eea3a9f5ff61.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/09bb6b49eea3a9f5ff61.webm"
+            },
+            {
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/f8e10eea3d3c2b55c6fa.png",
                 "assets/3a40fd5cd3b33ebaff43.png"
               ]
             },
@@ -267,7 +280,8 @@
             "figma"
           ],
           "bgColor": "#222324",
-          "blockGap": 5
+          "blockGap": 5,
+          "heroBg": "#222324"
         },
         {
           "id": "new-project-mte1su0b",
