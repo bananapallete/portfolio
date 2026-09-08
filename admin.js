@@ -633,12 +633,11 @@ function renderProfileFields(wrap, profile) {
   row1.appendChild(makeTextField("역할/타이틀", profile.role, (v) => { profile.role = v; live(); }));
   profileFold.body.appendChild(row1);
 
-  // ---- 소개문 (홈 화면 헤더 아래에 표시). 국문·영문 둘 다 적어두면
-  // 언어 버튼과 무관하게 두 글이 함께(국문 먼저, 빈 줄로 띄워 영문) 보인다. ----
+  // ---- 소개문 (홈 화면 헤더 아래에 표시). 언어 버튼으로 고른 쪽만 보인다 ----
   const bioField = document.createElement("div");
   bioField.className = "field";
   const bioLabel = document.createElement("label");
-  bioLabel.textContent = "소개문 · 국문 (홈 화면 헤더 아래에 표시, 비워두면 표시 안 함)";
+  bioLabel.textContent = "소개문 · 국문 (KR 선택 시 표시, 비워두면 표시 안 함)";
   const bioTa = document.createElement("textarea");
   bioTa.rows = 3;
   bioTa.value = profile.bio || "";
@@ -650,7 +649,7 @@ function renderProfileFields(wrap, profile) {
   const bioEnField = document.createElement("div");
   bioEnField.className = "field";
   const bioEnLabel = document.createElement("label");
-  bioEnLabel.textContent = "소개문 · 영문 (국문 아래에 이어서 함께 표시, 비워두면 국문만 표시)";
+  bioEnLabel.textContent = "소개문 · 영문 (EN 선택 시 표시, 비워두면 표시 안 함)";
   const bioEnTa = document.createElement("textarea");
   bioEnTa.rows = 3;
   bioEnTa.value = profile.bioEn || "";
