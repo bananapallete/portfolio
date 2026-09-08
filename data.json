@@ -28,64 +28,6 @@
       "name": "프로젝트",
       "projects": [
         {
-          "id": "branding-midas-week-2026",
-          "title": "2026 Global RPM Day",
-          "coverImage": "assets/5c222f34661a1984a299.webm",
-          "blocks": [
-            {
-              "type": "embed",
-              "src": "assets/807a270bfa590fd84f07.webm",
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/807a270bfa590fd84f07.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/6af6b818b39dc0a9f50c.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/6af6b818b39dc0a9f50c.webm"
-            },
-            {
-              "type": "embed",
-              "src": "assets/17e458b327928e659456.webm",
-              "ratioW": 1920,
-              "ratioH": 800,
-              "ratioSrc": "assets/17e458b327928e659456.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/74cbbd26c9ce5840cf90.webm",
-              "ratioW": 1920,
-              "ratioH": 850,
-              "ratioSrc": "assets/74cbbd26c9ce5840cf90.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/fa8b368877e0d7394db4.webm",
-              "ratioW": 1920,
-              "ratioH": 800,
-              "ratioSrc": "assets/fa8b368877e0d7394db4.webm",
-              "videoControls": false
-            }
-          ],
-          "summary": "마이다스아이티 사내 어워즈 키비주얼",
-          "blockGap": 0,
-          "bgColor": "#071345",
-          "tools": [
-            "illustrator",
-            "aftereffects",
-            "figma"
-          ],
-          "overview": "2030년을 향한 새로운 항해와 도약\n\n'Sail to VISION 2030'이라는 슬로건 아래, 미래를 향해 나아가는 굳건한 의지와 희망을 담아낸 행사 메인 비주얼입니다. \n끝없이 펼쳐진 수평선 너머로 눈부신 빛이 떠오르는 'Beyond the Horizon' 콘셉트를 적용해 하반기를 향한 기대감과 비전을 시각화했습니다.\n\n심연의 바다에서 수면 위로 뻗어나가는 듯한 빛의 궤적과 공간감을 주는 부드러운 곡선 그래픽은 거친 파도를 헤치고 전진하는 항해의 역동성을 상징합니다. \n신뢰와 무한한 가능성을 의미하는 깊은 블루 톤을 메인 컬러로 사용하고, 중앙의 밝은 그러데이션으로 시선을 집중시켜 목표를 향해 흔들림 없이 나아가는 명확한 방향성을 강조했습니다.",
-          "year": "2026.06",
-          "contribution": "100%"
-        },
-        {
           "id": "new-project-mt9nq9yg",
           "title": "Quest Hub",
           "coverImage": "assets/34dd338d0a17df203b8f.webm",
@@ -200,101 +142,135 @@
           "overviewColor": "#14121a"
         },
         {
-          "id": "new-project-mtb4jh1h",
-          "title": "Graphic Resource Center",
-          "coverImage": "assets/c8cee7d4dc0c1fed2925.webm",
+          "id": "branding-midas-week-2026",
+          "title": "2026 Global RPM Day",
+          "coverImage": "assets/5c222f34661a1984a299.webm",
           "blocks": [
             {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/5acd9313d1699aa63846.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "slider",
-              "images": [
-                "assets/2b71c22dcf6ba119faab.png",
-                "assets/5d7581280a05a0f7bb3e.png",
-                "assets/f00bb4b800c3631e2b2b.png",
-                "assets/0bcd55c45159279163c2.png"
-              ]
+              "type": "embed",
+              "src": "assets/807a270bfa590fd84f07.webm",
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/807a270bfa590fd84f07.webm",
+              "videoControls": false
             },
             {
               "type": "embed",
-              "src": "assets/5e1e7bd5759efedb4f57.webm",
+              "src": "assets/6af6b818b39dc0a9f50c.webm",
               "videoControls": false,
               "ratioW": 1920,
               "ratioH": 1080,
-              "ratioSrc": "assets/5e1e7bd5759efedb4f57.webm"
+              "ratioSrc": "assets/6af6b818b39dc0a9f50c.webm"
             },
             {
               "type": "embed",
-              "src": "assets/c0323640aae1449d7f07.webm",
-              "videoControls": false,
+              "src": "assets/17e458b327928e659456.webm",
               "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/c0323640aae1449d7f07.webm"
+              "ratioH": 800,
+              "ratioSrc": "assets/17e458b327928e659456.webm",
+              "videoControls": false
             },
             {
               "type": "embed",
-              "src": "assets/09bb6b49eea3a9f5ff61.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/09bb6b49eea3a9f5ff61.webm"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/3a40fd5cd3b33ebaff43.png"
-              ]
-            },
-            {
-              "type": "embed",
-              "src": "assets/7d3075e761809cf4ad5e.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/7d3075e761809cf4ad5e.webm"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/858c2a61522851c01acd.png",
-                "assets/b3e2460b02cf3c56a3df.png",
-                "assets/05d47e658326d14bdc6a.png"
-              ]
-            },
-            {
-              "type": "embed",
-              "src": "assets/cd6cd0a6f00f999d0c70.webm",
-              "videoControls": false,
+              "src": "assets/74cbbd26c9ce5840cf90.webm",
               "ratioW": 1920,
               "ratioH": 850,
-              "ratioSrc": "assets/cd6cd0a6f00f999d0c70.webm"
+              "ratioSrc": "assets/74cbbd26c9ce5840cf90.webm",
+              "videoControls": false
             },
             {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/cd69cdf48222f4295f0e.png"
-              ]
+              "type": "embed",
+              "src": "assets/fa8b368877e0d7394db4.webm",
+              "ratioW": 1920,
+              "ratioH": 800,
+              "ratioSrc": "assets/fa8b368877e0d7394db4.webm",
+              "videoControls": false
             }
           ],
-          "summary": "사내 아이콘 어셋 플랫폼, 그래픽 리소스센터 ‘비전’",
+          "summary": "마이다스아이티 사내 어워즈 키비주얼",
+          "blockGap": 0,
+          "bgColor": "#071345",
           "tools": [
             "illustrator",
             "aftereffects",
-            "lottie",
             "figma"
           ],
-          "bgColor": "#222324",
-          "blockGap": 5,
-          "heroBg": "#222324"
+          "overview": "2030년을 향한 새로운 항해와 도약\n\n'Sail to VISION 2030'이라는 슬로건 아래, 미래를 향해 나아가는 굳건한 의지와 희망을 담아낸 행사 메인 비주얼입니다. \n끝없이 펼쳐진 수평선 너머로 눈부신 빛이 떠오르는 'Beyond the Horizon' 콘셉트를 적용해 하반기를 향한 기대감과 비전을 시각화했습니다.\n\n심연의 바다에서 수면 위로 뻗어나가는 듯한 빛의 궤적과 공간감을 주는 부드러운 곡선 그래픽은 거친 파도를 헤치고 전진하는 항해의 역동성을 상징합니다. \n신뢰와 무한한 가능성을 의미하는 깊은 블루 톤을 메인 컬러로 사용하고, 중앙의 밝은 그러데이션으로 시선을 집중시켜 목표를 향해 흔들림 없이 나아가는 명확한 방향성을 강조했습니다.",
+          "year": "2026.06",
+          "contribution": "100%"
+        },
+        {
+          "id": "new-project-mtcndyjj",
+          "title": "MIDAS WEEK",
+          "coverImage": "assets/fb6b5ca257b720ef6ddf.webm",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "assets/fb6b5ca257b720ef6ddf.webm",
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/fb6b5ca257b720ef6ddf.webm",
+              "videoControls": false
+            },
+            {
+              "type": "embed",
+              "src": "assets/d5d56a5f55e025d387be.webm",
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/d5d56a5f55e025d387be.webm",
+              "videoControls": false
+            },
+            {
+              "type": "embed",
+              "src": "assets/f8c2a09a146ecbeef98f.webm",
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/f8c2a09a146ecbeef98f.webm",
+              "videoControls": false
+            },
+            {
+              "type": "embed",
+              "src": "assets/f5a10900f0150c9d1376.webm",
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/f5a10900f0150c9d1376.webm",
+              "videoControls": false
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/81ff7680bd220aa216e1.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/9279a20b3b4e052522d6.png",
+                "assets/8eb61d938c62f9fae145.png",
+                "assets/7a394fe2d3be8025fd00.png",
+                "assets/e756012354bd4fed8008.png",
+                "assets/d409f17f0789e9e1926c.png",
+                "assets/e22dc00905ecfc575daf.png",
+                "assets/14df6a88b8866d02a520.png"
+              ]
+            }
+          ],
+          "summary": "",
+          "tools": [
+            "photoshop",
+            "illustrator",
+            "aftereffects",
+            "figma",
+            "c4d",
+            "redshift"
+          ],
+          "contribution": "75",
+          "year": "2025.06",
+          "bgColor": "#f3f5f7",
+          "overview": "마이다스 구성원의 일주일 ‘마이다스 위크' 리브랜딩\n\n\n2024년의 그래픽을 리메이크하여 입체감과 현장감이 느껴지는 비주얼로 재탄생시켰습니다.",
+          "blockGap": 5
         },
         {
           "id": "new-project-mte1su0b",
@@ -409,91 +385,101 @@
           "blockGap": 5
         },
         {
-          "id": "new-project-mtcndyjj",
-          "title": "MIDAS WEEK",
-          "coverImage": "assets/fb6b5ca257b720ef6ddf.webm",
+          "id": "new-project-mtb4jh1h",
+          "title": "Graphic Resource Center",
+          "coverImage": "assets/c8cee7d4dc0c1fed2925.webm",
           "blocks": [
-            {
-              "type": "embed",
-              "src": "assets/fb6b5ca257b720ef6ddf.webm",
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/fb6b5ca257b720ef6ddf.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/d5d56a5f55e025d387be.webm",
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/d5d56a5f55e025d387be.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/f8c2a09a146ecbeef98f.webm",
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/f8c2a09a146ecbeef98f.webm",
-              "videoControls": false
-            },
-            {
-              "type": "embed",
-              "src": "assets/f5a10900f0150c9d1376.webm",
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/f5a10900f0150c9d1376.webm",
-              "videoControls": false
-            },
             {
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/81ff7680bd220aa216e1.png"
+                "assets/5acd9313d1699aa63846.png"
               ]
             },
             {
               "type": "images",
+              "layout": "slider",
+              "images": [
+                "assets/2b71c22dcf6ba119faab.png",
+                "assets/5d7581280a05a0f7bb3e.png",
+                "assets/f00bb4b800c3631e2b2b.png",
+                "assets/0bcd55c45159279163c2.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/5e1e7bd5759efedb4f57.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/5e1e7bd5759efedb4f57.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/c0323640aae1449d7f07.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/c0323640aae1449d7f07.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/09bb6b49eea3a9f5ff61.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/09bb6b49eea3a9f5ff61.webm"
+            },
+            {
+              "type": "images",
               "layout": "single",
               "images": [
-                "assets/9279a20b3b4e052522d6.png",
-                "assets/8eb61d938c62f9fae145.png",
-                "assets/7a394fe2d3be8025fd00.png",
-                "assets/e756012354bd4fed8008.png",
-                "assets/d409f17f0789e9e1926c.png",
-                "assets/e22dc00905ecfc575daf.png",
-                "assets/14df6a88b8866d02a520.png"
+                "assets/3a40fd5cd3b33ebaff43.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/7d3075e761809cf4ad5e.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/7d3075e761809cf4ad5e.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/858c2a61522851c01acd.png",
+                "assets/b3e2460b02cf3c56a3df.png",
+                "assets/05d47e658326d14bdc6a.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/cd6cd0a6f00f999d0c70.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 850,
+              "ratioSrc": "assets/cd6cd0a6f00f999d0c70.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/cd69cdf48222f4295f0e.png"
               ]
             }
           ],
-          "summary": "",
+          "summary": "사내 아이콘 어셋 플랫폼, 그래픽 리소스센터 ‘비전’",
           "tools": [
-            "photoshop",
             "illustrator",
             "aftereffects",
-            "figma",
-            "c4d",
-            "redshift"
+            "lottie",
+            "figma"
           ],
-          "contribution": "75",
-          "year": "2025.06",
-          "bgColor": "#f3f5f7",
-          "overview": "마이다스 구성원의 일주일 ‘마이다스 위크' 리브랜딩\n\n\n2024년의 그래픽을 리메이크하여 입체감과 현장감이 느껴지는 비주얼로 재탄생시켰습니다.",
-          "blockGap": 5
-        },
-        {
-          "id": "new-project-mtelwipy",
-          "title": "CIVIL NX",
-          "coverImage": "assets/e7fa604c6b4345cf784d.webm",
-          "blocks": [],
-          "summary": "Hyper CIVIL NX 출시 모션그래픽",
-          "year": "2026.04",
-          "contribution": "100%",
-          "tools": [
-            "aftereffects",
-            "c4d",
-            "redshift"
-          ]
+          "bgColor": "#222324",
+          "blockGap": 5,
+          "heroBg": "#222324"
         },
         {
           "id": "new-project-mtjpk8mu",
