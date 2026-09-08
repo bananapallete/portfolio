@@ -628,6 +628,13 @@
               "type": "images",
               "layout": "single",
               "images": [
+                "assets/e67b96ffc9f93f3ae5bf.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
                 "assets/15dcaa99642f85273be3.png",
                 "assets/650c2bf073114ac20878.png"
               ]
@@ -636,29 +643,29 @@
               "type": "images",
               "layout": "slider",
               "images": [
-                "assets/40f24a73b8582d61edc5.png",
-                "assets/d359cdfc6427ad7dcbbf.png",
-                "assets/5dc379de716c2aa0b536.png",
-                "assets/626f79d470fca8d59fbd.png"
+                "assets/869b2fb6cb6521332624.png",
+                "assets/4c205e490292974652c9.png",
+                "assets/778e0142ebc9d784e263.png",
+                "assets/7db782ca00a580b618da.png"
               ]
             },
             {
               "type": "images",
               "layout": "slider",
               "images": [
-                "assets/ea6398e2156c7b0ff525.png",
-                "assets/e7ea5aaca4f89be9d310.png"
+                "assets/d9aa98bb37e6be9b6904.png",
+                "assets/1a6726d03d4b6a439255.png"
               ]
             },
             {
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/62a3a87f06d5a3348769.png",
-                "assets/0d4b6855bef752449538.png",
-                "assets/da464b8c216c813e6f09.png",
-                "assets/a4e5a0ff68c79ff456f3.png",
-                "assets/a20f2de2f8060aa21bdc.png"
+                "assets/5bcd7064deca3ce76f5f.png",
+                "assets/e2ea44d4b3c064080c62.png",
+                "assets/d34c3e4abfde0498ab52.png",
+                "assets/45f789a64848ef105b35.png",
+                "assets/e80e635460d7ecf0c48b.png"
               ]
             }
           ],
