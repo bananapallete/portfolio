@@ -1889,22 +1889,65 @@ body.gate-locked { overflow: hidden; }
   bottom: 12px;
   left: 0;
   right: 0;
+  z-index: 2;
   display: flex;
   justify-content: center;
   gap: 7px;
 }
 
+/* 배경(사진) 색과 무관하게 항상 또렷이 보이도록, 밑에 깔린 색을 그대로
+   반전시키는 difference 블렌드로 그린다 — 어두운 사진 위에선 밝게,
+   밝은 사진 위에선 어둡게 저절로 바뀐다. */
 .blk-slider-dots button {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   border: none;
   padding: 0;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 1px 3px rgba(20, 18, 26, 0.3);
+  background: #fff;
+  mix-blend-mode: difference;
+  transition: transform 0.2s ease;
 }
 
-.blk-slider-dots button.active { background: #fff; }
+.blk-slider-dots button.active { transform: scale(1.4); }
+
+@media (max-width: 640px) {
+  /* 모바일에서는 동그라미를 데스크톱의 절반 크기로 줄인다 */
+  .blk-slider-dots button { width: 4px; height: 4px; }
+}
+
+/* 좌우 이동 버튼: 동그라미와 같은 이유로 difference 블렌드를 쓴다 */
+.blk-slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blk-slider-prev { left: 4px; }
+.blk-slider-next { right: 4px; }
+
+.blk-slider-nav::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-style: solid;
+  border-width: 0 2.5px 2.5px 0;
+  border-color: #fff;
+  mix-blend-mode: difference;
+}
+
+.blk-slider-prev::before { transform: rotate(135deg); margin-left: 4px; }
+.blk-slider-next::before { transform: rotate(-45deg); margin-right: 4px; }
 
 .blk-embed iframe {
   width: 100%;

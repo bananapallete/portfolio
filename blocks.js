@@ -473,43 +473,92 @@ function renderSlider(images, firstEager = false) {
   wrap.className = "blk-slider reveal";
   const track = document.createElement("div");
   track.className = "blk-slider-track";
-  images.forEach((src, i) => {
+
+  const n = images.length;
+  // 끝에서 처음으로(또는 그 반대로) 넘어갈 때도 항상 같은 방향으로 자연스럽게
+  // 이어지도록, 맨 앞엔 마지막 이미지를, 맨 뒤엔 첫 이미지를 복제해 둔다.
+  // 복제본에 도착한 뒤 다음으로 또 움직이려는 시점에(settleIfCloned 참고)
+  // 진짜 이미지 위치로 애니메이션 없이 순간 이동시켜서, 보는 사람 눈에는
+  // 계속 같은 방향으로 도는 것처럼 보인다.
+  const slides = [images[n - 1], ...images, images[0]];
+  slides.forEach((src, i) => {
     const img = document.createElement("img");
     img.src = src;
     img.alt = "";
-    // 첫 장만 즉시, 나머지는 넘어가기 전에 받아온다 (3.5초 간격이라 충분)
-    setImgLoading(img, firstEager && i === 0);
+    // 실제로 처음 보이는 장(복제본 제외 진짜 첫 장)만 즉시, 나머지는 넘어가기 전에 받아온다
+    setImgLoading(img, firstEager && i === 1);
     track.appendChild(img);
   });
   wrap.appendChild(track);
 
   const dots = document.createElement("div");
   dots.className = "blk-slider-dots";
-  let idx = 0;
+
+  let pos = 1; // 트랙 안에서의 실제 위치: 0=마지막 복제, 1..n=진짜 이미지, n+1=첫 복제
   let timer = null;
 
-  const go = (i) => {
-    idx = (i + images.length) % images.length;
-    track.style.transform = `translateX(-${idx * 100}%)`;
-    Array.from(dots.children).forEach((d, j) => d.classList.toggle("active", j === idx));
+  const setActiveDot = () => {
+    const dotIdx = ((pos - 1) % n + n) % n;
+    Array.from(dots.children).forEach((d, j) => d.classList.toggle("active", j === dotIdx));
   };
+
+  const move = (p, animate) => {
+    if (!animate) track.style.transition = "none";
+    track.style.transform = `translateX(-${p * 100}%)`;
+    if (!animate) {
+      track.offsetHeight; // 강제 리플로우로 트랜지션 없이 바로 적용시킨다
+      track.style.transition = "";
+    }
+  };
+
+  // 복제 위치(맨 앞/맨 뒤)에 멈춰 있다면, 다음 이동을 계산하기 전에 애니메이션
+  // 없이 진짜 이미지 위치로 먼저 되돌려 둔다. 복제는 진짜 이미지와 픽셀이
+  // 완전히 같아서 화면엔 아무 티가 안 나고, 그다음 이동 거리만 항상 올바르게
+  // 계산된다 (트랜지션 종료 이벤트나 타이머에 기대지 않는 방식이라, 클론에
+  // 도착한 뒤로 한참 아무 조작이 없다가 다시 움직여도 항상 정확하다).
+  const settleIfCloned = () => {
+    if (pos === n + 1) { pos = 1; move(pos, false); }
+    else if (pos === 0) { pos = n; move(pos, false); }
+  };
+
+  const go = (p) => {
+    settleIfCloned();
+    pos = p;
+    move(pos, true);
+    setActiveDot();
+  };
+
+  const next = () => { settleIfCloned(); go(pos + 1); };
+  const prev = () => { settleIfCloned(); go(pos - 1); };
   const start = () => {
-    timer = setInterval(() => go(idx + 1), 3500);
+    timer = setInterval(next, 3500);
     sliderTimers.push(timer);
   };
+  const restart = () => { clearInterval(timer); start(); };
 
   images.forEach((_, i) => {
     const d = document.createElement("button");
-    d.addEventListener("click", () => {
-      clearInterval(timer);
-      go(i);
-      start();
-    });
+    d.addEventListener("click", () => { go(i + 1); restart(); });
     dots.appendChild(d);
   });
   wrap.appendChild(dots);
 
-  go(0);
+  const prevBtn = document.createElement("button");
+  prevBtn.type = "button";
+  prevBtn.className = "blk-slider-nav blk-slider-prev";
+  prevBtn.setAttribute("aria-label", "이전 이미지");
+  prevBtn.addEventListener("click", () => { prev(); restart(); });
+  wrap.appendChild(prevBtn);
+
+  const nextBtn = document.createElement("button");
+  nextBtn.type = "button";
+  nextBtn.className = "blk-slider-nav blk-slider-next";
+  nextBtn.setAttribute("aria-label", "다음 이미지");
+  nextBtn.addEventListener("click", () => { next(); restart(); });
+  wrap.appendChild(nextBtn);
+
+  move(pos, false);
+  setActiveDot();
   start();
   return wrap;
 }
