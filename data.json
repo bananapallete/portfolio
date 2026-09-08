@@ -19,7 +19,9 @@
     "panelTopGap": 25,
     "panelBottomGap": 25,
     "overviewLineHeight": 2,
-    "bioEn": "This is the one of my graphic design workspaces.\nFeel free to browse, and if you have any questions, please contact me :)"
+    "bioEn": "This is the one of my graphic design workspaces.\nFeel free to browse, and if you have any questions, please contact me :)",
+    "headerHeight": 40,
+    "headerHeightMobile": 30
   },
   "categories": [
     {
