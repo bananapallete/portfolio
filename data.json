@@ -585,8 +585,8 @@
       "projects": [
         {
           "id": "illustration-jihaksa",
-          "title": "지학사",
-          "coverImage": "assets/d7578e404504795fab17.png",
+          "title": "지학사 중등수학 일러스트",
+          "coverImage": "assets/329be5f8c0db01ed8ab0.webm",
           "blocks": [
             {
               "type": "images",
@@ -595,10 +595,35 @@
                 "assets/20fe84bdd0ac9a60eebf.png"
               ],
               "grid": "3"
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/c0a4319f9acdcafedcef.png",
+                "assets/acb62009d1c6f0a82236.png",
+                "assets/664059b4f7b3320a6412.png"
+              ],
+              "grid": "3"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/50f5dba104c25f17a744.png"
+              ]
             }
           ],
-          "summary": "지학사 책 표지 디자인",
-          "blockGap": 2
+          "summary": "지학사 중등수학 표지 디자인",
+          "blockGap": 2,
+          "bgColor": "#f5f4f0",
+          "overviewColor": "#14121a",
+          "tools": [
+            "photoshop",
+            "procreate"
+          ],
+          "contribution": "100%",
+          "year": "2024.06"
         },
         {
           "id": "new-project-mtb0xnip",
