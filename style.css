@@ -2997,8 +2997,6 @@ body.theme-dark .acc-chevron {
 /* ---------------------------- 모바일 반응형 ---------------------------- */
 
 @media (max-width: 640px) {
-  :root { --header-h: 48px; }
-
   /* blocks.js가 --text-*를 인라인 스타일로 늘 채워두므로, 여기서 :root의
      --text-* 자체를 다시 정의해도 우선순위에서 밀려 소용없다. 그래서 실제
      쓰는 곳마다 -mobile 변수로 따로 덮어쓴다(각 규칙은 위에서 이미 정의). */
@@ -3021,9 +3019,11 @@ body.theme-dark .acc-chevron {
   .proj-overview-desc,
   .blk-text { font-size: var(--text-body-mobile); }
 
+  .work-section { scroll-margin-top: calc(var(--header-h-mobile, 48px) + 8px); }
+
   .site-header .container {
     flex-direction: row;
-    height: var(--header-h);
+    height: var(--header-h-mobile, 48px);
     padding: 0 16px;
     gap: 10px;
   }

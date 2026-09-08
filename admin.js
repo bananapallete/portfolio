@@ -747,6 +747,13 @@ function renderLayoutFields(wrap, profile) {
     live
   ));
   webCol.appendChild(buildSliderField(
+    "홈 · 상단 헤더 높이",
+    () => profile.headerHeight,
+    (v) => { if (v == null) delete profile.headerHeight; else profile.headerHeight = v; },
+    { min: 40, max: 160, def: HEADER_H_DEFAULT },
+    live
+  ));
+  webCol.appendChild(buildSliderField(
     "최대 폭 (홈)",
     () => readMaxWidth(profile.maxWidthHome, profile.fullBleedHome),
     (v) => {
@@ -791,6 +798,13 @@ function renderLayoutFields(wrap, profile) {
     () => profile.sideMarginMobile,
     (v) => { if (v == null) delete profile.sideMarginMobile; else profile.sideMarginMobile = v; },
     { min: 0, max: 60, def: SIDE_MARGIN_MOBILE_DEFAULT },
+    live
+  ));
+  mobileCol.appendChild(buildSliderField(
+    "홈 · 상단 헤더 높이",
+    () => profile.headerHeightMobile,
+    (v) => { if (v == null) delete profile.headerHeightMobile; else profile.headerHeightMobile = v; },
+    { min: 30, max: 100, def: HEADER_H_MOBILE_DEFAULT },
     live
   ));
   mobileCol.appendChild(buildSliderField(

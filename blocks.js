@@ -99,6 +99,10 @@ const CARD_RADIUS_DEFAULT = 0; // 카드 모서리 둥글기
 // 모바일에서는 지금까지 좌우 여백을 18px로 고정해 뒀던 값을 그대로 기본값으로 쓴다
 const SIDE_MARGIN_MOBILE_DEFAULT = 18;
 const CONTENT_MARGIN_MOBILE_DEFAULT = 18;
+// 상단 헤더(로고·언어 전환 줄) 높이. 웹/모바일은 지금 CSS에 실제로 적용돼
+// 있는 값을 그대로 기본값으로 쓴다.
+const HEADER_H_DEFAULT = 78;
+const HEADER_H_MOBILE_DEFAULT = 48;
 
 /* 반응형 타이포그래피 스케일(Figma 참고). "본문 기본"만 실제 px 값이고,
    나머지 7단계는 본문 기본의 배율(rem 개념)로 정의한다 — 본문 기본만
@@ -188,6 +192,14 @@ function applyLayoutVars(profile, scope = "home") {
   root.setProperty("--card-radius", (radius != null ? radius : CARD_RADIUS_DEFAULT) + "px");
   root.setProperty("--side-mobile", (sideMobile != null ? sideMobile : SIDE_MARGIN_MOBILE_DEFAULT) + "px");
   root.setProperty("--side-menu-mobile", (contentMobile != null ? contentMobile : CONTENT_MARGIN_MOBILE_DEFAULT) + "px");
+
+  // 상단 헤더 높이. 모바일은 --header-h를 그대로 덮어쓰지 않고 별도 변수로 둬야
+  // (--text-* 와 같은 이유로) media query 쪽 :root 재정의가 인라인 스타일에
+  // 밀려 무시되지 않는다.
+  const headerH = normalizeGap(p.headerHeight);
+  const headerHMobile = normalizeGap(p.headerHeightMobile);
+  root.setProperty("--header-h", (headerH != null ? headerH : HEADER_H_DEFAULT) + "px");
+  root.setProperty("--header-h-mobile", (headerHMobile != null ? headerHMobile : HEADER_H_MOBILE_DEFAULT) + "px");
 
   // 타이포그래피 스케일: 본문 기본(px) 하나를 기준으로 나머지 7단계는
   // 그 배율로 계산한다. --text-body 를 바꾸면 전부 비례해서 따라온다.
