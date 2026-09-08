@@ -502,14 +502,7 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/98ddc76daa8e7254844b.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/c2efae885dbf7feef38e.png"
+                "assets/1dfaa6507107b76d9f10.png"
               ]
             },
             {
@@ -535,6 +528,13 @@
               "ratioW": 1920,
               "ratioH": 1080,
               "ratioSrc": "assets/71839d1d62df45164bc3.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/98ddc76daa8e7254844b.png"
+              ]
             },
             {
               "type": "images",
