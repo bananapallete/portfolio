@@ -631,6 +631,53 @@
           "coverImage": "assets/67aba58943c66cb26386.png",
           "blocks": [],
           "summary": ""
+        },
+        {
+          "id": "new-project-mtsbf5hk",
+          "title": "INHR+ 캐릭터 가이드",
+          "coverImage": "assets/45716aeedef593cda867.png",
+          "blocks": [
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/15dcaa99642f85273be3.png",
+                "assets/650c2bf073114ac20878.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "slider",
+              "images": [
+                "assets/58a70e61d38469d5aaff.png",
+                "assets/327ebaa38e640554b83e.png",
+                "assets/40f24a73b8582d61edc5.png",
+                "assets/d359cdfc6427ad7dcbbf.png",
+                "assets/5dc379de716c2aa0b536.png",
+                "assets/626f79d470fca8d59fbd.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/62a3a87f06d5a3348769.png",
+                "assets/0d4b6855bef752449538.png",
+                "assets/da464b8c216c813e6f09.png",
+                "assets/a4e5a0ff68c79ff456f3.png",
+                "assets/a20f2de2f8060aa21bdc.png"
+              ]
+            }
+          ],
+          "summary": "마이다스의 Saas 플랫폼 INHR+ 캐릭터 일러스트",
+          "bgColor": "#f5f4f0",
+          "tools": [
+            "illustrator",
+            "figma"
+          ],
+          "year": "2022.04",
+          "contribution": "100%",
+          "blockGap": 5
         }
       ],
       "nameSub": "Illustrations"
