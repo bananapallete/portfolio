@@ -34,19 +34,19 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "assets/6af6b818b39dc0a9f50c.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/6af6b818b39dc0a9f50c.webm"
-            },
-            {
-              "type": "embed",
               "src": "assets/807a270bfa590fd84f07.webm",
               "ratioW": 1920,
               "ratioH": 1080,
               "ratioSrc": "assets/807a270bfa590fd84f07.webm",
               "videoControls": false
+            },
+            {
+              "type": "embed",
+              "src": "assets/6af6b818b39dc0a9f50c.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/6af6b818b39dc0a9f50c.webm"
             },
             {
               "type": "embed",
