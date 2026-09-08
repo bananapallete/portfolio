@@ -636,12 +636,18 @@
               "type": "images",
               "layout": "slider",
               "images": [
-                "assets/58a70e61d38469d5aaff.png",
-                "assets/327ebaa38e640554b83e.png",
                 "assets/40f24a73b8582d61edc5.png",
                 "assets/d359cdfc6427ad7dcbbf.png",
                 "assets/5dc379de716c2aa0b536.png",
                 "assets/626f79d470fca8d59fbd.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "slider",
+              "images": [
+                "assets/ea6398e2156c7b0ff525.png",
+                "assets/e7ea5aaca4f89be9d310.png"
               ]
             },
             {
