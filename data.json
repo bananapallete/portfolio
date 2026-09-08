@@ -212,6 +212,16 @@
               ]
             },
             {
+              "type": "images",
+              "layout": "slider",
+              "images": [
+                "assets/2b71c22dcf6ba119faab.png",
+                "assets/5d7581280a05a0f7bb3e.png",
+                "assets/f00bb4b800c3631e2b2b.png",
+                "assets/0bcd55c45159279163c2.png"
+              ]
+            },
+            {
               "type": "embed",
               "src": "assets/aac26ce58e3a5440bee7.webm",
               "videoControls": false,
@@ -585,38 +595,6 @@
                 "assets/20fe84bdd0ac9a60eebf.png"
               ],
               "grid": "3"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/bed999c1ae75d17ae650.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "grid",
-              "images": [
-                "assets/fff17cc99ef6e98299d2.png",
-                "assets/1a8e2450116954c982b5.png"
-              ],
-              "grid": "2"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/00c5db200247476488c6.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "grid",
-              "images": [
-                "assets/fc9b1a82f20bdeede474.png",
-                "assets/938e1f0e1574d1f954a3.png"
-              ],
-              "grid": "2"
             }
           ],
           "summary": "지학사 책 표지 디자인",
