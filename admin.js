@@ -848,7 +848,7 @@ function renderLayoutFields(wrap, profile) {
     "펼친 영역 상단 여백",
     () => profile.panelTopGap,
     (v) => { if (v == null) delete profile.panelTopGap; else profile.panelTopGap = v; },
-    { min: 0, max: 40, def: PANEL_TOP_GAP_DEFAULT },
+    { min: 0, max: 80, def: PANEL_TOP_GAP_DEFAULT },
     live
   ));
   detailBox.appendChild(buildSliderField(
