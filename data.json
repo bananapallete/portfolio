@@ -671,6 +671,59 @@
           "year": "2022.04",
           "contribution": "100%",
           "blockGap": 5
+        },
+        {
+          "id": "new-project-mtse5ln6",
+          "title": "카카오 ESG 일러스트레이션",
+          "coverImage": "assets/2b855dd87def30581965.png",
+          "blocks": [
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/ef17f3734f14ac5d3886.png",
+                "assets/f177d7a8359c3d645547.png",
+                "assets/c56995b076bdade641b0.png",
+                "assets/9e5b017316e538306dca.png",
+                "assets/1f4baa3359070a96a14e.png",
+                "assets/59b5f336df8139b0ae2b.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/0a0cfd7553d938dba2a6.webm",
+              "videoControls": false,
+              "ratioW": 1400,
+              "ratioH": 787,
+              "ratioSrc": "assets/0a0cfd7553d938dba2a6.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/1e885c0100b593430966.webm",
+              "videoControls": false,
+              "ratioW": 1400,
+              "ratioH": 787,
+              "ratioSrc": "assets/1e885c0100b593430966.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/83f343d1cdb35f2e7884.png"
+              ]
+            }
+          ],
+          "summary": "Kakao ESG Illustration 개인작업",
+          "overview": "카카오 스타일을 담은 ESG 일러스트레이션입니다.\n\n",
+          "year": "2024.08",
+          "contribution": "100%",
+          "tools": [
+            "illustrator",
+            "aftereffects",
+            "procreate"
+          ],
+          "overviewColor": "#14121a",
+          "bgColor": "#ffc93c"
         }
       ],
       "nameSub": "Illustrations"
