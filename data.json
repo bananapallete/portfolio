@@ -615,7 +615,7 @@
             }
           ],
           "summary": "지학사 중등수학 표지 디자인",
-          "blockGap": 2,
+          "blockGap": 5,
           "bgColor": "#f5f4f0",
           "overviewColor": "#14121a",
           "tools": [
