@@ -635,26 +635,27 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/15dcaa99642f85273be3.png",
-                "assets/650c2bf073114ac20878.png"
+                "assets/1ecc4faac3bfd598cc6a.png",
+                "assets/02d8df094283262f4bd4.png",
+                "assets/98a35fb264aef2bea42b.png"
               ]
             },
             {
               "type": "images",
               "layout": "slider",
               "images": [
-                "assets/869b2fb6cb6521332624.png",
+                "assets/fb95c4223b285632792d.png",
+                "assets/dde8ffb80edd11043f44.png",
+                "assets/7f8b675af6277d1ccb97.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "slider",
+              "images": [
                 "assets/4c205e490292974652c9.png",
                 "assets/778e0142ebc9d784e263.png",
                 "assets/7db782ca00a580b618da.png"
-              ]
-            },
-            {
-              "type": "images",
-              "layout": "slider",
-              "images": [
-                "assets/d9aa98bb37e6be9b6904.png",
-                "assets/1a6726d03d4b6a439255.png"
               ]
             },
             {
@@ -667,6 +668,11 @@
                 "assets/45f789a64848ef105b35.png",
                 "assets/e80e635460d7ecf0c48b.png"
               ]
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": []
             }
           ],
           "summary": "마이다스의 Saas 플랫폼 INHR+ 캐릭터 일러스트",
