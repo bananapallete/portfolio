@@ -223,21 +223,6 @@
             },
             {
               "type": "embed",
-              "src": "assets/aac26ce58e3a5440bee7.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 850,
-              "ratioSrc": "assets/aac26ce58e3a5440bee7.webm"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/cd69cdf48222f4295f0e.png"
-              ]
-            },
-            {
-              "type": "embed",
               "src": "assets/5e1e7bd5759efedb4f57.webm",
               "videoControls": false,
               "ratioW": 1920,
@@ -282,6 +267,21 @@
                 "assets/858c2a61522851c01acd.png",
                 "assets/b3e2460b02cf3c56a3df.png",
                 "assets/05d47e658326d14bdc6a.png"
+              ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/cd6cd0a6f00f999d0c70.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 850,
+              "ratioSrc": "assets/cd6cd0a6f00f999d0c70.webm"
+            },
+            {
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/cd69cdf48222f4295f0e.png"
               ]
             }
           ],
