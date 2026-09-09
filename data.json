@@ -569,7 +569,32 @@
           "id": "new-project-mttdypbz",
           "title": "Experts Day",
           "coverImage": "assets/5d32f93f3573ec1b1df5.webm",
-          "blocks": [],
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "assets/f3e7ea85517d707f031b.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/f3e7ea85517d707f031b.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/5ec18d3088bf07f20b0a.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/5ec18d3088bf07f20b0a.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/a391dc7ae6a277bbf766.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/a391dc7ae6a277bbf766.webm"
+            }
+          ],
           "summary": "마이다스아이티의 'Experts Day' 행사 브랜딩",
           "tools": [
             "illustrator",
@@ -577,7 +602,35 @@
           ],
           "year": "2025.12",
           "contribution": "100%",
-          "bgColor": "#0656ac"
+          "bgColor": "#0656ac",
+          "overview": "프로젝트명\n마이다스의 기술 공유 행사 'Experts Day'의 행사 키비주얼 작업\n\n작업 목표\n\n'지식공유', '상승' 의 아이덴티티를 시각화 하기\n\n\n연출 의도\n딥 블루를 사용하여 전문성과 신뢰감을 확보하고 볼드한 세리프 타이포그래피를 적용해 시각적인 재미를 주었습니다. \n종이비행기와 구름, 하프톤 패턴 오브제를 우상향으로 배치하여 상승하는 방향성을 연출했습니다. ",
+          "overviewRuns": [
+            {
+              "t": "프로젝트명",
+              "b": true
+            },
+            {
+              "t": "\n마이다스의 기술 공유 행사 'Experts Day'의 행사 키비주얼 작업\n\n",
+              "b": false
+            },
+            {
+              "t": "작업 목표",
+              "b": true
+            },
+            {
+              "t": "\n\n'지식공유', '상승' 의 아이덴티티를 시각화 하기\n\n\n",
+              "b": false
+            },
+            {
+              "t": "연출 의도",
+              "b": true
+            },
+            {
+              "t": "\n딥 블루를 사용하여 전문성과 신뢰감을 확보하고 볼드한 세리프 타이포그래피를 적용해 시각적인 재미를 주었습니다. \n종이비행기와 구름, 하프톤 패턴 오브제를 우상향으로 배치하여 상승하는 방향성을 연출했습니다. ",
+              "b": false
+            }
+          ],
+          "overviewColor": "#f5f4f0"
         }
       ],
       "nameSub": "Works"
