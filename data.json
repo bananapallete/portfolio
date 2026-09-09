@@ -21,7 +21,8 @@
     "overviewLineHeight": 2,
     "bioEn": "This is the one of my graphic design workspaces.\nFeel free to browse, and if you have any questions, please contact me :)",
     "headerHeight": 60,
-    "headerHeightMobile": 50
+    "headerHeightMobile": 50,
+    "contentMargin": 0
   },
   "categories": [
     {
