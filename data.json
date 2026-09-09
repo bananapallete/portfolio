@@ -23,7 +23,7 @@
     "headerHeight": 60,
     "headerHeightMobile": 50,
     "contentMargin": 0,
-    "sideMargin": 0
+    "sideMargin": 25
   },
   "categories": [
     {
