@@ -564,6 +564,20 @@
           "overview": "개발자 채용 플랫폼 '잡다 데브'의 키비주얼 그래픽을 작업했습니다.\n도트 그래픽을 필두로 Lottie, 3D 모션을 적용해 마치 게임을 하는 듯한 경험을 선사합니다.",
           "bgColor": "#16133f",
           "blockGap": 5
+        },
+        {
+          "id": "new-project-mttdypbz",
+          "title": "Experts Day",
+          "coverImage": "assets/5d32f93f3573ec1b1df5.webm",
+          "blocks": [],
+          "summary": "마이다스아이티의 'Experts Day' 행사 브랜딩",
+          "tools": [
+            "illustrator",
+            "aftereffects"
+          ],
+          "year": "2025.12",
+          "contribution": "100%",
+          "bgColor": "#0656ac"
         }
       ],
       "nameSub": "Works"
