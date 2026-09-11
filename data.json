@@ -630,7 +630,8 @@
               "b": false
             }
           ],
-          "overviewColor": "#f5f4f0"
+          "overviewColor": "#f5f4f0",
+          "blockGap": 5
         }
       ],
       "nameSub": "Works"
