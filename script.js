@@ -328,6 +328,29 @@ function accPanelDuration(height) {
   return Math.min(ACC_PANEL_DURATION_MAX, Math.max(ACC_PANEL_DURATION_MIN, ms));
 }
 
+/* 패널이 쓰는 CSS transition 곡선(ease = cubic-bezier(.25,.1,.25,1))을
+   스크롤에도 그대로 쓰기 위한 함수. 두 움직임이 같은 곡선을 타야
+   한 덩어리로 움직이는 것처럼 보인다.
+
+   베지어는 x(시간)를 바로 풀 수 없어, x가 t가 되는 지점을 몇 번 좁혀
+   찾은 뒤 그 자리의 y(진행률)를 돌려준다. */
+const ACC_EASE = (() => {
+  const p1 = 0.25, p2 = 0.1, p3 = 0.25, p4 = 1;
+  const curve = (a, b, t) =>
+    3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t;
+  return (t) => {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    let lo = 0, hi = 1, mid = t;
+    for (let i = 0; i < 20; i++) {
+      mid = (lo + hi) / 2;
+      const x = curve(p1, p3, mid);
+      if (x < t) lo = mid; else hi = mid;
+    }
+    return curve(p2, p4, mid);
+  };
+})();
+
 /* 카테고리를 아코디언으로 렌더링: 이름 줄을 누르면 바로 아래로 그 카테고리의
    프로젝트 그리드가 펼쳐진다. 한 번에 하나만 열리도록 다른 항목은 함께 접는다.
    그리드는 처음 열 때 한 번만 만들고(이미지 낭비 없이), 이후로는 열고 닫기만 한다. */
@@ -346,49 +369,56 @@ function renderAccordion() {
   let openItem = null;
   langEntries = [];
 
-  /* 어느 카테고리를 열든 목록 맨 위(1번 카테고리 자리)로 맞춰 준다.
-     열려 있는 이름 줄은 sticky top:0이라, 목록 맨 위에 스크롤을 맞추면
-     닫힌 이름 줄들이 위에 차례로 쌓이고 그 아래로 펼쳐진 내용이 보인다.
+  /* 펼침과 스크롤을 한 덩어리로 움직인다.
 
-     맨 위 항목의 자리는 그 아래에서 무엇이 열리고 닫히든 달라지지 않으므로,
-     누른 순간 재 둔 값을 그대로 쓰면 된다. */
-  const scrollToListTop = () => {
+     둘 다 같은 순간에 시작해서, 패널이 쓰는 것과 똑같은 시간(accPanelDuration)과
+     똑같은 곡선(ACC_EASE)으로 끝난다. Lenis 기본 스크롤은 시간이 정해진
+     애니메이션이 아니라 매 프레임 목표에 다가가는 방식이라 패널과 속도·곡선이
+     어긋나므로, 여기서는 직접 프레임마다 위치를 정한다.
+
+     펼쳐지는 동안에는 페이지가 아직 다 길어지지 않아 목표까지 못 갈 수 있다.
+     매 프레임 갈 수 있는 데까지만 보내면, 페이지가 자라는 만큼 따라가 끝에는
+     목표에 닿는다. 그래서 다 펼쳐진 뒤에 또 한 번 움직일 필요가 없다.
+
+     사용자가 도중에 직접 스크롤하면 즉시 손을 뗀다. */
+  let scrollAnim = 0;
+  const scrollListTopWith = (durationMs) => {
     const first = wrap.querySelector(".acc-item");
     if (!first) return;
-    const y = Math.max(0, first.getBoundingClientRect().top + window.scrollY);
-    // Lenis는 페이지 높이를 250ms 늦게 다시 잰다. 카테고리가 막 펼쳐져
-    // 길어진 직후엔 예전 높이로 목표를 잘라내므로, 먼저 다시 재게 한다.
-    if (window.lenis) {
-      if (typeof window.lenis.resize === "function") window.lenis.resize();
-      window.lenis.scrollTo(y);
-    } else {
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+    const startY = window.scrollY;
+    const targetY = Math.max(0, first.getBoundingClientRect().top + startY);
+    if (Math.abs(targetY - startY) < 1) return;
 
-  /* 모두 접힌 상태에서는 페이지가 짧아 아직 그만큼 스크롤할 여지가 없다.
-     펼쳐지면서 페이지가 길어지므로, 다 펼쳐진 뒤에 한 번 더 맞춘다.
-     이미 맨 위에 닿았으면 아무것도 하지 않아 두 번 움직이지 않는다.
+    cancelAnimationFrame(scrollAnim);
+    let stopped = false;
+    const letGo = () => { stopped = true; };
+    window.addEventListener("wheel", letGo, { once: true, passive: true });
+    window.addEventListener("touchstart", letGo, { once: true, passive: true });
 
-     카드에도 나타나는 애니메이션이 있어 그 transitionend가 먼저 올라오므로,
-     패널 자신의 높이 전환만 골라 듣는다. 전환이 아예 일어나지 않는 경우
-     (동작 최소화 설정 등)를 대비해 시간제한도 함께 둔다. */
-  const keepListTop = (panel) => {
-    scrollToListTop();
-
-    let done = false;
-    const settle = () => {
-      if (done) return;
-      done = true;
-      panel.removeEventListener("transitionend", onEnd);
-      const first = wrap.querySelector(".acc-item");
-      if (first && Math.abs(first.getBoundingClientRect().top) > 2) scrollToListTop();
+    const startedAt = performance.now();
+    const step = (now) => {
+      if (stopped) return;
+      const t = Math.min(1, (now - startedAt) / durationMs);
+      const want = startY + (targetY - startY) * ACC_EASE(t);
+      // 아직 그만큼 길어지지 않았으면 갈 수 있는 데까지만
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const y = Math.max(0, Math.min(want, max));
+      // Lenis가 켜져 있으면 그쪽을 통해 옮겨야 내부 위치와 어긋나지 않는다.
+      // 다만 Lenis는 페이지 높이를 250ms 늦게 다시 재고 그 값으로 목표를
+      // 잘라내므로, 펼쳐지며 길어지는 동안에는 프레임마다 다시 재게 한다.
+      if (window.lenis) {
+        if (typeof window.lenis.resize === "function") window.lenis.resize();
+        window.lenis.scrollTo(y, { immediate: true, force: true });
+      } else {
+        window.scrollTo(0, y);
+      }
+      if (t < 1) scrollAnim = requestAnimationFrame(step);
+      else {
+        window.removeEventListener("wheel", letGo);
+        window.removeEventListener("touchstart", letGo);
+      }
     };
-    const onEnd = (e) => {
-      if (e.target === panel && e.propertyName === "max-height") settle();
-    };
-    panel.addEventListener("transitionend", onEnd);
-    setTimeout(settle, accPanelDuration(panel.scrollHeight) + 120);
+    scrollAnim = requestAnimationFrame(step);
   };
 
   // 창 크기가 바뀌면(카드 폭이 바뀌어 이미지 높이도 바뀌므로) 열려 있는
@@ -494,14 +524,16 @@ function renderAccordion() {
         head.setAttribute("aria-expanded", "true");
         // 실제 콘텐츠 높이를 재서 넣어야 max-height 트랜지션이 부드럽게 펼쳐진다
         const targetHeight = panel.scrollHeight;
-        panel.style.transitionDuration = accPanelDuration(targetHeight) + "ms";
+        const duration = accPanelDuration(targetHeight);
+        panel.style.transitionDuration = duration + "ms";
         panel.style.maxHeight = targetHeight + "px";
         openItem = item;
         // 카테고리가 열려 있는 동안엔 GNB가 스크롤을 따라오지 않고 흘러 지나가서,
         // 이 이름 줄이 최상단에 닿았을 때 그 자리를 대신할 수 있게 한다
         document.body.classList.add("has-open-category");
-        // 몇 번째를 눌렀든 목록 맨 위에서 펼쳐진 모습을 보게 한다
-        keepListTop(panel);
+        // 몇 번째를 눌렀든 목록 맨 위에서 펼쳐진 모습을 보게 한다.
+        // 펼침과 같은 시간·같은 곡선으로, 같은 순간에 함께 움직인다.
+        scrollListTopWith(duration);
       }
     });
 
