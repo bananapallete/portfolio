@@ -346,6 +346,51 @@ function renderAccordion() {
   let openItem = null;
   langEntries = [];
 
+  /* 어느 카테고리를 열든 목록 맨 위(1번 카테고리 자리)로 맞춰 준다.
+     열려 있는 이름 줄은 sticky top:0이라, 목록 맨 위에 스크롤을 맞추면
+     닫힌 이름 줄들이 위에 차례로 쌓이고 그 아래로 펼쳐진 내용이 보인다.
+
+     맨 위 항목의 자리는 그 아래에서 무엇이 열리고 닫히든 달라지지 않으므로,
+     누른 순간 재 둔 값을 그대로 쓰면 된다. */
+  const scrollToListTop = () => {
+    const first = wrap.querySelector(".acc-item");
+    if (!first) return;
+    const y = Math.max(0, first.getBoundingClientRect().top + window.scrollY);
+    // Lenis는 페이지 높이를 250ms 늦게 다시 잰다. 카테고리가 막 펼쳐져
+    // 길어진 직후엔 예전 높이로 목표를 잘라내므로, 먼저 다시 재게 한다.
+    if (window.lenis) {
+      if (typeof window.lenis.resize === "function") window.lenis.resize();
+      window.lenis.scrollTo(y);
+    } else {
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  /* 모두 접힌 상태에서는 페이지가 짧아 아직 그만큼 스크롤할 여지가 없다.
+     펼쳐지면서 페이지가 길어지므로, 다 펼쳐진 뒤에 한 번 더 맞춘다.
+     이미 맨 위에 닿았으면 아무것도 하지 않아 두 번 움직이지 않는다.
+
+     카드에도 나타나는 애니메이션이 있어 그 transitionend가 먼저 올라오므로,
+     패널 자신의 높이 전환만 골라 듣는다. 전환이 아예 일어나지 않는 경우
+     (동작 최소화 설정 등)를 대비해 시간제한도 함께 둔다. */
+  const keepListTop = (panel) => {
+    scrollToListTop();
+
+    let done = false;
+    const settle = () => {
+      if (done) return;
+      done = true;
+      panel.removeEventListener("transitionend", onEnd);
+      const first = wrap.querySelector(".acc-item");
+      if (first && Math.abs(first.getBoundingClientRect().top) > 2) scrollToListTop();
+    };
+    const onEnd = (e) => {
+      if (e.target === panel && e.propertyName === "max-height") settle();
+    };
+    panel.addEventListener("transitionend", onEnd);
+    setTimeout(settle, accPanelDuration(panel.scrollHeight) + 120);
+  };
+
   // 창 크기가 바뀌면(카드 폭이 바뀌어 이미지 높이도 바뀌므로) 열려 있는
   // 패널의 max-height를 다시 재준다. 리스너는 아코디언당 하나만 붙인다.
   window.addEventListener("resize", () => {
@@ -455,6 +500,8 @@ function renderAccordion() {
         // 카테고리가 열려 있는 동안엔 GNB가 스크롤을 따라오지 않고 흘러 지나가서,
         // 이 이름 줄이 최상단에 닿았을 때 그 자리를 대신할 수 있게 한다
         document.body.classList.add("has-open-category");
+        // 몇 번째를 눌렀든 목록 맨 위에서 펼쳐진 모습을 보게 한다
+        keepListTop(panel);
       }
     });
 
