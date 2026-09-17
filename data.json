@@ -384,7 +384,8 @@
           ],
           "overview": "마이다스인의 경영지원 통합 솔루션 “에이치닷\" 브랜딩",
           "titleColor": "#f5f4f0",
-          "blockGap": 5
+          "blockGap": 5,
+          "heroBg": "#14121a"
         },
         {
           "id": "new-project-mtb4jh1h",
