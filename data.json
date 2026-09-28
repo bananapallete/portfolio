@@ -49,7 +49,7 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/83901581b44d7ad46606.png"
+                "assets/6154701cc3364820bf04.png"
               ]
             },
             {
@@ -78,18 +78,17 @@
               "grid": "2"
             },
             {
-              "type": "embed",
-              "src": "assets/ccb4a22bf735dc9c7d07.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 1080,
-              "ratioSrc": "assets/ccb4a22bf735dc9c7d07.webm"
+              "type": "images",
+              "layout": "single",
+              "images": [
+                "assets/cfba279b08ce2e638692.png"
+              ]
             },
             {
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/cfba279b08ce2e638692.png"
+                "assets/d8b43ab28bce38568131.png"
               ]
             },
             {
@@ -100,13 +99,6 @@
                 "assets/410216f62aba901e78a0.png"
               ],
               "grid": "2"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/d8b43ab28bce38568131.png"
-              ]
             }
           ],
           "summary": "실습형 학습 서비스 '퀘스트 허브' 프로모션 영상",
@@ -494,7 +486,7 @@
         {
           "id": "new-project-mtjpk8mu",
           "title": "Jobda Dev",
-          "coverImage": "assets/c2351c266a3585d27d02.webm",
+          "coverImage": "assets/d7130e25a4ae19e4839a.webm",
           "blocks": [
             {
               "type": "embed",
