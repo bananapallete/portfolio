@@ -61,6 +61,14 @@
               "videoControls": false
             },
             {
+              "type": "embed",
+              "src": "assets/4145f343786bc5ccf83f.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/4145f343786bc5ccf83f.webm"
+            },
+            {
               "type": "images",
               "layout": "single",
               "images": [
