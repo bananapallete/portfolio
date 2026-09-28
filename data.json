@@ -49,7 +49,7 @@
               "type": "images",
               "layout": "single",
               "images": [
-                "assets/6154701cc3364820bf04.png"
+                "assets/83901581b44d7ad46606.png"
               ]
             },
             {
@@ -76,6 +76,14 @@
                 "assets/269fb480c72a104c93e6.png"
               ],
               "grid": "2"
+            },
+            {
+              "type": "embed",
+              "src": "assets/ccb4a22bf735dc9c7d07.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/ccb4a22bf735dc9c7d07.webm"
             },
             {
               "type": "images",
@@ -486,7 +494,7 @@
         {
           "id": "new-project-mtjpk8mu",
           "title": "Jobda Dev",
-          "coverImage": "assets/d7130e25a4ae19e4839a.webm",
+          "coverImage": "assets/c2351c266a3585d27d02.webm",
           "blocks": [
             {
               "type": "embed",
