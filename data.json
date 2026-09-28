@@ -78,6 +78,14 @@
               "grid": "2"
             },
             {
+              "type": "embed",
+              "src": "assets/ccb4a22bf735dc9c7d07.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/ccb4a22bf735dc9c7d07.webm"
+            },
+            {
               "type": "images",
               "layout": "single",
               "images": [
