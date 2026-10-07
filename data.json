@@ -603,22 +603,6 @@
             },
             {
               "type": "images",
-              "layout": "grid",
-              "images": [
-                "assets/29d4ea49cee945b9568e.png",
-                "assets/b6e0b7766bc6f35cf25f.png"
-              ],
-              "grid": "2"
-            },
-            {
-              "type": "images",
-              "layout": "single",
-              "images": [
-                "assets/f32eeb2651e20f8ee196.png"
-              ]
-            },
-            {
-              "type": "images",
               "layout": "slider",
               "images": [
                 "assets/e56d451c3df50fa8dfd0.png",
@@ -632,6 +616,15 @@
               "images": [
                 "assets/6cedb38b64706fdfeabb.png",
                 "assets/7be12e93465d8e2ba83c.png"
+              ]
+            },
+            {
+              "type": "images",
+              "layout": "slider",
+              "images": [
+                "assets/f32eeb2651e20f8ee196.png",
+                "assets/a848e3d5e2d2e4403241.png",
+                "assets/3dab31d89fb6d374c283.png"
               ]
             }
           ],
