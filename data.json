@@ -619,20 +619,20 @@
               "ratioSrc": "assets/3465c479d30273a738fd.webm"
             },
             {
-              "type": "embed",
-              "src": "assets/f12f5ac13c0bad8bfd57.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 625,
-              "ratioSrc": "assets/f12f5ac13c0bad8bfd57.webm"
-            },
-            {
               "type": "images",
               "layout": "slider",
               "images": [
                 "assets/6cedb38b64706fdfeabb.png",
                 "assets/7be12e93465d8e2ba83c.png"
               ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/f12f5ac13c0bad8bfd57.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 625,
+              "ratioSrc": "assets/f12f5ac13c0bad8bfd57.webm"
             },
             {
               "type": "images",
