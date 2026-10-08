@@ -624,8 +624,32 @@
               "images": [
                 "assets/f32eeb2651e20f8ee196.png",
                 "assets/a848e3d5e2d2e4403241.png",
-                "assets/3dab31d89fb6d374c283.png"
+                "assets/b6e0b7766bc6f35cf25f.png"
               ]
+            },
+            {
+              "type": "embed",
+              "src": "assets/3465c479d30273a738fd.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 250,
+              "ratioSrc": "assets/3465c479d30273a738fd.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/106a2a3fb1325e89f338.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 625,
+              "ratioSrc": "assets/106a2a3fb1325e89f338.webm"
+            },
+            {
+              "type": "embed",
+              "src": "assets/2de5335c27e6ebd67ae1.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 1080,
+              "ratioSrc": "assets/2de5335c27e6ebd67ae1.webm"
             }
           ],
           "summary": "마이다스아이티의 'Experts Day' 행사 브랜딩",
