@@ -571,8 +571,23 @@ function normalizeGap(v) {
   return Math.max(0, n);
 }
 
+/* 블록 안에 영상이 하나라도 들어 있는지.
+   영상은 이미지보다 무거워 잘게 쪼개 놓으면 보기도 어렵고 재생도 버거우므로,
+   영상이 섞인 블록은 2열까지만 쓴다(모자이크·3·4열은 쓰지 않는다). */
+function blockHasVideo(block) {
+  return (block.images || []).some((src) => src && isVideoFile(src));
+}
+
+const VIDEO_GRID_MAX_COLS = "2";
+
+// 영상이 섞이면 2열 그리드로 내려오므로 모자이크(컬럼 흐름)가 아니게 된다
+function isMasonryGrid(block) {
+  return block.layout === "grid" && block.grid === "masonry" && !blockHasVideo(block);
+}
+
 // 이미지 블록의 그리드 레이아웃 클래스명
 function gridClassName(block) {
+  if (blockHasVideo(block)) return `blk-images-grid blk-grid-${VIDEO_GRID_MAX_COLS}`;
   if (block.grid === "masonry") return "blk-images-masonry";
   const cols = ["2", "3", "4"].includes(String(block.grid)) ? block.grid : "3";
   return `blk-images-grid blk-grid-${cols}`;
@@ -723,7 +738,7 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
     // 블록별 "이미지 간격"이 우선, 없으면 프로젝트의 "콘텐츠 간격"을 따른다 (최소 0px)
     const ownGap = normalizeGap(block.gap);
     const gap = ownGap != null ? ownGap : normalizeGap(defaultGap);
-    const isMasonry = block.layout === "grid" && block.grid === "masonry";
+    const isMasonry = isMasonryGrid(block);
     if (block.layout === "grid") {
       div.classList.add(...gridClassName(block).split(" "));
       if (gap != null) div.style[isMasonry ? "columnGap" : "gap"] = gap + "px";
@@ -732,13 +747,12 @@ function renderBlock(block, defaultGap = null, firstEager = false) {
       if (gap != null) div.style.gap = gap + "px";
     }
     images.forEach((src, i) => {
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "";
-      setImgLoading(img, firstEager && i === 0);
+      // 이미지든 영상이든 같은 칸에 들어간다. 영상은 소리 없이 반복 재생되고,
+      // 화면에 보일 때만 돌아간다(buildCoverMedia가 그 처리를 갖고 있다).
+      const media = buildCoverMedia(src, "", firstEager && i === 0);
       // 모자이크(컬럼) 레이아웃은 세로 간격이 margin-bottom으로 정해진다
-      if (isMasonry && gap != null) img.style.marginBottom = gap + "px";
-      div.appendChild(img);
+      if (isMasonry && gap != null) media.style.marginBottom = gap + "px";
+      div.appendChild(media);
     });
     return div;
   }

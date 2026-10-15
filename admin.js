@@ -1724,7 +1724,10 @@ function renderCategoryModalBody() {
 function blockTypeLabel(block) {
   if (block.type === "text") return "텍스트";
   if (block.type === "images") {
-    return { single: "이미지 · 단일", grid: "이미지 · 그리드", slider: "이미지 · 자동 슬라이드" }[block.layout] || "이미지";
+    // 같은 블록이라도 안에 영상이 들어 있으면 그대로 이름에 드러낸다
+    const kind = blockHasVideo(block) ? "비디오" : "이미지";
+    const shape = { single: "단일", grid: "그리드", slider: "자동 슬라이드" }[block.layout];
+    return shape ? `${kind} · ${shape}` : kind;
   }
   return "비디오";
 }
@@ -1953,6 +1956,10 @@ function renderBlocksEditor(project) {
   addRow.appendChild(mkAdd("+ 텍스트", () => ({ type: "text", content: "", color: "#000000", align: "left" })));
   addRow.appendChild(mkAdd("+ 이미지", () => ({ type: "images", layout: "single", images: [] })));
   addRow.appendChild(mkAdd("+ 비디오", () => ({ type: "embed", src: "" })));
+  // 영상 여러 개를 나란히 놓는 자리. 이미지 그리드와 같은 블록이라 둘을 섞어도 된다.
+  addRow.appendChild(mkAdd("+ 비디오 그리드", () => ({
+    type: "images", layout: "grid", grid: VIDEO_GRID_MAX_COLS, images: [],
+  })));
   wrap.appendChild(addRow);
 
   return wrap;
@@ -2018,8 +2025,8 @@ function renderBlockBody(project, block, blockIndex) {
       }
     ));
 
-    // 그리드 형태 선택
-    if (block.layout === "grid") {
+    // 그리드 형태 선택. 영상이 섞이면 2열로 고정이라 고를 것이 없다.
+    if (block.layout === "grid" && !blockHasVideo(block)) {
       segRow.appendChild(buildSeg(
         [["2", "2열"], ["3", "3열"], ["4", "4열"], ["masonry", "모자이크"]],
         block.grid || "3",
@@ -2046,6 +2053,14 @@ function renderBlockBody(project, block, blockIndex) {
       const hint = document.createElement("div");
       hint.className = "block-hint";
       hint.textContent = "사이트에서 3.5초 간격으로 자동으로 넘어가요. 점을 눌러 이동할 수도 있어요.";
+      body.appendChild(hint);
+    }
+    if (blockHasVideo(block)) {
+      const hint = document.createElement("div");
+      hint.className = "block-hint";
+      hint.textContent = block.layout === "grid"
+        ? "영상이 들어간 그리드는 2열까지만 올라가요. 영상은 소리 없이 반복 재생되고, 화면에 보일 때만 돌아가요."
+        : "영상은 소리 없이 반복 재생되고, 화면에 보일 때만 돌아가요.";
       body.appendChild(hint);
     }
     return body;
@@ -2534,7 +2549,7 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       div = document.createElement("div");
       div.className = gridClassName(block);
       if (gap != null) {
-        if (block.grid === "masonry") div.style.columnGap = gap + "px";
+        if (isMasonryGrid(block)) div.style.columnGap = gap + "px";
         else div.style.gap = gap + "px";
       }
     } else {
@@ -2547,15 +2562,13 @@ function renderPreviewBlockContent(project, block, blockIndex) {
       const w = document.createElement("div");
       w.className = "pv-img-wrap";
       // 모자이크(컬럼) 레이아웃의 세로 간격은 margin-bottom으로 정해진다
-      if (block.layout === "grid" && block.grid === "masonry" && gap != null) {
+      if (isMasonryGrid(block) && gap != null) {
         w.style.marginBottom = gap + "px";
       }
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "";
-      img.draggable = false;
-      setImgLoading(img, false);
-      w.appendChild(img);
+      // 영상이면 <video>로, 이미지면 <img>로 (공개 화면과 같은 규칙)
+      const media = buildCoverMedia(src, "", false);
+      media.draggable = false;
+      w.appendChild(media);
 
       const h = document.createElement("button");
       h.type = "button";
@@ -2713,8 +2726,10 @@ function makeThumb(src, kind, onRemove) {
 function emptySlotCount(block) {
   const n = (block.images || []).length;
   let slots = 1;
-  if (block.layout === "grid" && block.grid !== "masonry") {
-    const cols = parseInt(block.grid, 10) || 3;
+  if (block.layout === "grid" && !isMasonryGrid(block)) {
+    const cols = blockHasVideo(block)
+      ? parseInt(VIDEO_GRID_MAX_COLS, 10)
+      : (parseInt(block.grid, 10) || 3);
     const rest = n % cols;
     slots = rest === 0 ? (n === 0 ? cols : 1) : cols - rest;
   }
@@ -2726,20 +2741,21 @@ function makeImageSlot(onImages) {
   const slot = document.createElement("button");
   slot.type = "button";
   slot.className = "img-slot file-btn";
-  slot.title = "이 칸에 이미지 올리기";
+  slot.title = "이 칸에 이미지나 영상 올리기";
 
   const plus = document.createElement("span");
   plus.className = "img-slot-plus";
   plus.textContent = "＋";
   const text = document.createElement("span");
   text.className = "img-slot-text";
-  text.textContent = "이미지 추가";
+  text.textContent = "이미지 · 영상 추가";
   slot.appendChild(plus);
   slot.appendChild(text);
 
   const input = document.createElement("input");
   input.type = "file";
-  input.accept = "image/*";
+  // 한 블록 안에 이미지와 영상을 섞어 둘 수 있다
+  input.accept = "image/*,video/*";
   input.multiple = true;
   input.addEventListener("change", (e) => {
     const files = Array.from(e.target.files || []);
@@ -2755,12 +2771,12 @@ function makeImageReplaceBtn(onImage) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "img-action img-replace file-btn";
-  btn.title = "다른 이미지로 교체";
+  btn.title = "다른 이미지·영상으로 교체";
   btn.appendChild(document.createTextNode("교체"));
 
   const input = document.createElement("input");
   input.type = "file";
-  input.accept = "image/*";
+  input.accept = "image/*,video/*";
   input.addEventListener("change", (e) => {
     const file = (e.target.files || [])[0];
     if (file) readFileAsDataURL(file).then(onImage);

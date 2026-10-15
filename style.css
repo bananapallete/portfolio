@@ -1811,7 +1811,8 @@ body.gate-locked { overflow: hidden; }
   gap: 14px;
 }
 
-.blk-images-single img {
+.blk-images-single img,
+.blk-images-single video {
   width: 100%;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
@@ -1829,7 +1830,8 @@ body.gate-locked { overflow: hidden; }
 .blk-grid-4 { grid-template-columns: repeat(4, 1fr); }
 
 /* 정사각형으로 맞추려고 잘라내지 않는다 — 올린 그대로의 비율을 지킨다 */
-.blk-images-grid img {
+.blk-images-grid img,
+.blk-images-grid video {
   display: block;
   width: 100%;
   height: auto;
@@ -1847,7 +1849,8 @@ body.gate-locked { overflow: hidden; }
   margin-bottom: 14px;
 }
 
-.blk-images-masonry img {
+.blk-images-masonry img,
+.blk-images-masonry video {
   width: 100%;
   display: block;
   border-radius: var(--radius-sm);
@@ -1879,7 +1882,8 @@ body.gate-locked { overflow: hidden; }
   transition: transform 0.5s ease;
 }
 
-.blk-slider-track img {
+.blk-slider-track img,
+.blk-slider-track video {
   flex: 0 0 100%;
   width: 100%;
 }
@@ -2205,8 +2209,11 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
 .proj-blocks .blk-images-single { gap: 0; }
 
 .proj-blocks .blk-images-single img,
+.proj-blocks .blk-images-single video,
 .proj-blocks .blk-images-grid img,
+.proj-blocks .blk-images-grid video,
 .proj-blocks .blk-images-masonry img,
+.proj-blocks .blk-images-masonry video,
 .proj-blocks .blk-slider {
   border: none;
   border-radius: 0;
