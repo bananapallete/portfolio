@@ -688,14 +688,6 @@
           "coverImage": "",
           "blocks": [
             {
-              "type": "embed",
-              "src": "assets/01261b6fa57e977ff3aa.webm",
-              "videoControls": false,
-              "ratioW": 1920,
-              "ratioH": 540,
-              "ratioSrc": "assets/01261b6fa57e977ff3aa.webm"
-            },
-            {
               "type": "images",
               "layout": "grid",
               "images": [
@@ -703,6 +695,15 @@
                 "assets/d8809a228055bb8e84f1.png"
               ],
               "grid": "2"
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "grid": "2",
+              "images": [
+                "assets/65eeedba2a0597e9c5b2.webm",
+                "assets/c630b43e9d34e5d673ef.webm"
+              ]
             }
           ],
           "summary": "",
@@ -917,7 +918,15 @@
     {
       "id": "new-category-mtgtufsu",
       "name": "경력",
-      "projects": [],
+      "projects": [
+        {
+          "id": "new-project-mv96vc63",
+          "title": "새 프로젝트",
+          "coverImage": "",
+          "blocks": [],
+          "summary": ""
+        }
+      ],
       "nameSub": "Careers",
       "career": {
         "about": {
