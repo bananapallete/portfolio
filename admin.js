@@ -1084,6 +1084,13 @@ function renderSections() {
       subEl.textContent = cat.nameSub;
       text.appendChild(subEl);
     }
+    // 사이트에서 내용을 덮어둔 카테고리는 여기서 바로 알아볼 수 있게 표시한다
+    if (cat.contentHidden) {
+      const badge = document.createElement("span");
+      badge.className = "cat-hidden-badge";
+      badge.textContent = "내용 숨김";
+      text.appendChild(badge);
+    }
     row.appendChild(text);
 
     const actions = document.createElement("div");
@@ -1286,7 +1293,7 @@ function openCategoryEditor(cat) {
   editingContext = {
     type: "category",
     cat,
-    copy: { name: cat.name || "", nameSub: cat.nameSub || "" },
+    copy: { name: cat.name || "", nameSub: cat.nameSub || "", contentHidden: !!cat.contentHidden },
     dirty: false,
   };
   openEditModal();
@@ -1338,6 +1345,9 @@ async function saveModalAndPublish() {
   } else if (ctx.type === "category") {
     ctx.cat.name = ctx.copy.name;
     ctx.cat.nameSub = ctx.copy.nameSub;
+    // 꺼져 있는 게 기본이라, 켤 때만 데이터에 남긴다
+    if (ctx.copy.contentHidden) ctx.cat.contentHidden = true;
+    else delete ctx.cat.contentHidden;
   }
   saveDraft();
   const ok = await publishToGithub();
@@ -1717,6 +1727,22 @@ function renderCategoryModalBody() {
     saveDraft();
   }));
   card.appendChild(row);
+
+  /* 다시 디자인하는 동안 잠시 덮어두는 스위치. 내용은 지워지지 않고
+     사이트에서 이름 줄만 보이게 된다(펼쳐지지 않는다). */
+  const hideRow = document.createElement("div");
+  hideRow.className = "block-controls-row";
+  hideRow.appendChild(buildToggleField(
+    "사이트에서 내용 숨기기 (이름 줄만 보이고 펼쳐지지 않아요)",
+    () => copy.contentHidden,
+    (v) => { copy.contentHidden = v; }
+  ));
+  card.appendChild(hideRow);
+
+  const hideHint = document.createElement("div");
+  hideHint.className = "block-hint";
+  hideHint.textContent = "안에 있는 내용은 그대로 남아 있어요. 다시 끄면 원래대로 보여요.";
+  card.appendChild(hideHint);
 }
 
 /* ---------------------------------- 블록 에디터 ---------------------------------- */

@@ -461,6 +461,20 @@ function renderAccordion() {
     }
     head.appendChild(text);
 
+    /* 아직 다시 디자인하는 중인 카테고리(cat.contentHidden)는 이름 줄만 남긴다.
+       내용은 data.json에 그대로 있고 여기서 그리지 않을 뿐이라, 플래그만
+       내리면 예전 모습으로 돌아온다. 펼칠 게 없으니 화살표도, 누르는 동작도
+       달지 않는다. */
+    const locked = !!cat.contentHidden;
+    if (locked) {
+      item.classList.add("acc-locked");
+      head.disabled = true;
+      head.removeAttribute("aria-expanded");
+      item.appendChild(head);
+      wrap.appendChild(item);
+      return;
+    }
+
     const chevron = document.createElement("img");
     chevron.className = "acc-chevron";
     chevron.src = "assets/icons/chevron-down.svg";

@@ -441,6 +441,14 @@ body.has-open-category .site-header { position: static; }
   color: var(--ink);
 }
 
+/* 내용을 숨겨 둔 카테고리(cat.contentHidden). 이름 줄만 남아 펼쳐지지 않으므로
+   누를 수 있는 것처럼 보이면 안 된다 — 손가락 커서와 흐려짐을 모두 되돌린다. */
+.acc-locked .acc-head {
+  cursor: default;
+  opacity: 1;
+  color: var(--ink);
+}
+
 .acc-head-text {
   display: flex;
   align-items: baseline;
@@ -2513,6 +2521,21 @@ button.proj-meta-tool:hover { background: color-mix(in srgb, var(--ink) 9%, tran
   letter-spacing: 0.05em;
   color: color-mix(in srgb, var(--ink) 50%, transparent);
   transition: color 0.15s ease;
+}
+
+/* 사이트에서 내용을 덮어둔 카테고리임을 관리자 목록에서 알리는 작은 칩 */
+.cat-hidden-badge {
+  align-self: center;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--ui-surface, rgba(0, 0, 0, 0.06));
+  border: 1px solid var(--ui-line, rgba(0, 0, 0, 0.12));
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 /* 레이아웃 선택 · 간격 등 작은 컨트롤들을 한 줄에 모아 배치 */
