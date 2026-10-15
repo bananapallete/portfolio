@@ -689,11 +689,20 @@
           "blocks": [
             {
               "type": "embed",
-              "src": "assets/30f99afc5c8822925979.webm",
+              "src": "assets/01261b6fa57e977ff3aa.webm",
               "videoControls": false,
               "ratioW": 1920,
               "ratioH": 540,
-              "ratioSrc": "assets/30f99afc5c8822925979.webm"
+              "ratioSrc": "assets/01261b6fa57e977ff3aa.webm"
+            },
+            {
+              "type": "images",
+              "layout": "grid",
+              "images": [
+                "assets/91914ecc7faaec0fd274.png",
+                "assets/d8809a228055bb8e84f1.png"
+              ],
+              "grid": "2"
             }
           ],
           "summary": ""
