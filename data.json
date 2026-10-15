@@ -681,6 +681,22 @@
           ],
           "overviewColor": "#f5f4f0",
           "blockGap": 5
+        },
+        {
+          "id": "new-project-mv8vq8hk",
+          "title": "CIVIL NX",
+          "coverImage": "",
+          "blocks": [
+            {
+              "type": "embed",
+              "src": "assets/30f99afc5c8822925979.webm",
+              "videoControls": false,
+              "ratioW": 1920,
+              "ratioH": 540,
+              "ratioSrc": "assets/30f99afc5c8822925979.webm"
+            }
+          ],
+          "summary": ""
         }
       ],
       "nameSub": "Works"
