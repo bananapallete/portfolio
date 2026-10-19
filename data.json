@@ -709,8 +709,8 @@
               "type": "images",
               "layout": "grid",
               "images": [
-                "assets/5b676edeca763d4d97a0.png",
-                "assets/cb73c265a8f0bf575ddd.png"
+                "assets/bdee215ea65776d8fc1a.png",
+                "assets/b7f67b777ccb19228038.png"
               ],
               "grid": "2"
             },
@@ -718,8 +718,8 @@
               "type": "images",
               "layout": "grid",
               "images": [
-                "assets/bdee215ea65776d8fc1a.png",
-                "assets/b7f67b777ccb19228038.png"
+                "assets/5b676edeca763d4d97a0.png",
+                "assets/cb73c265a8f0bf575ddd.png"
               ],
               "grid": "2"
             }
